@@ -1,0 +1,215 @@
+
+qgraph.loadings=function( fact, ...)
+{
+
+arguments=list(...)
+
+# SET DEFAULT ARGUMENTS:
+if(is.null(arguments$vsize)) vsize=max((-1/72)*(nrow(fact))+5.35,1) else vsize=arguments$vsize
+if(is.null(arguments$groups)) groups=NULL else groups=arguments$groups
+if(is.null(arguments$color)) color=NULL else color=arguments$color
+if(is.null(arguments$model)) model="none" else model=arguments$model
+if(is.null(arguments$crossloadings)) crossloadings=FALSE else crossloadings=arguments$crossloadings
+if(is.null(arguments$labels)) labels=TRUE else labels=arguments$labels
+if(is.null(arguments$Fname)) Fname=NULL else Fname=arguments$Fname
+if(is.null(arguments$layout)) layout="default" else layout=arguments$layout
+if(is.null(arguments$legend))
+{
+	if (!is.null(groups) & !is.null(names(groups))) legend=TRUE else legend=FALSE
+} else legend=arguments$legend
+if(is.null(arguments$legend.cex)) legend.cex=1 else legend.cex=arguments$legend.cex
+
+# Output arguments:
+if(is.null(arguments$filetype)) filetype="R" else filetype=arguments$filetype
+if(is.null(arguments$filename)) filename="qgraph" else filename=arguments$filename
+if(is.null(arguments$width)) width=10 else width=arguments$width
+if(is.null(arguments$height))
+{
+	if (layout=="circle") height=10 else height=5
+}	else height=arguments$height
+if(is.null(arguments$pty)) pty='m' else pty=arguments$pty
+if(is.null(arguments$res)) res=320 else res=arguments$res
+
+
+# Start output:
+if (filetype=='R') windows(width=width,height=height)
+if (filetype=='eps') postscript(paste(filename,".eps",sep=""),height=height,width=width, horizontal=FALSE)
+if (filetype=='pdf') pdf(paste(filename,".pdf",sep=""),height=height,width=width)
+if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),unit='in',res=res,height=height,width=width)
+if (filetype=='png') png(paste(filename,".png",sep=""),unit='in',res=res,height=height,width=width)
+if (filetype=='jpg' | filetype=='jpeg') jpeg(paste(filename,".jpg",sep=""),unit='in',res=res,height=height,width=width)
+if (filetype=="svg")
+{
+	require("RSVGTipsDevice")
+	devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
+}
+if (!filetype%in%c('pdf','png','jpg','jpeg','svg','R','eps','tiff')) warning(paste("File type",filetype,"is not supported")) 
+
+# Rescale dims:
+if (pty=='s')
+{
+	width=height=min(c(width,height))
+}
+
+# Parameters:
+n=nrow(fact)
+k=ncol(fact)
+
+names=names(groups)
+
+# Max loadings:
+if (k>1) 
+{
+	maxload=apply(abs(fact),1,which.max)
+	sorted=sort(maxload,index.return=T)
+
+	sort2=sort(apply(fact,2,which.max),index.return=T)$ix
+
+	#IDENTIFY GROUPS:
+	if (!is.null(groups)) 
+	{
+		identity=vector("numeric",length(groups))
+
+		for (i in 1:length(groups)) 
+		{
+			identity[i]=as.numeric(names(sort(table(maxload[groups[[i]]])))[1]) 
+		}
+
+		if (length(unique(identity))==length(groups)) identified=TRUE else identified=FALSE
+	} else identified=FALSE
+
+	if (k!=length(groups)) identified=FALSE 
+
+	# crossloadings:
+	if (crossloadings) 
+	{
+		if (identified) 
+		{
+			for (i in 1:k) 
+			{
+				fact[groups[[i]],identity[i]]=0 
+			} 
+		} else 
+		{
+			for (i in 1:k) 
+			{
+				fact[maxload==i,i]=0 
+			} 
+		} 
+	}
+} 
+if (k==1) identified=FALSE
+
+#comupte the adjacency matrix
+m=matrix(0,nrow=n+k,ncol=n+k)
+
+m[1:n,(n+1):(n+k)]=fact
+
+if (model=="reflective") m=t(m)
+if (!model%in%c("formative","reflective")) m=m+t(m)
+
+# Set shapes:
+shape=character()
+shape[1:n]="square"
+shape[(n+1):(n+k)]="circle"
+
+if (!is.null(groups)) identitysort=sort(identity,index=T)$ix
+
+# Set labels:
+Glabels=rep("",n+k)
+if (!is.logical(labels)) 
+{
+	Glabels[1:n]=labels 
+} else if (is.logical(labels)) 
+{
+	if (labels == TRUE) 
+	{
+		Glabels[1:n]=seq(nrow(fact)) 
+	} 
+}
+Glabels[(n+1):(n+k)]=1:k
+if (!is.null(names) & identified) 
+{
+	for (i in 1:k) 
+	{
+	Glabels[n+i]=names[identitysort[i]] 
+	}
+}
+if (k==1 & !is.null(Fname)) Glabels[n+1]=Fname
+
+#  Vertex sizes
+if (length(vsize)==1) vsize=rep(vsize,2)
+
+Gvsize=rep(vsize[1],nrow(fact)+ncol(fact))
+Gvsize[(n+1):(n+k)]=vsize[2]
+
+
+# Set colors:
+Gcolor = rep("white",nrow(fact)+ncol(fact))
+if (is.null(color) & !is.null(groups)) color=rainbow(length(groups))
+
+if (!is.null(groups)) 
+{ 
+	for (i in 1:length(groups)) 
+	{
+	Gcolor[groups[[i]]]<-color[i] 
+	} 
+}
+
+if (identified) 
+{
+	for (i in 1:k) 
+	{
+		Gcolor[n+i]=color[identitysort[i]] 
+	}
+}
+
+# Set layout:
+if (layout!="circle")
+{
+	l2=l=matrix(0,nc=2,nr=n+k)
+	l2[,2]=c(rep(-1,n),rep(0,k))
+	l2[,1]=c(seq(-1,1,length=n),seq(-1,1,length=k+2)[2:(k+1)])
+
+	if (k>1) 
+	{
+		for (i in 1:n) l[i,]=l2[which(sorted$ix==i),]
+		l[(n+1):(n+k),]=l2[(n+1):(n+k),] 
+	} else l=l2
+}
+if (layout=="circle")
+{
+	l2=l=matrix(0,nc=2,nr=n+k)
+	tl=n+1
+	l2[1:n,1]=sin(seq(0,2*pi, length=tl))[-tl]
+	l2[1:n,2]=cos(seq(0,2*pi, length=tl))[-tl]
+	
+	if (k>1)
+	{
+		for (i in 1:n) l[i,]=l2[which(sorted$ix==i),]
+		tl=k+1
+		l[(n+1):(n+k),1]=0.5*sin(seq(0,2*pi,length=tl)+(2*pi/k))[-tl]
+		l[(n+1):(n+k),2]=0.5*cos(seq(0,2*pi,length=tl)+(2*pi/k))[-tl]
+	} else l[1:n,]=l2[1:n,]
+}
+	
+
+### RUN QGRAPH ###
+class(arguments)="qgraph"
+qgraph(m,layout=l,vsize=Gvsize,color=Gcolor,labels=Glabels,shape=shape,filetype="",
+	height=height,width=width,legend=F,arguments)
+	
+# Legend:
+
+if (legend & filetype=="pdf")
+{
+	legend.cex=legend.cex*2
+	plot(1, ann = FALSE, axes = FALSE, xlim = c(-1, 1), ylim = c(-1 ,1 ),type = "n", xaxs = "i", yaxs = "i")
+	legend (0,0, names(groups), col= color ,pch = 19, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
+	legend (0,0, names(groups), col= "black" ,pch = 1, xjust=0.5, ,yjust=0.5, cex=legend.cex, bty='n') 
+}
+else if (legend & filetype!="pdf") warning("Legend in qgraph.loadings only supported for pdf output")
+	
+if (filetype%in%c('pdf','png','jpg','jpeg','svg','eps','tiff')) dev.off()
+}
+
