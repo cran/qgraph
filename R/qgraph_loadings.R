@@ -38,11 +38,11 @@ if (filetype=='pdf') pdf(paste(filename,".pdf",sep=""),height=height,width=width
 if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),unit='in',res=res,height=height,width=width)
 if (filetype=='png') png(paste(filename,".png",sep=""),unit='in',res=res,height=height,width=width)
 if (filetype=='jpg' | filetype=='jpeg') jpeg(paste(filename,".jpg",sep=""),unit='in',res=res,height=height,width=width)
-if (filetype=="svg")
-{
-	require("RSVGTipsDevice")
-	devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
-}
+#if (filetype=="svg")
+#{
+#	require("RSVGTipsDevice")
+#	devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
+#}
 if (!filetype%in%c('pdf','png','jpg','jpeg','svg','R','eps','tiff')) warning(paste("File type",filetype,"is not supported")) 
 
 # Rescale dims:

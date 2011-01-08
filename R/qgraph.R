@@ -131,9 +131,9 @@ if(is.null(arguments$diag)) diag=F else diag=arguments$diag
 if(is.null(arguments$bidirectional)) bidirectional=FALSE else bidirectional=arguments$bidirectional
 
 # Arguments for SVG pictures:
-if(is.null(arguments$tooltips)) tooltips=NULL else tooltips=arguments$tooltops
-if(is.null(arguments$SVGtooltips)) SVGtooltips=NULL else SVGtooltips=arguments$SVGtooltips
-if(is.null(arguments$hyperlinks)) hyperlinks=NULL else hyperlinks=arguments$hyperlinks
+#if(is.null(arguments$tooltips)) tooltips=NULL else tooltips=arguments$tooltops
+#if(is.null(arguments$SVGtooltips)) SVGtooltips=NULL else SVGtooltips=arguments$SVGtooltips
+#if(is.null(arguments$hyperlinks)) hyperlinks=NULL else hyperlinks=arguments$hyperlinks
 
 
 # Legend setting 1
@@ -153,11 +153,17 @@ if (filetype=='pdf') pdf(paste(filename,".pdf",sep=""),height=height,width=width
 if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),unit='in',res=res,height=height,width=width)
 if (filetype=='png') png(paste(filename,".png",sep=""),unit='in',res=res,height=height,width=width)
 if (filetype=='jpg' | filetype=='jpeg') jpeg(paste(filename,".jpg",sep=""),unit='in',res=res,height=height,width=width)
-if (filetype=="svg")
+if (filetype=="svg") 
 {
-	require("RSVGTipsDevice")
-	devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
+	stop("SVG is not supported in this version because the RSVGTipsDevice only
+	supports 32bit. Please see https://sites.google.com/site/qgraphproject/ for
+	a version that supports this")
 }
+#if (filetype=="svg")
+#{
+#	require("RSVGTipsDevice")
+#	devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
+#}
 #if (!filetype%in%c('pdf','png','jpg','jpeg','svg','R','eps','tiff')) warning(paste("File type",filetype,"is not supported")) 
 
 # Rescale dims:
@@ -857,14 +863,14 @@ if (!is.logical(labels))
 	if (label.scale) label.cex[nchar(labels)>1]=label.cex[nchar(labels)>1]*2/nchar(labels[nchar(labels)>1],"width")
 	for (i in 1:nNodes) 
 	{
-		if (!is.null(tooltips)) if (!is.na(tooltips[i]))
-		{
-			if (filetype!='svg') warning("Tooltips only supported in SVG filetype.") else setSVGShapeToolTip(desc=tooltips[i])
-		}
-		if (!is.null(SVGtooltips)) if (!is.na(SVGtooltips[i]))
-		{
-			setSVGShapeToolTip(desc=SVGtooltips[i])
-		}
+		#if (!is.null(tooltips)) if (!is.na(tooltips[i]))
+		#{
+		#	if (filetype!='svg') warning("Tooltips only supported in SVG filetype.") else setSVGShapeToolTip(desc=tooltips[i])
+		#}
+		#if (!is.null(SVGtooltips)) if (!is.na(SVGtooltips[i]))
+		#{
+		#	setSVGShapeToolTip(desc=SVGtooltips[i])
+		#}
 	text(layout[i,1],layout[i,2],labels[i],cex=label.cex[i]/4,col=lcolor,font=V.font[i])
 	}
 }
