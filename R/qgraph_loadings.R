@@ -4,6 +4,27 @@ qgraph.loadings=function( fact, ...)
 
 arguments=list(...)
 
+if (length(arguments)>0)
+{
+	for (i in 1:length(arguments))
+	{
+		if (class(arguments[[i]])=="qgraph") 
+		{
+			if (!is.null(names(arguments[[i]])))
+			{
+				for (j in 1:length(arguments[[i]]))
+				{
+					if (!(names(arguments[[i]])[j]%in%names(arguments)))
+					{
+						arguments[length(arguments)+1]=arguments[[i]][j]
+						names(arguments)[length(arguments)]=names(arguments[[i]])[j]
+					}
+				}
+			}
+		}
+	}
+}
+
 # SET DEFAULT ARGUMENTS:
 if(is.null(arguments$vsize)) vsize=max((-1/72)*(nrow(fact))+5.35,1) else vsize=arguments$vsize
 if(is.null(arguments$groups)) groups=NULL else groups=arguments$groups
@@ -32,17 +53,18 @@ if(is.null(arguments$res)) res=320 else res=arguments$res
 
 
 # Start output:
-if (filetype=='R') windows(width=width,height=height)
+if (filetype=='R') windows(rescale="fixed",width=width,height=height)
 if (filetype=='eps') postscript(paste(filename,".eps",sep=""),height=height,width=width, horizontal=FALSE)
 if (filetype=='pdf') pdf(paste(filename,".pdf",sep=""),height=height,width=width)
 if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),unit='in',res=res,height=height,width=width)
 if (filetype=='png') png(paste(filename,".png",sep=""),unit='in',res=res,height=height,width=width)
 if (filetype=='jpg' | filetype=='jpeg') jpeg(paste(filename,".jpg",sep=""),unit='in',res=res,height=height,width=width)
-#if (filetype=="svg")
-#{
-#	require("RSVGTipsDevice")
-#	devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
-#}
+if (filetype=="svg")
+{
+	if (R.Version()$arch=="x64") stop("RSVGTipsDevice is not available for 64bit versions of R.")
+	require("RSVGTipsDevice")
+	devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
+}
 if (!filetype%in%c('pdf','png','jpg','jpeg','svg','R','eps','tiff')) warning(paste("File type",filetype,"is not supported")) 
 
 # Rescale dims:
@@ -72,13 +94,13 @@ if (k>1)
 
 		for (i in 1:length(groups)) 
 		{
-			identity[i]=as.numeric(names(sort(table(maxload[groups[[i]]])))[1]) 
+			identity[i]=as.numeric(names(which.max(table(maxload[groups[[i]]]))))
 		}
 
 		if (length(unique(identity))==length(groups)) identified=TRUE else identified=FALSE
 	} else identified=FALSE
 
-	if (k!=length(groups)) identified=FALSE 
+	if (k<length(groups)) identified=FALSE 
 
 	# crossloadings:
 	if (crossloadings) 
@@ -211,5 +233,8 @@ if (legend & filetype=="pdf")
 else if (legend & filetype!="pdf") warning("Legend in qgraph.loadings only supported for pdf output")
 	
 if (filetype%in%c('pdf','png','jpg','jpeg','svg','eps','tiff')) dev.off()
+
+class(arguments)="qgraph"
+invisible(arguments)
 }
 

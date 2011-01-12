@@ -4,7 +4,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{qgraph.sem}
 \description{
-This functions uses a 'sem' object from the \code{\link{sem}} function (from the sem package; Fox, 2010) and outputs a multi-page pdf file containing goodness of fit indices, path diagram, graphs of the parameter estimates and graphs of the implied and observed covariance and correlation matrices.
+This functions uses a 'sem' object from the 'sem' function (from the sem package; Fox, 2010) and outputs a multi-page pdf file containing goodness of fit indices, path diagram, graphs of the parameter estimates and graphs of the implied and observed covariance and correlation matrices.
 }
 \usage{
 qgraph.sem(res, layout="tree", vsize.man=4, vsize.lat=7, filename="qgraph", 
@@ -13,7 +13,7 @@ qgraph.sem(res, layout="tree", vsize.man=4, vsize.lat=7, filename="qgraph",
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-	\item{res}{The output from the \code{\link{sem}} function. See details for extra details on specifying the model}
+	\item{res}{The output from the 'sem' function. See details for extra details on specifying the model}
 	\item{layout}{The layout used for the path diagram. Can be "tree", "spring", "circle" and "springtree"}
 	\item{vsize.man}{Size of the manifest variables in the path diagram}
 	\item{vsize.lat}{Size of the latent variables in the path diagram}
@@ -30,7 +30,7 @@ qgraph.sem(res, layout="tree", vsize.man=4, vsize.lat=7, filename="qgraph",
 }
 
 \details{
-This function uses a 'sem' object (\code{\link{sem}}) and outputs a multi-page pdf file. 
+This function uses a 'sem' object and outputs a multi-page pdf file. 
 The function reads the 'sem' file and creates a residual variable for each variable present 
 in the model. The default layout is a tree-layout (layout="tree") in which each variable is 
 placed as a node on one of four vertical levels. At the bottom are the residuals of the 
@@ -65,7 +65,6 @@ Sacha Epskamp (s.epskamp@uva.nl)
 }
 \seealso{
 \code{\link{qgraph}}
-\code{\link{sem}}
 }
 \examples{
 \dontrun{

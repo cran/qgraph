@@ -45,6 +45,14 @@ so by setting this to a lower value for some nodes the node won't move so much. 
 the 'init' argument to make sure nodes don't move too much from their initial setup. This can be useful when
 adding a new node to an existing network and if you don't want the network to completely change.}
 
+
+\value{
+%%  ~Describe the value returned
+%%  If it is a LIST, use
+%%  \item{comp1 }{Description of 'comp1'}
+%%  \item{comp2 }{Description of 'comp2'}
+%% ...
+}
 \references{
 https://sites.google.com/site/qgraphproject
 

@@ -44,6 +44,25 @@ eps=matrix(rnorm(200*100),ncol=100)
 Y=eta\%*\%t(lam)+eps
 
 loadings=loadings(factanal(covmat=cor(Y),factors=5))[1:100,1:5]
-qgraph.loadings(loadings)
+
+# Run qgraph:
+qgraph.loadings(loadings,vsize=c(1,10))
+
+# Show crossloadings:
+qgraph.loadings(loadings,crossloadings=T,cut=0,vsize=c(1,10))
+
+# Wider plot with larger nodes:
+Q=qgraph.loadings(loadings,vsize=c(2,10),width=17)
+
+# With measurement model:
+groups=list(1:20,21:40,41:60,61:80,81:100)
+names(groups)=LETTERS[1:5]
+
+qgraph.loadings(loadings,Q,groups=groups,legend=FALSE)
+
+# Circulair layout:
+qgraph.loadings(loadings,vsize=c(2,10),layout="circle",groups=groups,
+	legend=FALSE)
+	
 }
 }

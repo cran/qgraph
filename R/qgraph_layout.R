@@ -113,9 +113,9 @@ if(is.null(arguments$diag)) diag=F else diag=arguments$diag
 if(is.null(arguments$bidirectional)) bidirectional=FALSE else bidirectional=arguments$bidirectional
 
 # Arguments for SVG pictures:
-#if(is.null(arguments$tooltips)) tooltips=NULL else tooltips=arguments$tooltops
-#if(is.null(arguments$tooltips)) SVGtooltips=NULL else SVGtooltips=arguments$SVGtooltops
-#if(is.null(arguments$hyperlinks)) hyperlinks=NULL else hyperlinks=arguments$hyperlinks
+if(is.null(arguments$tooltips)) tooltips=NULL else tooltips=arguments$tooltops
+if(is.null(arguments$tooltips)) SVGtooltips=NULL else SVGtooltips=arguments$SVGtooltops
+if(is.null(arguments$hyperlinks)) hyperlinks=NULL else hyperlinks=arguments$hyperlinks
 
 
 # Legend setting 1
@@ -244,7 +244,7 @@ if (is.null(layout)) layout="default"
 if (!is.numeric(layout))
 {
 if (layout=="default" & (directed | !weighted)) layout="spring"
-if (layout=="default" | layout=="circulair") 
+if (layout=="default" | layout=="circular") 
 {
 	if (is.null(groups))
 	{

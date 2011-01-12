@@ -14,7 +14,7 @@ qgraph.efa=function(cor,factors=1,rotation="promax",...) {
 fact=factanal(covmat=cor,factors=factors,rotation=rotation)
 loadings=as.matrix(loadings(fact)[1:nrow(cor),1:factors])
 
-qgraph.loadings(loadings,model="reflective",...) 
+Q=qgraph.loadings(loadings,model="reflective",...) 
 	
-
+invisible(Q)
 }

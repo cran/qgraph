@@ -24,7 +24,7 @@ qgraph( adj, ... )
 	\item{maximum}{qgraph regards the highest of the maximum or highest absolute edge weight as the highest weight to scale the edge widths too. To compare several graphs, set this argument to a higher value than any edge weight in the graphs (typically 1 for correlations).}
 	\item{vsize}{A value indicating the size of the nodes. Can also be a vector of length 2 (nodes are scaled to degree) or a size for each node.}
 	\item{esize}{Size of the largest edge (or what it would be if there was an edge with weight maximum).}
-	\item{filetype}{A character containing the file type to save the output in. "R" outputs in R, "pdf" creates a pdf file.}
+	\item{filetype}{A character containing the file type to save the output in. "R" outputs in R, "pdf" creates a pdf file. "svg" creates a svg file (requires RSVGTipsDevice)}
 	\item{filename}{Name of the file, if outputting in pdf}
 	\item{width}{Width of the plot, in inches}
 	\item{height}{Height of the plot, in inches}
@@ -47,7 +47,10 @@ qgraph( adj, ... )
 	\item{lty}{Line type, see 'par'}
 	\item{curve}{A value indicating how strongly edges should be curved. Defaults to 0 (no curve) for each edge except for edges in directional graphs between nodes that have two edges in between them. CURVING LINES DRASTICALLY INCREASES FILE SIZE!}
 	\item{arrows}{A logical indicating if arrows should be drawn, or a number indicating how much arrows should be drawn on each edge. If this is TRUE, a simple arrow is plotted, if this is a number, arrows are put in the middle of the edges.}
+	\item{asize}{Scalar of the length of arrow heads, in inches. Defaults to 0.15.}
+	\item{open}{Logical indicating if open (TRUE) or closed (FALSE) arrowheads should be drawn.}
 	\item{bidirectional}{If this is TRUE, Then directional edges between nodes that have two edges between them are not curved.}
+	\item{tooltips}{A vector with tooltips for each node, only when filetype='svg'}
 	\item{nNodes}{The number of nodes, only needs to be specified if the first argument is an edge-list and some nodes have no edges}
 }}
 
@@ -144,17 +147,14 @@ are optimized to be plotted in a PDF file. To create a pdf file set the 'filetyp
 to specify the filename and folder to output in. 'height' and 'width' can be used to specify the height and width of the image
 in inches. If filetype is set to any character that is not included (like "") the graph will be plotted as a normal R plot and
 can be included in larger files or pictures (note that when doing this 'width' and 'height' still optimize the image for those
-width and heights, even though the output screen size isn't affected).}
+width and heights, even though the output screen size isn't affected).
 
-\section{SVG files}{
 The graphs can also be outputted in an SVG file using the RSVGTipsDevice package (Plate, 2009). An SVG image can be opened in most
 browsers (firefox and chrome are recommended), and can be used to display tooltips. Each node can be given a tooltip
-with the 'tooltips' argument. The function 'qgraph.svg' can be used to make a battery of svg pictures with hyperlinks
+with the 'tooltips' argument. The function \code{\link{qgraph.svg}} can be used to make a battery of svg pictures with hyperlinks
 to each other, working like a navigation menu.
 
-IMPORTANT NOTE: RSVGTipsDevice only supports 32bit users. To facilitate 64bit users all support for SVG files was dropped
-from this version of qgraph. For a 32bit version that still has this support please check our site: 
-https://sites.google.com/site/qgraphproject}
+IMPORTANT NOTE: RSVGTipsDevice is a 32-bit only package, so SVG functionality is not available in 64bit versions of R.}
 
 \section{Additional information}{
 By default, edges will be straight between two nodes unless there are two edges between two nodes. To overwrite this the 'bidirectional'
@@ -209,6 +209,7 @@ Sacha Epskamp<s.epskamp@uva.nl>
 \code{\link{qgraph.pca}}
 \code{\link{qgraph.loadings}}
 \code{\link{qgraph.sem}}
+\code{\link{qgraph.svg}}
 }
 \examples{
 \dontrun{
