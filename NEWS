@@ -1,0 +1,10 @@
+Changes in Version 0.4.2
+  o Changed the standard output in R to fixed width windows (windows(rescale="fixed"...).
+  o Fixed a spelling error in the authors.
+  o Minimum and maximum details moved slightly to the center.
+  o Fixed a bug in identifying the factors in 'qgraph.loadings'
+  o Extended and improved the examples of the qgraph.efa, qgraph.pca and qgraph.loadings functions.
+  o Changed qgraph from depending to suggesting the psych, sem and RSVGTipsDevice packages. This enables 64bit users to install the complete package
+  o Similar to 'qgraph', 'qgraph.loadings' 'qgraph.efa' and 'qgraph.pca' now also return (invisible) a list of class "qgraph" containing the arguments.
+  o Removed scaling of the sizes of arrow heads, and added the argument 'asize' to control arrow head size.
+  o Added a new function, 'qgraph.arrow' which will be used to draw the arrowheads instead of 'arrows'. This enables closed arrowheads (by default) as well as better optimalization for pdf output.

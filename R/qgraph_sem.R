@@ -15,6 +15,7 @@ qgraph.sem=function(
 	height=5,
 	...)
 {
+require('sem')
 if (class(res)!="sem") stop("Input must me a 'sem' object")
 
 arguments=list(...)

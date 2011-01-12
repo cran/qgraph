@@ -7,23 +7,23 @@ arguments=list(...)
 
 if (length(arguments)>0)
 {
-for (i in 1:length(arguments))
-{
-	if (class(arguments[[i]])=="qgraph") 
+	for (i in 1:length(arguments))
 	{
-		if (!is.null(names(arguments[[i]])))
+		if (class(arguments[[i]])=="qgraph") 
 		{
-			for (j in 1:length(arguments[[i]]))
+			if (!is.null(names(arguments[[i]])))
 			{
-				if (!(names(arguments[[i]])[j]%in%names(arguments)))
+				for (j in 1:length(arguments[[i]]))
 				{
-					arguments[length(arguments)+1]=arguments[[i]][j]
-					names(arguments)[length(arguments)]=names(arguments[[i]])[j]
+					if (!(names(arguments[[i]])[j]%in%names(arguments)))
+					{
+						arguments[length(arguments)+1]=arguments[[i]][j]
+						names(arguments)[length(arguments)]=names(arguments[[i]])[j]
+					}
 				}
 			}
 		}
 	}
-}
 }	
 # Settings for the edgelist
 if(is.null(arguments$edgelist)) 
@@ -127,13 +127,16 @@ if(is.null(arguments$lty)) lty=NULL else lty=arguments$lty
 # Arguments for directed graphs:
 if(is.null(arguments$curve)) curve=NULL else curve=arguments$curve
 if(is.null(arguments$arrows)) arrows=TRUE else arrows=arguments$arrows
-if(is.null(arguments$diag)) diag=F else diag=arguments$diag
+if(is.null(arguments$asize)) asize=0.15 else asize=arguments$asize
+asize=asize*2.4/height
+if(is.null(arguments$open)) open=FALSE else open=arguments$open
+if(is.null(arguments$diag)) diag=FALSE else diag=arguments$diag
 if(is.null(arguments$bidirectional)) bidirectional=FALSE else bidirectional=arguments$bidirectional
 
 # Arguments for SVG pictures:
-#if(is.null(arguments$tooltips)) tooltips=NULL else tooltips=arguments$tooltops
-#if(is.null(arguments$SVGtooltips)) SVGtooltips=NULL else SVGtooltips=arguments$SVGtooltips
-#if(is.null(arguments$hyperlinks)) hyperlinks=NULL else hyperlinks=arguments$hyperlinks
+if(is.null(arguments$tooltips)) tooltips=NULL else tooltips=arguments$tooltops
+if(is.null(arguments$SVGtooltips)) SVGtooltips=NULL else SVGtooltips=arguments$SVGtooltips
+if(is.null(arguments$hyperlinks)) hyperlinks=NULL else hyperlinks=arguments$hyperlinks
 
 
 # Legend setting 1
@@ -147,23 +150,18 @@ if (legend & filetype!='pdf' & filetype!='eps')
 }
 
 # Start output:
-if (filetype=='R') windows(width=width,height=height)
+if (filetype=='R') windows(rescale="fixed",width=width,height=height)
 if (filetype=='eps') postscript(paste(filename,".eps",sep=""),height=height,width=width, horizontal=FALSE)
 if (filetype=='pdf') pdf(paste(filename,".pdf",sep=""),height=height,width=width)
 if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),unit='in',res=res,height=height,width=width)
 if (filetype=='png') png(paste(filename,".png",sep=""),unit='in',res=res,height=height,width=width)
 if (filetype=='jpg' | filetype=='jpeg') jpeg(paste(filename,".jpg",sep=""),unit='in',res=res,height=height,width=width)
-if (filetype=="svg") 
+if (filetype=="svg")
 {
-	stop("SVG is not supported in this version because the RSVGTipsDevice only
-	supports 32bit. Please see https://sites.google.com/site/qgraphproject/ for
-	a version that supports this")
+	if (R.Version()$arch=="x64") stop("RSVGTipsDevice is not available for 64bit versions of R.")
+	require("RSVGTipsDevice")
+	devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
 }
-#if (filetype=="svg")
-#{
-#	require("RSVGTipsDevice")
-#	devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
-#}
 #if (!filetype%in%c('pdf','png','jpg','jpeg','svg','R','eps','tiff')) warning(paste("File type",filetype,"is not supported")) 
 
 # Rescale dims:
@@ -569,14 +567,17 @@ colarray=((2.2-colarray)/2.2)^bgcontrol
 colarray2=array(dim=c(3,bgres,bgres))
  }
 
- 
+# Arrow sizes:
+if (length(asize)==1) asize=rep(asize,length(edgelist.from))
+
+if (length(asize)!=length(edgelist.from)) warning("Length of 'asize' is not equal to the number of edges")
 
 
 # PLOT:
 par(mar=c(0,0,0,0), bg=background)
 if (plot)
 {
-	plot(1, ann = FALSE, axes = FALSE, xlim = c(-1.2, 1.2), ylim = c(-1.2 ,1.2 ),type = "n", xaxs = "i", yaxs = "i")
+	plot(1, ann = FALSE, axes = FALSE, xlim = c(-1.2, 1.2), ylim = c(-1.2 ,1.2),type = "n", xaxs = "i", yaxs = "i")
 }
 
 if (is.logical(bg)) if (bg){
@@ -703,18 +704,20 @@ if (!directed)
 				{
 					Ax=seq(x1,x2,length=arrows+2)
 					Ay=seq(y1,y2,length=arrows+2)
-					
-					arrows(x1,y1,Ax,Ay,lwd=max(edge.width[i]/2,1),col=edge.color[i],
-						length=max(0.25*avgW[i],0.1),lty=lty[i])
+					for (a in 1:arrows+1)
+					{
+						qgraph.arrow(Ax[a],Ay[a],x1,y1,length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+							col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
+					}
 				}
-				else if (arrows)
+								else if (arrows)
 				{
-					arrows(x1,y1,x2,y2,lwd=max(edge.width[i]/2,1),col=edge.color[i],
-						length=max(0.25*avgW[i],0.1),lty=lty[i])
+					qgraph.arrow(x2,y2,x1,y1,length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+						col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
 					if (any(edgelist.from==edgelist.to[i] & edgelist.to==edgelist.from[i]) & bidirectional[i])
 					{
-						arrows(x2,y2,x1,y1,lwd=max(edge.width[i]/2,1),col=edge.color[i],
-						length=max(0.25*avgW[i],0.1),lty=lty[i])
+						qgraph.arrow(x1,y1,x2,y2,length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+						col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
 					}
 				}
 			} else {
@@ -805,17 +808,18 @@ if (!directed)
 						Ax=seq(1,length(spl$x),length=arrows+2)
 						Ay=seq(1,length(spl$y),length=arrows+2)
 						
-						arrows(spl$x[Ax[2:(arrows+1)]],spl$y[Ay[2:(arrows+1)]],spl$x[Ax[2:(arrows+1)]+1],spl$y[Ay[2:(arrows+1)]+1],lwd=max(edge.width[i]/2,1),col=edge.color[i],
-							length=max(0.25*avgW[i],0.1),lty=lty[i])
+						qgraph.arrow(spl$x[Ax[2:(arrows+1)]+1],spl$y[Ay[2:(arrows+1)]+1],spl$x[Ax[2:(arrows+1)]],spl$y[Ay[2:(arrows+1)]],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+							col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
 					}
 					else if (arrows)
 					{
-						arrows(spl$x[length(spl$x)-3],spl$y[length(spl$y)-3],x2,y2,lwd=max(edge.width[i]/2,1),col=edge.color[i],
-							length=max(0.25*avgW[i],0.1),lty=lty[i])
+						qgraph.arrow(x2,y2,spl$x[length(spl$x)-3],spl$y[length(spl$y)-3],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+							col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
+							
 						if (any(edgelist.from==edgelist.to[i] & edgelist.to==edgelist.from[i]) & bidirectional[i])
 						{
-							arrows(spl$x[3],spl$y[3],x1,y1,lwd=max(edge.width[i]/2,1),col=edge.color[i],
-							length=max(0.25*avgW[i],0.1),lty=lty[i])
+							qgraph.arrow(x1,y1,spl$x[3],spl$y[3],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+								col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
 						}
 					}
 					
@@ -863,14 +867,14 @@ if (!is.logical(labels))
 	if (label.scale) label.cex[nchar(labels)>1]=label.cex[nchar(labels)>1]*2/nchar(labels[nchar(labels)>1],"width")
 	for (i in 1:nNodes) 
 	{
-		#if (!is.null(tooltips)) if (!is.na(tooltips[i]))
-		#{
-		#	if (filetype!='svg') warning("Tooltips only supported in SVG filetype.") else setSVGShapeToolTip(desc=tooltips[i])
-		#}
-		#if (!is.null(SVGtooltips)) if (!is.na(SVGtooltips[i]))
-		#{
-		#	setSVGShapeToolTip(desc=SVGtooltips[i])
-		#}
+		if (!is.null(tooltips)) if (!is.na(tooltips[i]))
+		{
+			if (filetype!='svg') warning("Tooltips only supported in SVG filetype.") else setSVGShapeToolTip(desc=tooltips[i])
+		}
+		if (!is.null(SVGtooltips)) if (!is.na(SVGtooltips[i]))
+		{
+			setSVGShapeToolTip(desc=SVGtooltips[i])
+		}
 	text(layout[i,1],layout[i,2],labels[i],cex=label.cex[i]/4,col=lcolor,font=V.font[i])
 	}
 }
@@ -919,9 +923,9 @@ for (i in scores.range[1]:scores.range[2]-scores.range[1]) text(i+1.5,length(gro
 # Plot details:
 if (details & weighted)
 {
-	if (cut != 0) text(0,-1.15,paste("Cutoff:",round(cut,2)),cex=0.6)
-	if (minimum != 0) text(-1.2,-1.15,paste("Minimum:",round(minimum,2)),pos=4,cex=0.6)
-	text(1.2,-1.15,paste("Maximum:",round(maximum,2)),pos=2,cex=0.6)
+	if (cut != 0) text(0,-1.1,paste("Cutoff:",round(cut,2)),cex=0.6)
+	if (minimum != 0) text(-1,-1.1,paste("Minimum:",round(minimum,2)),pos=4,cex=0.6)
+	text(1,-1.1,paste("Maximum:",round(maximum,2)),pos=2,cex=0.6)
 }
 
 	

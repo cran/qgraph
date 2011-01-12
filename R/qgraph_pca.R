@@ -16,7 +16,7 @@ require(psych)
 fact=principal(cor,factors,rotate=rotation)
 loadings=as.matrix(loadings(fact)[1:nrow(cor),1:factors])
 
-qgraph.loadings(loadings,model="formative",...) 
+Q=qgraph.loadings(loadings,model="formative",...) 
 	
-
+invisible(Q)
 }
