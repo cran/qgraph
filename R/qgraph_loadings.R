@@ -41,7 +41,7 @@ if(is.null(arguments$legend))
 if(is.null(arguments$legend.cex)) legend.cex=1 else legend.cex=arguments$legend.cex
 
 # Output arguments:
-if(is.null(arguments$filetype)) filetype="R" else filetype=arguments$filetype
+if(is.null(arguments$filetype)) filetype="default" else filetype=arguments$filetype
 if(is.null(arguments$filename)) filename="qgraph" else filename=arguments$filename
 if(is.null(arguments$width)) width=10 else width=arguments$width
 if(is.null(arguments$height))
@@ -53,7 +53,8 @@ if(is.null(arguments$res)) res=320 else res=arguments$res
 
 
 # Start output:
-if (filetype=='R') windows(rescale="fixed",width=width,height=height)
+if (filetype=='default') if (is.null(dev.list()[dev.cur()])) dev.new(rescale="fixed",width=width,height=height)
+if (filetype=='R') dev.new(rescale="fixed",width=width,height=height)
 if (filetype=='eps') postscript(paste(filename,".eps",sep=""),height=height,width=width, horizontal=FALSE)
 if (filetype=='pdf') pdf(paste(filename,".pdf",sep=""),height=height,width=width)
 if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),unit='in',res=res,height=height,width=width)

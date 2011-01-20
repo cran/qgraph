@@ -24,7 +24,7 @@ qgraph( adj, ... )
 	\item{maximum}{qgraph regards the highest of the maximum or highest absolute edge weight as the highest weight to scale the edge widths too. To compare several graphs, set this argument to a higher value than any edge weight in the graphs (typically 1 for correlations).}
 	\item{vsize}{A value indicating the size of the nodes. Can also be a vector of length 2 (nodes are scaled to degree) or a size for each node.}
 	\item{esize}{Size of the largest edge (or what it would be if there was an edge with weight maximum).}
-	\item{filetype}{A character containing the file type to save the output in. "R" outputs in R, "pdf" creates a pdf file. "svg" creates a svg file (requires RSVGTipsDevice)}
+	\item{filetype}{A character containing the file type to save the output in. "R" outputs in a new R window, "pdf" creates a pdf file. "svg" creates a svg file (requires RSVGTipsDevice). 'jpg', 'tiff' and 'png' can also be used. If this is given any other string (e.g. filetype="") no device is opened. Defaults to 'R' if the current devide is the NULL-device or no new device if there already is an open device.}
 	\item{filename}{Name of the file, if outputting in pdf}
 	\item{width}{Width of the plot, in inches}
 	\item{height}{Height of the plot, in inches}
@@ -145,9 +145,8 @@ in each group will be given a color, and a legend can be plotted (by setting 'le
 By default qgraph will plot the graph in a new R window. However the graphs
 are optimized to be plotted in a PDF file. To create a pdf file set the 'filetype' argument to "pdf". 'filename' can be used
 to specify the filename and folder to output in. 'height' and 'width' can be used to specify the height and width of the image
-in inches. If filetype is set to any character that is not included (like "") the graph will be plotted as a normal R plot and
-can be included in larger files or pictures (note that when doing this 'width' and 'height' still optimize the image for those
-width and heights, even though the output screen size isn't affected).
+in inches. By default a new R window is opened if the current device is the NULL-device, otherwise the current device is used (note that when doing this 'width' and 'height' still optimize the image for those
+widths and heights, even though the output screen size isn't affected, this is especially important for directed graphs!).
 
 The graphs can also be outputted in an SVG file using the RSVGTipsDevice package (Plate, 2009). An SVG image can be opened in most
 browsers (firefox and chrome are recommended), and can be used to display tooltips. Each node can be given a tooltip
@@ -210,6 +209,7 @@ Sacha Epskamp<s.epskamp@uva.nl>
 \code{\link{qgraph.loadings}}
 \code{\link{qgraph.sem}}
 \code{\link{qgraph.svg}}
+\code{\link{qgraph.panel}}
 }
 \examples{
 \dontrun{
