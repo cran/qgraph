@@ -98,7 +98,7 @@ if(is.null(arguments$layout.par)) layout.par=list() else layout.par=arguments$la
 if(is.null(arguments$details)) details=TRUE else details=arguments$details
 
 # Output arguments:
-if(is.null(arguments$filetype)) filetype="R" else filetype=arguments$filetype
+if(is.null(arguments$filetype)) filetype="default" else filetype=arguments$filetype
 if(is.null(arguments$filename)) filename="qgraph" else filename=arguments$filename
 if(is.null(arguments$width)) width=7 else width=arguments$width
 if(is.null(arguments$height)) height=7 else height=arguments$height
@@ -134,10 +134,12 @@ if(is.null(arguments$diag)) diag=FALSE else diag=arguments$diag
 if(is.null(arguments$bidirectional)) bidirectional=FALSE else bidirectional=arguments$bidirectional
 
 # Arguments for SVG pictures:
-if(is.null(arguments$tooltips)) tooltips=NULL else tooltips=arguments$tooltops
+if(is.null(arguments$tooltips)) tooltips=NULL else tooltips=arguments$tooltips
 if(is.null(arguments$SVGtooltips)) SVGtooltips=NULL else SVGtooltips=arguments$SVGtooltips
 if(is.null(arguments$hyperlinks)) hyperlinks=NULL else hyperlinks=arguments$hyperlinks
 
+# Arguments for TEX:
+if(is.null(arguments$standAlone)) standAlone=TRUE else standAlone=arguments$standAlone
 
 # Legend setting 1
 if (is.null(legend))
@@ -150,7 +152,8 @@ if (legend & filetype!='pdf' & filetype!='eps')
 }
 
 # Start output:
-if (filetype=='R') windows(rescale="fixed",width=width,height=height)
+if (filetype=='default') if (is.null(dev.list()[dev.cur()])) dev.new(rescale="fixed",width=width,height=height)
+if (filetype=='R') dev.new(rescale="fixed",width=width,height=height)
 if (filetype=='eps') postscript(paste(filename,".eps",sep=""),height=height,width=width, horizontal=FALSE)
 if (filetype=='pdf') pdf(paste(filename,".pdf",sep=""),height=height,width=width)
 if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),unit='in',res=res,height=height,width=width)
@@ -162,7 +165,39 @@ if (filetype=="svg")
 	require("RSVGTipsDevice")
 	devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
 }
-#if (!filetype%in%c('pdf','png','jpg','jpeg','svg','R','eps','tiff')) warning(paste("File type",filetype,"is not supported")) 
+if (filetype=="tex")
+{
+	# Special thanks to Charlie Sharpsteen for supplying these tikz codes on stackoverflow.com !!!
+	
+	require(tikzDevice)
+	opt= c( 
+	getOption('tikzLatexPackages'),  
+    "\\def\\tooltiptarget{\\phantom{\\rule{1mm}{1mm}}}",
+    "\\newbox\\tempboxa\\setbox\\tempboxa=\\hbox{}\\immediate\\pdfxform\\tempboxa \\edef\\emptyicon{\\the\\pdflastxform}",
+    "\\newcommand\\tooltip[1]{\\pdfstartlink user{/Subtype /Text/Contents  (#1)/AP <</N \\emptyicon\\space 0 R >>}\\tooltiptarget\\pdfendlink}"
+	)
+	
+	place_PDF_tooltip = function(x, y, text)
+	{
+
+		# Calculate coordinates
+		tikzX <- round(grconvertX(x, to = "device"), 2)
+		tikzY <- round(grconvertY(y, to = "device"), 2)
+		# Insert node
+		tikzAnnotate(paste(
+		"\\node at (", tikzX, ",", tikzY, ") ",
+		"{\\tooltip{", text, "}};",
+		sep = ''
+		))
+	  invisible()
+	}
+	
+	print("NOTE: Using 'tex' as filetype will take longer to run than other filetypes")
+	
+	tikz(paste(filename,".tex",sep=""), standAlone = standAlone, width=width, height=height, packages=opt)
+}
+	
+	#if (!filetype%in%c('pdf','png','jpg','jpeg','svg','R','eps','tiff')) warning(paste("File type",filetype,"is not supported")) 
 
 # Rescale dims:
 if (pty=='s')
@@ -301,7 +336,10 @@ if (directed & is.null(curve))
 	{
 		if (any(edgelist.from==edgelist.to[i] & edgelist.to==edgelist.from[i]))
 		{
-			if (!bidirectional[i]) curve[i]=0.2		
+			if (min(abs(edgelist.weight[edgelist.from==edgelist.to[i] & edgelist.to==edgelist.from[i]]))>minimum)
+			{
+				if (!bidirectional[i]) curve[i]=0.2		
+			}
 		}
 	}
 }
@@ -622,15 +660,14 @@ if (!is.logical(edge.labels))
 
 	## Set fonts (symbol):
 	strsplE=strsplit(edge.labels,"")
-	greekE=logical(0)
-
-	for (i in 1:length(strsplE)) 
-	{
-		greekE[i]=any(strsplE[[i]]=="*")
-		edge.labels[i]=paste(strsplE[[i]][which(strsplE[[i]]!="*")],collapse="") 
-	}
+		
+	greekE=sapply(strsplE,function(x)any(x=="*"))
+	edge.labels=sapply(strsplE,function(x)paste(x[x!="*"],collapse=""))
+	
 	edge.font=rep(1,length(edgelist.from))
 	edge.font[greekE]=5
+	
+	edge.labels[edge.labels=="NA"]=""
 }
 			
 			
@@ -652,7 +689,7 @@ if (!directed)
 	curve[edgelist.from==edgelist.to]=1
 	for (i in edgesort)
 	{
-		if (abs(edgelist.weight[i])>minimum)
+		if (abs(edgelist.weight[i])>=minimum)
 		{
 			x1=layout[edgelist.from[i],1]
 			x2=layout[edgelist.to[i],1]
@@ -807,9 +844,11 @@ if (!directed)
 					{
 						Ax=seq(1,length(spl$x),length=arrows+2)
 						Ay=seq(1,length(spl$y),length=arrows+2)
-						
-						qgraph.arrow(spl$x[Ax[2:(arrows+1)]+1],spl$y[Ay[2:(arrows+1)]+1],spl$x[Ax[2:(arrows+1)]],spl$y[Ay[2:(arrows+1)]],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
-							col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
+						for (a in 2:(arrows+1))
+						{
+							qgraph.arrow(spl$x[Ax[a]+1],spl$y[Ay[a]+1],spl$x[Ax[a]],spl$y[Ay[a]],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+								col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
+						}
 					}
 					else if (arrows)
 					{
@@ -869,15 +908,19 @@ if (!is.logical(labels))
 	{
 		if (!is.null(tooltips)) if (!is.na(tooltips[i]))
 		{
-			if (filetype!='svg') warning("Tooltips only supported in SVG filetype.") else setSVGShapeToolTip(desc=tooltips[i])
+			if (filetype=='svg') setSVGShapeToolTip(desc=tooltips[i])
 		}
 		if (!is.null(SVGtooltips)) if (!is.na(SVGtooltips[i]))
 		{
 			setSVGShapeToolTip(desc=SVGtooltips[i])
 		}
-	text(layout[i,1],layout[i,2],labels[i],cex=label.cex[i]/4,col=lcolor,font=V.font[i])
+		text(layout[i,1],layout[i,2],labels[i],cex=label.cex[i]/4,col=lcolor,font=V.font[i])
+		if (filetype=='tex' & !is.null(tooltips)) if (!is.na(tooltips[i])) place_PDF_tooltip(layout[i,1],layout[i,2],tooltips[i])
 	}
 }
+
+
+
 
 # Plot Legend:
 if (legend)
@@ -929,7 +972,7 @@ if (details & weighted)
 }
 
 	
-if (filetype%in%c('pdf','png','jpg','jpeg','svg','eps','tiff')) 
+if (filetype%in%c('pdf','png','jpg','jpeg','svg','eps','tiff','tex')) 
 {
 	print(paste("Output stored in ",getwd(),"/",filename,".",filetype,sep=""))
 	dev.off()

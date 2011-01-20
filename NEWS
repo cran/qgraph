@@ -1,3 +1,14 @@
+Changes in Version 0.4.3
+  o Fixed a bug in the 'tooltips' argument in qgraph.
+  o Fixed a bug with numeric assignment for the 'arrows' argument on curved lines
+  o By default lines are now only curved if there is no other edge with a weight over the minimum between the two nodes instead of if there is any other edge between the two nodes.
+  o Greek labels are now identified by using sapply rather than a for-loop.
+  o Added 'tex' as filetype. Graphs can now be output in a .tex format using the 'tikzDevice'. The .tex file can then be build in LaTeX compilers. 
+  o The 'tooltips' argument can now also be used for filetype='tex'
+  o Replaced the use of 'windows' function with the 'dev.new' function. This should fix problems with the default output on platforms other than Windows.
+  o By default, a new R window is now only opened if the active device is the NULL-device.
+  o Added the 'qgraph.panel' function. Which creates a 4-panel plot with useful default graphs for correlation matrices.
+  
 Changes in Version 0.4.2
   o Changed the standard output in R to fixed width windows (windows(rescale="fixed"...).
   o Fixed a spelling error in the authors.
