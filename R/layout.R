@@ -22,30 +22,10 @@ qgraph.layout.fruchtermanreingold=function(edgelist,weights=NULL,vcount=NULL,nit
     #x<-n/(2*pi)*sin(2*pi*tempa)
     #y<-n/(2*pi)*cos(2*pi*tempa)
 	
-	if (is.null(groups))
-	{
 		init=matrix(0,nrow=n,ncol=2)
 		tl=n+1
 		init[,1]=sin(seq(0,2*pi, length=tl))[-tl]
 		init[,2]=cos(seq(0,2*pi, length=tl))[-tl] 
-	} else
-	{
-		if (is.null(rotation)) rotation=rep(0,length=length(groups))
-			
-		l1=matrix(0,nrow=length(groups),ncol=2)
-		tl=nrow(l1)+1
-		l1[,1]=sin(seq(0,2*pi, length=tl))[-tl]
-		l1[,2]=cos(seq(0,2*pi, length=tl))[-tl]
-		l1=l1*length(groups)*layout.control
-			
-		init=matrix(0,nrow=n,ncol=2)
-		for (i in 1:length(groups)) 
-		{
-			tl=length(groups[[i]])+1
-			init[groups[[i]],1]=sin(seq(rotation[i],rotation[i]+2*pi, length=tl))[-tl]+l1[i,1]
-			init[groups[[i]],2]=cos(seq(rotation[i],rotation[i]+2*pi, length=tl))[-tl]+l1[i,2] 
-		}
-	}
 }
 x<-init[,1]
 y<-init[,2]
