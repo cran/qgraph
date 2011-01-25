@@ -51,11 +51,16 @@ if(is.null(arguments$groups)) groups=NULL else groups=arguments$groups
 # Factorial graph:
 if(is.null(arguments$nfact))
 {
- if (is.null(groups)) nfact=round(nNodes/2,0) else nfact=length(groups)
+	nfact=NULL
 } else nfact=arguments$nfact
  
 if (fact)
 {
+	if (is.null(nfact)) 
+	{
+		if (is.null(groups)) nfact=sum(eigen(adj)$values>1) else nfact=length(groups)
+	}
+	
 	loadings=loadings(factanal(factors=nfact,covmat=adj,rotation="promax"))
 
 	loadings=loadings[1:nrow(loadings),1:ncol(loadings)]
@@ -85,7 +90,7 @@ if(is.null(arguments$edge.labels)) edge.labels=FALSE else edge.labels=arguments$
 if(is.null(arguments$edge.label.cex)) edge.label.cex=1 else edge.label.cex=arguments$edge.label.cex
 if(is.null(arguments$directed))
 {
-	if (edgelist) directed=FALSE else directed=NULL 
+	if (edgelist) directed=TRUE else directed=NULL 
 } else directed=arguments$directed
 if(is.null(arguments$legend))
 {
@@ -100,8 +105,14 @@ if(is.null(arguments$details)) details=TRUE else details=arguments$details
 # Output arguments:
 if(is.null(arguments$filetype)) filetype="default" else filetype=arguments$filetype
 if(is.null(arguments$filename)) filename="qgraph" else filename=arguments$filename
-if(is.null(arguments$width)) width=7 else width=arguments$width
-if(is.null(arguments$height)) height=7 else height=arguments$height
+if(is.null(arguments$width))
+{
+	if (is.null(dev.list()[dev.cur()])) width=7 else width=dev.size(units="in")[1]
+} else width=arguments$width
+if(is.null(arguments$height))
+{
+	if (is.null(dev.list()[dev.cur()])) height=7 else height=dev.size(units="in")[2]
+} else height=arguments$height
 if(is.null(arguments$pty)) pty='m' else pty=arguments$pty
 if(is.null(arguments$res)) res=320 else res=arguments$res
 
@@ -263,6 +274,7 @@ if (is.character(diag))
 	{
 		diagWeights=diag(adj)
 		diagCols=TRUE
+		diag=FALSE
 	}
 }
 if (is.numeric(diag))
@@ -271,6 +283,7 @@ if (is.numeric(diag))
 	if (length(diag)!=nNodes) stop("Numerical assignment of the 'diag' argument must be if length equal to the number of nodes")
 	diagWeights=diag
 	diagCols=TRUE
+	diag=FALSE
 }
 if (is.logical(diag)) if (!diag & !edgelist) diag(adj)=0
 	
@@ -387,12 +400,11 @@ if (layout=="default" | layout=="circular")
 	}
 } else if (layout=="spring")
 {
-	layout=qgraph.layout.fruchtermanreingold(cbind(edgelist.from,edgelist.to),abs(edgelist.weight),nNodes,groups=groups,rotation=rotation,layout.control=layout.control,
+	layout=qgraph.layout.fruchtermanreingold(cbind(edgelist.from,edgelist.to),abs(edgelist.weight/maximum),nNodes,rotation=rotation,layout.control=layout.control,
 		niter=layout.par$niter,max.delta=layout.par$max.delta,area=layout.par$area,cool.exp=layout.par$cool.exp,repulse.rad=layout.par$repulse.rad,init=layout.par$init,
 			constraints=layout.par$constraints)
 }
 }
-
 # Layout matrix:
 if (is.matrix(layout)) if (ncol(layout)>2)
 {
@@ -677,7 +689,25 @@ if (!directed)
 { 
 	for (i in edgesort) if (abs(edgelist.weight[i])>minimum) 
 	{
-		points(layout[c(edgelist.from[i],edgelist.to[i]),1],layout[c(edgelist.from[i],edgelist.to[i]),2],lwd=edge.width[i],col=edge.color[i],type='l',lty=lty[i])
+		if (edgelist.from[i]!=edgelist.to[i])
+		{
+			points(layout[c(edgelist.from[i],edgelist.to[i]),1],layout[c(edgelist.from[i],edgelist.to[i]),2],lwd=edge.width[i],col=edge.color[i],type='l',lty=lty[i])
+		} else
+		{
+			x1=layout[edgelist.from[i],1]
+			x2=layout[edgelist.to[i],1]
+			y1=layout[edgelist.from[i],2]
+			y2=layout[edgelist.to[i],2]
+			
+			loopX=loop*3*(0.5*vsize[edgelist.to[i]]*0.125*(7/width)*par("cin")[2])
+			spx=c(x1+loopX,x1,x1-loopX)
+			loopY=loop*3*(0.5*vsize[edgelist.to[i]]*0.125*(7/height)*par("cin")[2])
+			spy=c(y1,y1+loopY,y1)
+			spl=xspline(c(x1,spx,x2),c(y1,spy,y2),1,draw=F)
+			
+			lines(spl,lwd=edge.width[i],col=edge.color[i],lty=lty[i])
+		}
+		
 		if (!is.logical(edge.labels))
 		{
 			midX[i]=mean(layout[c(edgelist.from[i],edgelist.to[i]),1])
@@ -790,8 +820,8 @@ if (!directed)
 					}
 					if (edgelist.from[i]==edgelist.to[i])
 					{
-						spx=c(x1+loop,x1,x1-loop)
-						spy=c(y1,y1+loop,y1)
+						spx=c(x1+loopX,x1,x1-loopX)
+						spy=c(y1,y1+loopY,y1)
 						spl=xspline(c(x1,spx,x2),c(y1,spy,y2),1,draw=F)
 					} else 
 					{

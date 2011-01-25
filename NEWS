@@ -1,3 +1,13 @@
+Changes in Version 0.4.4
+  o Weights are now divided by the 'maximum' when computing the fruchterman-reingold layout.
+  o Fixed an issue causing loops to become too large
+  o Fixed an issue causing diag="col" assignment to also create loops
+  o 'directed' now defaults to TRUE if an edgelist is used as input in 'qgraph'
+  o Fixed a bug with the spring layout and groups list
+  o The nfact argument now defaults to the amount of eigenvalues greater than 1 or the length of the groups list.
+  o Using layout="circle" in qgraph.loadings should now generate a better looking layout.
+  o 'width' and 'height' are now automatically adjusted to the size of the opened device.
+  
 Changes in Version 0.4.3
   o Fixed a bug in the 'tooltips' argument in qgraph.
   o Fixed a bug with numeric assignment for the 'arrows' argument on curved lines

@@ -43,10 +43,16 @@ if(is.null(arguments$legend.cex)) legend.cex=1 else legend.cex=arguments$legend.
 # Output arguments:
 if(is.null(arguments$filetype)) filetype="default" else filetype=arguments$filetype
 if(is.null(arguments$filename)) filename="qgraph" else filename=arguments$filename
-if(is.null(arguments$width)) width=10 else width=arguments$width
+if(is.null(arguments$width))
+{
+	if (is.null(dev.list()[dev.cur()])) width=10 else width=dev.size(units="in")[1]
+} else width=arguments$width
 if(is.null(arguments$height))
 {
-	if (layout=="circle") height=10 else height=5
+	if (is.null(dev.list()[dev.cur()]))
+	{
+		if (layout=="circle") height=10 else height=5
+	} else height=dev.size(units="in")[2]
 }	else height=arguments$height
 if(is.null(arguments$pty)) pty='m' else pty=arguments$pty
 if(is.null(arguments$res)) res=320 else res=arguments$res
@@ -211,8 +217,8 @@ if (layout=="circle")
 	{
 		for (i in 1:n) l[i,]=l2[which(sorted$ix==i),]
 		tl=k+1
-		l[(n+1):(n+k),1]=0.5*sin(seq(0,2*pi,length=tl)+(2*pi/k))[-tl]
-		l[(n+1):(n+k),2]=0.5*cos(seq(0,2*pi,length=tl)+(2*pi/k))[-tl]
+		l[(n+1):(n+k),1]=0.5*sin(seq(0,2*pi,length=tl)+(1*pi/k))[-tl]
+		l[(n+1):(n+k),2]=0.5*cos(seq(0,2*pi,length=tl)+(1*pi/k))[-tl]
 	} else l[1:n,]=l2[1:n,]
 }
 	

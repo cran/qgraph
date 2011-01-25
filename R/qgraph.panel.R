@@ -7,8 +7,14 @@ class(Q)="qgraph"
 # Output Q:
 if(is.null(Q$filetype)) filetype="default" else filetype=Q$filetype
 if(is.null(Q$filename)) filename="qgraph" else filename=Q$filename
-if(is.null(Q$width)) width=7 else width=Q$width
-if(is.null(Q$height)) height=7 else height=Q$height
+if(is.null(Q$width))
+{
+	if (is.null(dev.list()[dev.cur()])) width=7/2 else width=dev.size(units="in")[1]/2
+} else width=Q$width
+if(is.null(Q$height))
+{
+	if (is.null(dev.list()[dev.cur()])) height=7/2 else height=dev.size(units="in")[2]/2
+} else height=Q$height
 if(is.null(Q$pty)) pty='m' else pty=Q$pty
 if(is.null(Q$res)) res=320 else res=Q$res
 
