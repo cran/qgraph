@@ -5,18 +5,12 @@ qgraph.layout.fruchtermanreingold=function(edgelist,weights=NULL,vcount=NULL,nit
   ecount=nrow(edgelist)
   if (!is.null(vcount)) n=vcount else n=max(length(unique(c(edgelist))),max(edgelist))
   if (is.null(weights)) weights=rep(1,ecount)
-  if(is.null(niter))
-    niter<-500
-  if(is.null(max.delta))
-    max.delta<-n
-  if (length(max.delta)==1)
-	max.delta=rep(max.delta,vcount)
-  if(is.null(area))
-    area<-n^2
-  if(is.null(cool.exp))
-    cool.exp<-1.5
-  if(is.null(repulse.rad))
-    repulse.rad<-area*n
+  if(is.null(niter)) niter<-500
+  if(is.null(max.delta)) max.delta<-n
+  if (length(max.delta)==1) max.delta=rep(max.delta,vcount)
+  if(is.null(area)) area<-n^2
+  if(is.null(cool.exp)) cool.exp<-1.5
+  if(is.null(repulse.rad)) repulse.rad<-area*n
   if(is.null(init)){
     #tempa<-sample((0:(n-1))/n) #Set initial positions randomly on the circle
     #x<-n/(2*pi)*sin(2*pi*tempa)
@@ -50,7 +44,8 @@ y[Cy]=constraints[Cy,2]
 	as.double(area), as.double(cool.exp), as.double(repulse.rad), as.integer(Ef),
 	as.integer(Et), as.double(abs(weights)), as.double(x), as.double(y), as.integer(Cx), as.integer(Cy))
   #Return the result
-  cbind(layout[[11]],layout[[12]])
+
+  return(cbind(layout[[11]],layout[[12]]))
 }
 
 

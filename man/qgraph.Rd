@@ -15,6 +15,7 @@ qgraph( adj, ... )
 \section{Additional optional arguments}{	
 \describe{
 	\item{layout}{This argument controls the layout of the graph. "circle" gives a circular layout, "groups" gives a layout in which each group is put in a circle and "spring" gives a force embedded layout. It also can be a matrix with a row for each node and x and y coordinates in the first and second column respectively. Defaults to "circle" in weighted graphs without a groups list, "groups" in weighted graphs with a groups list, and "spring" in unweighted graphs.}
+	\item{details}{Logical indicating if minimum, maximum and cutoff score should be printed under the graph. Defaults to FALSE.}
 	\item{graph}{Type of graph to be made, for use with a correlation matrix as input. "association" will plot the matrix as is, "concentration" will first compute partial correlations between each pair of nodes (controlled for all other variables) and "factorial" will create a graph based on an exploratory factor analysis. See details.}
 	\item{cut}{In weighted graphs, this argument can be used to make edges with absolute weights over this value of the strongest color intensity and become wider the stronger they are, and edges with absolute weights under this value of the smallest width and become vaguer the smaller the weight. If this is set to NULL, no cutoff is used and all edges vary in width and color. Defaults to NULL for graphs with less then 50 nodes and 0.3 to larger graphs.}
 	\item{groups}{A list object with the measurement model. Each element represents one factor, and must contain the numbers of the nodes in that factor (same order as in the adjacency matrix). This can be used to group the nodes and give them colors.}
@@ -52,6 +53,7 @@ qgraph( adj, ... )
 	\item{bidirectional}{If this is TRUE, Then directional edges between nodes that have two edges between them are not curved.}
 	\item{tooltips}{A vector with tooltips for each node, only when filetype='svg'}
 	\item{nNodes}{The number of nodes, only needs to be specified if the first argument is an edge-list and some nodes have no edges}
+	\item{vTranse}{Transparency of the nodes, must be an integer between 0 and 255, 255 indicating no transparancy. Defaults to 255}
 }}
 
 \details{
@@ -183,7 +185,9 @@ To shut down the output device!}
 \value{
 qgraph returns a 'qgraph' object that contains all the arguments used, with the exeption of the 'layout' argument which 
 is set to the final layout used in the graph.
-This can then be sent to a new qgraph function to use the same arguments in the new plot.}
+This can then be sent to a new qgraph function to use the same arguments in the new plot.
+
+One of the values returned is 'layout.orig', the original (not rescaled) layout, which needs to be used when using constraint layouts.}
 
 
 \references{

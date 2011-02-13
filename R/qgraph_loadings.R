@@ -72,7 +72,6 @@ if (filetype=="svg")
 	require("RSVGTipsDevice")
 	devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
 }
-if (!filetype%in%c('pdf','png','jpg','jpeg','svg','R','eps','tiff')) warning(paste("File type",filetype,"is not supported")) 
 
 # Rescale dims:
 if (pty=='s')
@@ -202,7 +201,13 @@ if (layout!="circle")
 
 	if (k>1) 
 	{
-		for (i in 1:n) l[i,]=l2[which(sorted$ix==i),]
+		if (!identified)
+		{
+			for (i in 1:n) l[i,]=l2[which(sorted$ix==i),]
+		} else
+		{
+			l[unlist(groups[identitysort]),]<-l2[1:n,]
+		}
 		l[(n+1):(n+k),]=l2[(n+1):(n+k),] 
 	} else l=l2
 }
@@ -215,10 +220,15 @@ if (layout=="circle")
 	
 	if (k>1)
 	{
-		for (i in 1:n) l[i,]=l2[which(sorted$ix==i),]
+		if (!identified) for (i in 1:n) l[i,]=l2[which(sorted$ix==i),]
+		if (identified)
+		{
+			l[unlist(groups[identitysort]),]<-l2[1:n,]
+		}
 		tl=k+1
 		l[(n+1):(n+k),1]=0.5*sin(seq(0,2*pi,length=tl)+(1*pi/k))[-tl]
 		l[(n+1):(n+k),2]=0.5*cos(seq(0,2*pi,length=tl)+(1*pi/k))[-tl]
+		
 	} else l[1:n,]=l2[1:n,]
 }
 	
