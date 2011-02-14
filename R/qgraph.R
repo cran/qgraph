@@ -100,7 +100,7 @@ if(is.null(arguments$plot)) plot=T else plot=arguments$plot
 if(is.null(arguments$rotation)) rotation=NULL else rotation=arguments$rotation
 if(is.null(arguments$layout.control)) layout.control=0.5 else layout.control=arguments$layout.control
 if(is.null(arguments$layout.par)) layout.par=list() else layout.par=arguments$layout.par
-if(is.null(arguments$details)) details=TRUE else details=arguments$details
+if(is.null(arguments$details)) details=FALSE else details=arguments$details
 
 # Output arguments:
 if(is.null(arguments$filetype)) filetype="default" else filetype=arguments$filetype
@@ -134,6 +134,7 @@ if(is.null(arguments$label.scale)) label.scale=TRUE else label.scale=arguments$l
 if(is.null(arguments$scores)) scores=NULL else scores=arguments$scores
 if(is.null(arguments$scores.range)) scores.range=NULL else scores.range=arguments$scores.range
 if(is.null(arguments$lty)) lty=NULL else lty=arguments$lty
+if(is.null(arguments$vTrans)) vTrans=255 else vTrans=arguments$vTrans
 
 # Arguments for directed graphs:
 if(is.null(arguments$curve)) curve=NULL else curve=arguments$curve
@@ -316,11 +317,11 @@ if (edgelist)
 	edgelist.weight=edgelist.weight[edgelist.weight!=0]
 }
 
-maximum=max(abs(c(maximum,max(edgelist.weight),cut,diagWeights)))
+maximum=max(abs(c(maximum,max(abs(edgelist.weight)),cut,abs(diagWeights))))
 if (cut==0)
 {
 	avgW=(abs(edgelist.weight)-minimum)/(maximum-minimum)
-} else avgW=(abs(edgelist.weight)-cut)/(maximum-cut)
+} else if (maximum>cut) avgW=(abs(edgelist.weight)-cut)/(maximum-cut) else avgW=rep(0,length(edgelist.from))
 avgW[avgW<0]=0
 
 
@@ -400,7 +401,7 @@ if (layout=="default" | layout=="circular")
 	}
 } else if (layout=="spring")
 {
-	layout=qgraph.layout.fruchtermanreingold(cbind(edgelist.from,edgelist.to),abs(edgelist.weight/maximum),nNodes,rotation=rotation,layout.control=layout.control,
+	layout=qgraph.layout.fruchtermanreingold(cbind(edgelist.from,edgelist.to),abs(edgelist.weight/maximum)^2,nNodes,rotation=rotation,layout.control=layout.control,
 		niter=layout.par$niter,max.delta=layout.par$max.delta,area=layout.par$area,cool.exp=layout.par$cool.exp,repulse.rad=layout.par$repulse.rad,init=layout.par$init,
 			constraints=layout.par$constraints)
 }
@@ -546,6 +547,19 @@ if (is.null(border.colors))
 {
 	border.colors=rep("black",length(vertex.colors))
 }
+
+# Transparance in vertex colors:
+num2hex <- function(x)
+{
+	hex=unlist(strsplit("0123456789ABCDEF",split=""))
+	return(paste(hex[(x-x%%16)/16+1],hex[x%%16+1],sep=""))
+}
+
+colHEX <- rgb(t(col2rgb(vertex.colors)/255))
+
+vertex.colors <- paste(sapply(strsplit(colHEX,split=""),function(x)paste(x[1:7],collapse="")),num2hex(vTrans),sep="")
+
+
 
 # Vertex size:
 if (length(vsize)==1) vsize=rep(vsize,nNodes)
@@ -1013,6 +1027,7 @@ if (filetype%in%c('pdf','png','jpg','jpeg','svg','eps','tiff','tex'))
 
 returnval=arguments
 returnval$layout=layout
+returnval$layout.orig=original.layout
 
 class(returnval)="qgraph"
 

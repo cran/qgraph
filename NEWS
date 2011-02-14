@@ -1,3 +1,10 @@
+Changes in Version 0.4.5
+  o Added the Big 5 dataset.
+  o layout.orig is now returned as well as layout. This is the original layout (not rescaled) which can be used for constraints
+  o in 'qgraph.loadings' nodes are now reordered if the factors can be identified
+  o Added the 'vTrans' argument, which can be used to make nodes transparant.
+  o Fixed a critical bug resulting in oversized edges if the largest absolute edge weight is negative
+  
 Changes in Version 0.4.4
   o Weights are now divided by the 'maximum' when computing the fruchterman-reingold layout.
   o Fixed an issue causing loops to become too large
@@ -7,7 +14,7 @@ Changes in Version 0.4.4
   o The nfact argument now defaults to the amount of eigenvalues greater than 1 or the length of the groups list.
   o Using layout="circle" in qgraph.loadings should now generate a better looking layout.
   o 'width' and 'height' are now automatically adjusted to the size of the opened device.
-  
+ 
 Changes in Version 0.4.3
   o Fixed a bug in the 'tooltips' argument in qgraph.
   o Fixed a bug with numeric assignment for the 'arrows' argument on curved lines
