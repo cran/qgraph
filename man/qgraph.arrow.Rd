@@ -8,7 +8,8 @@ qgraph.arrow
 This function creates an open or closed arrowhead. It is used in \code{\link{qgraph}} and not designed for seperate use.
 }
 \usage{
-qgraph.arrow(x, y, x.orig, y.orig, length, angle = 30 * pi/180, lwd, col = "black", open = T, Xasp = 1, lty = 1)
+qgraph.arrow(x, y, x.orig, y.orig, length, angle = 30 * pi/180, lwd, 
+			 col = "black", open = T, Xasp = 1, lty = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

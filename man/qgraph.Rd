@@ -54,6 +54,8 @@ qgraph( adj, ... )
 	\item{tooltips}{A vector with tooltips for each node, only when filetype='svg'}
 	\item{nNodes}{The number of nodes, only needs to be specified if the first argument is an edge-list and some nodes have no edges}
 	\item{vTranse}{Transparency of the nodes, must be an integer between 0 and 255, 255 indicating no transparancy. Defaults to 255}
+	\item{directed}{Logical indicating if edges are directed or not. Can be TRUE or FALSE to indicate if all edges are directed, a logical vector (when using edgelists) or a logical matrix (when using adjacency matrix)}
+	\item{DoNotPlot}{Runs qgraph but does not plot. Useful for saving the output (i.e. layout) without plotting}
 }}
 
 \details{
@@ -216,47 +218,171 @@ Sacha Epskamp<s.epskamp@uva.nl>
 \code{\link{qgraph.panel}}
 }
 \examples{
-\dontrun{
-#### VISUALIZE CORRELATION MATRIX ###
-eta=matrix(rnorm(200*5),ncol=5)
-lam=matrix(0,nrow=100,ncol=5)
-for (i in 1:5) lam[(20*i-19):(20*i),i]=rnorm(20,0.7,0.3)
-eps=matrix(rnorm(200*100),ncol=100)
-Y=eta\%*\%t(lam)+eps
+### BIG 5 DATASET ###
+# Load big5 dataset:
+data(big5)
+data(big5groups)
 
-## run qgraph:
-Q=qgraph(cor(Y),groups=list(1:20,21:40,41:60,61:80,81:100),cut=0.4,vsize=3)
+# Correlations:
+Q <- qgraph(cor(big5),minimum=0.25,cut=0.4,vsize=2,groups=big5groups,legend=TRUE,borders=FALSE)
+title("Big 5 correlations",line=-2,cex.main=2)
 
-## Same graph but now with spring layout:
-qgraph(cor(Y),layout="spring",Q)
+# Same graph with spring layout:
+qgraph(Q,layout="spring")
+title("Big 5 correlations",line=-2,cex.main=2)
 
+
+# EFA:
+big5efa <- factanal(big5,factors=5,rotation="promax",scores="regression")
+qgraph(big5efa,groups=big5groups,layout="circle",rotation="promax",minimum=0.2,cut=0.4,vsize=c(1,15),borders=FALSE,asize=0.07,esize=4,vTrans=200,filetype="R",width=7,height=7)
+title("Big 5 EFA",line=-2,cex.main=2)
+
+# PCA:
+library("psych")
+big5pca <- principal(cor(big5),5,rotate="promax")
+qgraph(big5pca,groups=big5groups,layout="circle",rotation="promax",minimum=0.2,cut=0.4,vsize=c(1,15),borders=FALSE,asize=0.07,esize=4,vTrans=200)
+title("Big 5 PCA",line=-2,cex.main=2)
 
 #### UNWEIGHTED DIRECTED GRAPHS ###
-adj=matrix(sample(0:1,10^2,T,prob=c(0.8,0.2)),nrow=10,ncol=10)
+set.seed(1)
+adj=matrix(sample(0:1,10^2,TRUE,prob=c(0.8,0.2)),nrow=10,ncol=10)
 qgraph(adj)
+title("Unweighted and directed graphs",line=-2,cex.main=2)
 
 # Save plot to nonsquare pdf file:
+\dontrun{
 qgraph(adj,filetype='pdf',height=5,width=10)
-
+}
 
 #### EXAMPLES FOR EDGES UNDER DIFFERENT ARGUMENTS ###
 # Create edgelist:
-E=t(c(1,2))
-for (i in 2:11*2) E=rbind(E,(i-1):i)
-E=cbind(E,seq(-0.5,0.5,length=11))
+dat.3 <- matrix(c(1:15*2-1,1:15*2),,2)
+dat.3 <- cbind(dat.3,round(seq(-0.7,0.7,length=15),1))
 
-# Create layout matrix
-L=matrix(1:22,nrow=2)
+# Create grid layout:
+L.3 <- matrix(1:30,nrow=2)
 
-# Run qgraph with default settings:
-Q=qgraph(E,layout=L,labels=FALSE,width=7,height=4,edge.labels=T)
+# Different esize:
+qgraph(dat.3,layout=L.3,directed=FALSE,edge.labels=TRUE,esize=14)
 
-# Default settings with different minimum and maximum:
-qgraph(E,Q,maximum=1,minimum=0.1)
+# Different esize, strongest edges omitted (note how 0.4 edge is now 
+# just as wide as 0.7 edge in previous graph):
+qgraph(dat.3[-c(1:3,13:15),],layout=L.3,nNodes=30,directed=FALSE,
+	edge.labels=TRUE,esize=14)
 
-# Default settings with cutoff score:
-qgraph(E,Q,cut=0.3)}
+# Different esize, with maximum:
+qgraph(dat.3,layout=L.3,directed=FALSE,edge.labels=TRUE,esize=14,maximum=1)
+title("maximum=1",line=-2,cex.main=2)
+
+qgraph(dat.3[-c(1:3,13:15),],layout=L.3,nNodes=30,directed=FALSE,edge.labels=TRUE,
+	esize=14,maximum=1)
+title("maximum=1",line=-2,cex.main=2)
+
+# Different minimum
+qgraph(dat.3,layout=L.3,directed=FALSE,edge.labels=TRUE,esize=14,minimum=0.1)
+title("minimum=0.1",line=-2,cex.main=2)
+
+# With cutoff score:
+qgraph(dat.3,layout=L.3,directed=FALSE,edge.labels=TRUE,esize=14,cut=0.4)
+title("cut=0.4",line=-2,cex.main=2)
+
+# With details:
+qgraph(dat.3,layout=L.3,directed=FALSE,edge.labels=TRUE,esize=14,minimum=0.1,maximum=1,
+	cut=0.4,details=TRUE)
+title("details=TRUE",line=-2,cex.main=2)
+
+
+### STRUCTURAL EQUATION MODELLING ###
+\dontrun{
+library('sem')
+
+### This example is taken from the examples of the sem function. 
+### Only names were changed to better suit the path diagram.
+
+# ----------------------- Thurstone data ---------------------------------------
+#  Second-order confirmatory factor analysis, from the SAS manual for PROC CALIS
+
+R.thur <- read.moments(diag=FALSE, names=c('Sen','Voc',
+        'SC','FL','4LW','Suf',
+        'LS','Ped', 'LG'))
+    .828                                              
+    .776   .779                                        
+    .439   .493    .46                                 
+    .432   .464    .425   .674                           
+    .447   .489    .443   .59    .541                    
+    .447   .432    .401   .381    .402   .288              
+    .541   .537    .534   .35    .367   .32   .555        
+    .38   .358    .359   .424    .446   .325   .598   .452  
+            
+model.thur <- specify.model()
+    F1 -> Sen,               *l11, NA
+    F1 -> Voc,               *l21, NA
+    F1 -> SC,                *l31, NA
+    F2 -> FL,                *l41, NA
+    F2 -> 4LW,               *l52, NA
+    F2 -> Suf,               *l62, NA
+    F3 -> LS,                *l73, NA
+    F3 -> Ped,               *l83, NA
+    F3 -> LG,                *l93, NA
+    F4 -> F1,                *g1,  NA
+    F4 -> F2,                *g2,  NA
+    F4 -> F3,                *g3,  NA 
+    Sen <-> Sen,             q*1,   NA
+    Voc<-> Voc,              q*2,   NA
+    SC <-> SC,               q*3,   NA
+    FL <-> FL,               q*4,   NA
+    4LW <-> 4LW,             q*5,   NA
+    Suf<-> Suf,              q*6,   NA
+    LS <-> LS,               q*7,   NA
+    Ped<-> Ped,              q*8,   NA
+    LG <-> LG,               q*9,   NA
+    F1 <-> F1,               NA,     1
+    F2 <-> F2,               NA,     1
+    F3 <-> F3,               NA,     1
+    F4 <-> F4,               NA,     1
 }
+
+\dontshow{
+require('sem')
+
+### This example is taken from the examples of the sem function. 
+### Only names were changed to better suit the path diagram.
+
+# ----------------------- Thurstone data ---------------------------------------
+#  Second-order confirmatory factor analysis, from the SAS manual for PROC CALIS
+
+R.thur <- structure(c(1, 0.828, 0.776, 0.439, 0.432, 0.447, 0.447, 0.541, 
+0.38, 0, 1, 0.779, 0.493, 0.464, 0.489, 0.432, 0.537, 0.358, 
+0, 0, 1, 0.46, 0.425, 0.443, 0.401, 0.534, 0.359, 0, 0, 0, 1, 
+0.674, 0.59, 0.381, 0.35, 0.424, 0, 0, 0, 0, 1, 0.541, 0.402, 
+0.367, 0.446, 0, 0, 0, 0, 0, 1, 0.288, 0.32, 0.325, 0, 0, 0, 
+0, 0, 0, 1, 0.555, 0.598, 0, 0, 0, 0, 0, 0, 0, 1, 0.452, 0, 0, 
+0, 0, 0, 0, 0, 0, 1), .Dim = c(9L, 9L), .Dimnames = list(c("Sen", 
+"Voc", "SC", "FL", "4LW", "Suf", "LS", "Ped", "LG"), c("Sen", 
+"Voc", "SC", "FL", "4LW", "Suf", "LS", "Ped", "LG")))
+            
+model.thur <- structure(c("F1 -> Sen", "F1 -> Voc", "F1 -> SC", "F2 -> FL", 
+"F2 -> 4LW", "F2 -> Suf", "F3 -> LS", "F3 -> Ped", "F3 -> LG", 
+"F4 -> F1", "F4 -> F2", "F4 -> F3", "Sen <-> Sen", "Voc<-> Voc", 
+"SC <-> SC", "FL <-> FL", "4LW <-> 4LW", "Suf<-> Suf", "LS <-> LS", 
+"Ped<-> Ped", "LG <-> LG", "F1 <-> F1", "F2 <-> F2", "F3 <-> F3", 
+"F4 <-> F4", "*l11", "*l21", "*l31", "*l41", "*l52", "*l62", 
+"*l73", "*l83", "*l93", "*g1", "*g2", "*g3", "q*1", "q*2", "q*3", 
+"q*4", "q*5", "q*6", "q*7", "q*8", "q*9", NA, NA, NA, NA, NA, 
+NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 
+NA, NA, NA, NA, "1", "1", "1", "1"), .Dim = c(25L, 3L), class = "mod")
+}
+
+# Path diagram of the model:
+qgraph(model.thur)
+qgraph(model.thur,layout="tree",manifest=c('Sen','Voc','SC','FL','4LW','Suf','LS','Ped','LG'))
+
+# Estimate and plot parameters:
+sem.thur <- sem(model.thur, R.thur, 213)
+qgraph(sem.thur)
+}
+
+
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{ Graphs }

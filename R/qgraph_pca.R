@@ -9,14 +9,24 @@
 # factors: vector with how much factors are to be used
 # rotation: rotations to be used.
 
-qgraph.pca=function(cor,factors=1,rotation="promax",...) {
+qgraph.pca=function(cor,factors=1,...,rotation="promax",factorCors=TRUE) {
 
 require(psych)
 
-fact=principal(cor,factors,rotate=rotation)
-loadings=as.matrix(loadings(fact)[1:nrow(cor),1:factors])
+if (any(class(cor)=="principal"))
+{
+	fact <- cor
+	factors <- cor$factors
+} else
+{
+	fact <- principal(cor,factors,rotate=rotation)
+}
+loadings <- loadings(fact)
+loadings <- as.matrix(loadings[1:nrow(loadings),1:factors])
 
-Q=qgraph.loadings(loadings,model="formative",...) 
+if (factorCors) rcor <- fact$r.scores else rcor <- NULL
+
+Q=qgraph.loadings(loadings,model="formative",factorCors=rcor,...) 
 	
 invisible(Q)
 }
