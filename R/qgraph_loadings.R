@@ -2,6 +2,8 @@
 qgraph.loadings=function( fact, ...)
 {
 
+if (class(fact)=="loadings") fact <- fact[1:nrow(fact),1:ncol(fact)]
+
 arguments=list(...)
 
 if (length(arguments)>0)
@@ -25,7 +27,12 @@ if (length(arguments)>0)
 	}
 }
 
+
 # SET DEFAULT ARGUMENTS:
+if(is.null(arguments$resid)) resid=NULL else resid=arguments$resid
+if(is.null(arguments$factorCors)) factorCors=NULL else factorCors=arguments$factorCors
+if(is.null(arguments$residSize)) residSize=0.1 else residSize=arguments$residSize
+if(is.null(arguments$filetype)) filetype="default" else filetype=arguments$filetype
 if(is.null(arguments$vsize)) vsize=max((-1/72)*(nrow(fact))+5.35,1) else vsize=arguments$vsize
 if(is.null(arguments$groups)) groups=NULL else groups=arguments$groups
 if(is.null(arguments$color)) color=NULL else color=arguments$color
@@ -33,10 +40,10 @@ if(is.null(arguments$model)) model="none" else model=arguments$model
 if(is.null(arguments$crossloadings)) crossloadings=FALSE else crossloadings=arguments$crossloadings
 if(is.null(arguments$labels)) labels=TRUE else labels=arguments$labels
 if(is.null(arguments$Fname)) Fname=NULL else Fname=arguments$Fname
-if(is.null(arguments$layout)) layout="default" else layout=arguments$layout
+if(is.null(arguments$layout)) layout="circle" else layout=arguments$layout
 if(is.null(arguments$legend))
 {
-	if (!is.null(groups) & !is.null(names(groups))) legend=TRUE else legend=FALSE
+	if (!is.null(groups) & !is.null(names(groups)) & filetype=="pdf") legend=TRUE else legend=FALSE
 } else legend=arguments$legend
 if(is.null(arguments$legend.cex)) legend.cex=1 else legend.cex=arguments$legend.cex
 
@@ -128,13 +135,12 @@ if (k>1)
 } 
 if (k==1) identified=FALSE
 
-#comupte the adjacency matrix
-m=matrix(0,nrow=n+k,ncol=n+k)
+#comupte the edgelist
+m=matrix(c(rep(1:n,k),rep(n+1:k,each=n),fact),nrow=n*k,ncol=3)
 
-m[1:n,(n+1):(n+k)]=fact
+if (model%in%c("reflective","formative")) directed <- rep(TRUE ,n*k) else directed <- rep(FALSE,n*k)
+if (model=="reflective")  m[,1:2] <- m[,2:1]
 
-if (model=="reflective") m=t(m)
-if (!model%in%c("formative","reflective")) m=m+t(m)
 
 # Set shapes:
 shape=character()
@@ -231,12 +237,49 @@ if (layout=="circle")
 		
 	} else l[1:n,]=l2[1:n,]
 }
-	
 
+
+### Set residuals ###
+
+curve <- 0
+
+if (!is.null(resid))
+{
+	if (length(resid)!=n) stop("Length of residuals does not correspond to number of factors")
+	m <- rbind(m, cbind( n+k+1:n, 1:n, resid))
+	Gvsize <- c(Gvsize,rep(0,n))
+	Gcolor <- c(Gcolor, rep("#00000000",n))
+	Glabels <- c(Glabels, rep("",n))
+	shape <- c(shape,rep("circle",n))
+	directed <- c(directed,rep(TRUE,n))
+	if (layout!="circle")
+	{
+		l <- rbind(l, l[1:n,])
+		l[n+k+1:n,2] <- -1 - residSize
+	} else
+	{
+		l <- rbind(l, (1+residSize) * l[1:n,])
+	}
+}
+
+
+if (!is.null(factorCors))
+{
+	m <- rbind(m, cbind( rep(n+1:k,times=k), rep(n+1:k,each=k), c(factorCors) ) )
+	m <- m[m[,1] != m[,2],]
+	if (layout!="circle")
+	{
+		if (is.null(resid)) curve <- c( rep(0, n*k ), rep(0.4, k^2 - k)) else curve <- c( rep(0, n*k + n ), rep(0.4, k^2 - k))
+	}
+	directed <- c(directed,rep(TRUE, k^2-k))
+}
+	
 ### RUN QGRAPH ###
 class(arguments)="qgraph"
-qgraph(m,layout=l,vsize=Gvsize,color=Gcolor,labels=Glabels,shape=shape,filetype="",
-	height=height,width=width,legend=F,arguments)
+Q <- qgraph(m,layout=l,vsize=Gvsize,color=Gcolor,labels=Glabels,shape=shape,filetype="",curve=curve,
+	height=height,width=width,legend=F,arguments,directed=directed,bidirectional=TRUE)
+
+Q$filetype <- filetype
 	
 # Legend:
 
@@ -251,7 +294,7 @@ else if (legend & filetype!="pdf") warning("Legend in qgraph.loadings only suppo
 	
 if (filetype%in%c('pdf','png','jpg','jpeg','svg','eps','tiff')) dev.off()
 
-class(arguments)="qgraph"
-invisible(arguments)
+class(Q)="qgraph"
+invisible(Q)
 }
 

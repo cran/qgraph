@@ -6,14 +6,15 @@
 This function performs an Principal Component Analysis (PCA) using the 'princomp' function of the psych package (Revelle, 2010)  and sends the acquired factor loadings to \code{\link{qgraph.loadings}}.
 }
 \usage{
-qgraph.pca( cor, factors=1, rotation="promax", ...)
+qgraph.pca( cor, factors=1, ..., rotation="promax", factorCors = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-	\item{cor}{A correlation matrix}
+	\item{cor}{A correlation matrix or a "principal" object}
 	\item{factors}{The number of factors to extract}
-	\item{rotation}{rotation to be used. Can be "varimax", "promax" or "none"}
 	\item{...}{arguments passed to \code{\link{qgraph.loadings}}}
+	\item{rotation}{rotation to be used. Can be "varimax", "promax" or "none"}
+	\item{factorCors}{Logical, should the correlations between factors be plotted? Defaults to TRUE}
 }
 
 \references{
@@ -33,31 +34,12 @@ Sacha Epskamp (s.epskamp@uva.nl)
 \code{\link{qgraph.loadings}}
 }
 \examples{
-\dontrun{
-#### VISUALIZE CORRELATION MATRIX ###
-eta=matrix(rnorm(200*5),ncol=5)
-lam=matrix(0,nrow=100,ncol=5)
-for (i in 1:5) lam[(20*i-19):(20*i),i]=rnorm(20,0.7,0.3)
-eps=matrix(rnorm(200*100),ncol=100)
-Y=eta\%*\%t(lam)+eps
+data(big5)
+data(big5groups)
 
-# Run qgraph:
-qgraph.pca(cor(Y),5,vsize=c(1,10))
+qgraph.pca(cor(big5),5,groups=big5groups,rotation="promax",minimum=0.2,
+			cut=0.4,vsize=c(1,15),borders=FALSE,asize=0.07,esize=4,vTrans=200)
 
-# Show crossloadings:
-qgraph.pca(cor(Y),5,crossloadings=T,cut=0,vsize=c(1,10))
-
-# Wider plot with larger nodes:
-Q=qgraph.pca(cor(Y),5,vsize=c(2,10),width=17)
-
-# With measurement model:
-groups=list(1:20,21:40,41:60,61:80,81:100)
-names(groups)=LETTERS[1:5]
-
-qgraph.pca(cor(Y),5,,Q,groups=groups,legend=FALSE)
-
-# Circulair layout:
-qgraph.pca(cor(Y),5,vsize=c(2,10),layout="circle",groups=groups,
-	legend=FALSE)
-	
-}}
+# Tree layout:
+qgraph.pca(cor(big5), 5,groups=big5groups, rotation="promax", minimum=0.2, cut=0.4, vsize=c(1,15), borders=FALSE, asize=0.07, esize=4, layout="tree", width=20, filetype="R")
+}

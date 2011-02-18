@@ -3,7 +3,25 @@
 qgraph =function( adj, ... )
 {
 
-arguments=list(...)
+# S3 object methods:
+if (any(class(adj)=="factanal") )
+{
+	qgraph.efa(adj,...)
+} else if (any(class(adj)=="principal") )
+{
+	qgraph.pca(adj,...)
+} else if (any(class(adj)=="sem"))
+{
+	qgraph.sem(adj,edge.labels=TRUE,include=6,filetype="",...)
+} else if (any(class(adj)=="loadings"))
+{
+	qgraph.loadings(adj,...)
+}  else if (any(class(adj)=="mod"))
+{
+	qgraph.semModel(adj,...)
+} else {
+
+if (class(adj)=="qgraph") arguments <- list(...,adj) else arguments=list(...)
 
 if (length(arguments)>0)
 {
@@ -24,7 +42,14 @@ if (length(arguments)>0)
 			}
 		}
 	}
-}	
+}
+
+if (!is.null(arguments$qgraphEdgelist)&class(adj)=="qgraph") 
+{
+	adj <- cbind(arguments$qgraphEdgelist$from,arguments$qgraphEdgelist$to,arguments$qgraphEdgelist$weight)
+	if (is.null(arguments$directed)) arguments$directed <- arguments$qgraphEdgelist$directed
+}
+	
 # Settings for the edgelist
 if(is.null(arguments$edgelist)) 
 {
@@ -76,6 +101,7 @@ if (fact)
 
 # SET DEFAULT ARGUMENTS:
 # General arguments:
+if(is.null(arguments$DoNotPlot)) DoNotPlot=FALSE else DoNotPlot=arguments$DoNotPlot
 if(is.null(arguments$layout)) layout=NULL else layout=arguments$layout
 if(is.null(arguments$maximum)) maximum=0 else maximum=arguments$maximum
 if(is.null(arguments$minimum))
@@ -84,7 +110,7 @@ if (nNodes<50)  minimum=0
 if (nNodes>=50)  minimum=0.1
 }	else minimum=arguments$minimum
 if(is.null(arguments$weighted)) weighted=NULL else weighted=arguments$weighted
-if(is.null(arguments$rescale)) rescale=T else rescale=arguments$rescale
+if(is.null(arguments$rescale)) rescale=TRUE else rescale=arguments$rescale
 if(is.null(arguments$labels)) labels=TRUE else labels=arguments$labels
 if(is.null(arguments$edge.labels)) edge.labels=FALSE else edge.labels=arguments$edge.labels
 if(is.null(arguments$edge.label.cex)) edge.label.cex=1 else edge.label.cex=arguments$edge.label.cex
@@ -96,7 +122,7 @@ if(is.null(arguments$legend))
 {
 	if (!is.null(groups) & !is.null(names(groups))) legend=TRUE else legend=FALSE
 } else legend=arguments$legend
-if(is.null(arguments$plot)) plot=T else plot=arguments$plot
+if(is.null(arguments$plot)) plot=TRUE else plot=arguments$plot
 if(is.null(arguments$rotation)) rotation=NULL else rotation=arguments$rotation
 if(is.null(arguments$layout.control)) layout.control=0.5 else layout.control=arguments$layout.control
 if(is.null(arguments$layout.par)) layout.par=list() else layout.par=arguments$layout.par
@@ -107,11 +133,11 @@ if(is.null(arguments$filetype)) filetype="default" else filetype=arguments$filet
 if(is.null(arguments$filename)) filename="qgraph" else filename=arguments$filename
 if(is.null(arguments$width))
 {
-	if (is.null(dev.list()[dev.cur()])) width=7 else width=dev.size(units="in")[1]
+	if (is.null(dev.list()[dev.cur()])) width=7 else {par(mar=c(0,0,0,0));width=par('pin')[1]}
 } else width=arguments$width
 if(is.null(arguments$height))
 {
-	if (is.null(dev.list()[dev.cur()])) height=7 else height=dev.size(units="in")[2]
+	if (is.null(dev.list()[dev.cur()])) height=7 else {par(mar=c(0,0,0,0));height=par('pin')[2]}
 } else height=arguments$height
 if(is.null(arguments$pty)) pty='m' else pty=arguments$pty
 if(is.null(arguments$res)) res=320 else res=arguments$res
@@ -120,7 +146,7 @@ if(is.null(arguments$res)) res=320 else res=arguments$res
 if(is.null(arguments$vsize)) vsize=max((-1/72)*(nNodes)+5.35,1) else vsize=arguments$vsize
 if(is.null(arguments$esize)) esize=max((-1/72)*(nNodes)+5.35,1)  else esize=arguments$esize
 if(is.null(arguments$color)) color=NULL else color=arguments$color
-if(is.null(arguments$bg)) bg=F else bg=arguments$bg
+if(is.null(arguments$bg)) bg=FALSE else bg=arguments$bg
 if(is.null(arguments$bgcontrol)) bgcontrol=6 else bgcontrol=arguments$bgcontrol
 if(is.null(arguments$bgres)) bgres=100 else bgres=arguments$bgres
 if(is.null(arguments$transparency)) transparency=F else transparency=arguments$transparency
@@ -162,6 +188,9 @@ if (legend & filetype!='pdf' & filetype!='eps')
 {
 	width=width*1.5
 }
+
+if (!DoNotPlot)
+{
 
 # Start output:
 if (filetype=='default') if (is.null(dev.list()[dev.cur()])) dev.new(rescale="fixed",width=width,height=height)
@@ -208,7 +237,7 @@ if (filetype=="tex")
 	
 	tikz(paste(filename,".tex",sep=""), standAlone = standAlone, width=width, height=height, packages=opt)
 }
-	
+}	
 	#if (!filetype%in%c('pdf','png','jpg','jpeg','svg','R','eps','tiff')) warning(paste("File type",filetype,"is not supported")) 
 
 # Rescale dims:
@@ -290,89 +319,102 @@ if (is.logical(diag)) if (!diag & !edgelist) diag(adj)=0
 	
 # CREATE EDGELIST:
 
+E <- list()
+
 if (edgelist)
 {
-	edgelist.from=adj[,1]
-	edgelist.to=adj[,2]
-	if (ncol(adj)>2) edgelist.weight=adj[,3] else edgelist.weight=rep(1,length(edgelist.from))
+	E$from=adj[,1]
+	E$to=adj[,2]
+	if (ncol(adj)>2) E$weight=adj[,3] else E$weight=rep(1,length(E$from))
+	if (length(directed)==1) directed=rep(directed,length(E$from))
 } else
 {
-	edgelist.from=numeric(0)
-	edgelist.to=numeric(0)
-	edgelist.weight=numeric(0)
-
-	edgelist.from=rep(1:nrow(adj),times=nrow(adj))
-	edgelist.to=rep(1:nrow(adj),each=nrow(adj))
-	edgelist.weight=c(adj)
-
-	if (!directed)
+	if (is.matrix(directed))
 	{
-		edgelst.from=edgelist.from[c(upper.tri(adj),T)]
-		edgelst.to=edgelist.to[c(upper.tri(adj),T)]
-		edgelst.weight=edgelist.weight[c(upper.tri(adj),T)]
+		incl <- directed|upper.tri(adj)
+		directed <- directed[incl]
+	} else
+	{
+		if (length(directed)>1) 
+		{
+			stop("'directed' must be TRUE or FALSE or a matrix containing TRUE or FALSE for each element of the adjacency matrix") 
+		} else
+		{ 
+		if (!directed) incl <- upper.tri(adj) else incl <- matrix(TRUE,nNodes,nNodes)
+		}
 	}
 
-	edgelist.from=edgelist.from[edgelist.weight!=0]
-	edgelist.to=edgelist.to[edgelist.weight!=0]
-	edgelist.weight=edgelist.weight[edgelist.weight!=0]
+	E$from=numeric(0)
+	E$to=numeric(0)
+	E$weight=numeric(0)
+
+	E$from=rep(1:nrow(adj),times=nrow(adj))
+	E$to=rep(1:nrow(adj),each=nrow(adj))
+	E$weight=c(adj)
+
+	
+	E$from <- E$from[c(incl)]
+	E$to <- E$to[c(incl)]
+	E$weight <- E$weight[c(incl)]
+	
+
+	E$from=E$from[E$weight!=0]
+	E$to=E$to[E$weight!=0]
+	E$weight=E$weight[E$weight!=0]
 }
 
-maximum=max(abs(c(maximum,max(abs(edgelist.weight)),cut,abs(diagWeights))))
+if (length(directed)==1) 
+{
+	directed <- rep(directed,length(E$from))
+}
+
+maximum=max(abs(c(maximum,max(abs(E$weight)),cut,abs(diagWeights))))
 if (cut==0)
 {
-	avgW=(abs(edgelist.weight)-minimum)/(maximum-minimum)
-} else if (maximum>cut) avgW=(abs(edgelist.weight)-cut)/(maximum-cut) else avgW=rep(0,length(edgelist.from))
+	avgW=(abs(E$weight)-minimum)/(maximum-minimum)
+} else if (maximum>cut) avgW=(abs(E$weight)-cut)/(maximum-cut) else avgW=rep(0,length(E$from))
 avgW[avgW<0]=0
 
 
-edgesort=sort(abs(edgelist.weight),index.return=T)$ix
-edge.width=rep(1,length(edgelist.weight))
+edgesort=sort(abs(E$weight),index.return=TRUE)$ix
+edge.width=rep(1,length(E$weight))
 
 
 # lty and curve settings:
 if (is.null(lty))
 {
-	lty=rep(1,length(edgelist.from))
+	lty=rep(1,length(E$from))
 } else 
 {
-	if (length(lty)==1) lty=rep(lty,length(edgelist.from))
+	if (length(lty)==1) lty=rep(lty,length(E$from))
 }
 
 # Make bidirectional vector:
-if (length(bidirectional)==1) bidirectional=rep(bidirectional,length(edgelist.from))
-if (length(bidirectional)!=length(edgelist.from)) stop("Bidirectional vector must be of legth 1 or equal to the number of edges")
+if (length(bidirectional)==1) bidirectional=rep(bidirectional,length(E$from))
+if (length(bidirectional)!=length(E$from)) stop("Bidirectional vector must be of legth 1 or equal to the number of edges")
 
 
-if (directed & is.null(curve))
+srt <- cbind(pmin(E$from,E$to), pmax(E$from,E$to) )
+if (is.null(curve))
 {
-	curve=rep(0,length(edgelist.from))
-	for (i in 1:length(edgelist.from))
-	{
-		if (any(edgelist.from==edgelist.to[i] & edgelist.to==edgelist.from[i]))
-		{
-			if (min(abs(edgelist.weight[edgelist.from==edgelist.to[i] & edgelist.to==edgelist.from[i]]))>minimum)
-			{
-				if (!bidirectional[i]) curve[i]=0.2		
-			}
-		}
-	}
+	dub <- duplicated(srt)|duplicated(srt,fromLast=TRUE)
+	curve <- ifelse(dub&!bidirectional,0.2,0)
+	rm(dub)
 }
-if (any(bidirectional) & any(curve!=0))
+if (any(bidirectional))
 {
-	for (i in 1:length(edgelist.from))
-	{
-		if (bidirectional[i] & any(edgelist.from[i:length(edgelist.from)]==edgelist.to[i] & edgelist.to[i:length(edgelist.from)]==edgelist.from[i]))
-		{
-			edgelist.weight[i]=0
-		}
-	}
+	dub <- duplicated(srt)
+	E$weight[dub&bidirectional] <- 0
+	rm(dub)
 }	
+
+rm(srt)
 
 # Layout settings:
 if (is.null(layout)) layout="default"
 if (!is.numeric(layout))
 {
-if (layout=="default" & (directed | !weighted)) layout="spring"
+if (layout=="default" & (any(directed) | !weighted)) layout="spring"
 if (layout=="default" | layout=="circular") 
 {
 	if (is.null(groups))
@@ -401,7 +443,7 @@ if (layout=="default" | layout=="circular")
 	}
 } else if (layout=="spring")
 {
-	layout=qgraph.layout.fruchtermanreingold(cbind(edgelist.from,edgelist.to),abs(edgelist.weight/maximum)^2,nNodes,rotation=rotation,layout.control=layout.control,
+	layout=qgraph.layout.fruchtermanreingold(cbind(E$from,E$to),abs(E$weight/max(abs(E$weight)))^2,nNodes,rotation=rotation,layout.control=layout.control,
 		niter=layout.par$niter,max.delta=layout.par$max.delta,area=layout.par$area,cool.exp=layout.par$cool.exp,repulse.rad=layout.par$repulse.rad,init=layout.par$init,
 			constraints=layout.par$constraints)
 }
@@ -413,11 +455,10 @@ if (is.matrix(layout)) if (ncol(layout)>2)
 	LmatX=seq(-1,1,length=ncol(Lmat))
 	LmatY=seq(1,-1,length=nrow(Lmat))
 	layout=matrix(0,nrow=nNodes,ncol=2)
-	for (i in 1:nNodes)
-	{
-		loc=which(Lmat==i,arr.ind=T)
-		layout[i,]=c(LmatX[loc[2]],LmatY[loc[1]])
-	}
+	
+	loc <- which(Lmat==1:nNodes,arr.ind=TRUE)
+	layout <- cbind(LmatX[loc[,2]],LmatY[loc[,1]])
+	
 }
 
 # Rescale layout:
@@ -437,10 +478,10 @@ if (weighted)
 	edge.color="#00000000"
 	if (cut==0) 
 	{
-		col=(abs(edgelist.weight)-minimum)/(maximum-minimum)
+		col=(abs(E$weight)-minimum)/(maximum-minimum)
 	} else 
 	{
-		col=(abs(edgelist.weight)-minimum)/(cut-minimum)
+		col=(abs(E$weight)-minimum)/(cut-minimum)
 	}
 	col[col>1]=1
 	col[col<0]=0
@@ -452,24 +493,24 @@ if (weighted)
 		pos=col2rgb(rgb(0,0.6,0))/255
 
 		# Set colors for edges over cutoff:
-		edge.color[edgelist.weight< -1* minimum] <- rgb(neg[1],neg[2],neg[3],col[edgelist.weight< -1*minimum])
-		edge.color[edgelist.weight> minimum] <- rgb(pos[1],pos[2],pos[3],col[edgelist.weight> minimum])
+		edge.color[E$weight< -1* minimum] <- rgb(neg[1],neg[2],neg[3],col[E$weight< -1*minimum])
+		edge.color[E$weight> minimum] <- rgb(pos[1],pos[2],pos[3],col[E$weight> minimum])
 	} else 
 	{
-		edge.color[edgelist.weight>minimum]=rgb(1-col[edgelist.weight > minimum],1-(col[edgelist.weight > minimum]*0.25),1-col[edgelist.weight > minimum])
-		edge.color[edgelist.weight< -1*minimum]=rgb(1-(col[edgelist.weight < (-1)*minimum]*0.25),1-col[edgelist.weight < (-1)*minimum],1-col[edgelist.weight < (-1)*minimum])
+		edge.color[E$weight>minimum]=rgb(1-col[E$weight > minimum],1-(col[E$weight > minimum]*0.25),1-col[E$weight > minimum])
+		edge.color[E$weight< -1*minimum]=rgb(1-(col[E$weight < (-1)*minimum]*0.25),1-col[E$weight < (-1)*minimum],1-col[E$weight < (-1)*minimum])
 	}
 	if (cut!=0)
 	{
 		# Set colors for edges over cutoff:
-		edge.color[edgelist.weight<= -1*cut] <- "red"
-		edge.color[edgelist.weight>= cut] <- "darkgreen"
+		edge.color[E$weight<= -1*cut] <- "red"
+		edge.color[E$weight>= cut] <- "darkgreen"
 	}
 
 } else
 {
 	if (!is.logical(transparency)) Trans=transparency else Trans=1
-	edge.width=rep(esize,length(edgelist.weight))
+	edge.width=rep(esize,length(E$weight))
 	edge.color=rep(rgb(0.5,0.5,0.5,Trans),length(edgesort))
 }
 
@@ -548,17 +589,19 @@ if (is.null(border.colors))
 	border.colors=rep("black",length(vertex.colors))
 }
 
-# Transparance in vertex colors:
-num2hex <- function(x)
+if (vTrans<255)
 {
-	hex=unlist(strsplit("0123456789ABCDEF",split=""))
-	return(paste(hex[(x-x%%16)/16+1],hex[x%%16+1],sep=""))
+	# Transparance in vertex colors:
+	num2hex <- function(x)
+	{
+		hex=unlist(strsplit("0123456789ABCDEF",split=""))
+		return(paste(hex[(x-x%%16)/16+1],hex[x%%16+1],sep=""))
+	}
+
+	colHEX <- rgb(t(col2rgb(vertex.colors)/255))
+
+	vertex.colors <- paste(sapply(strsplit(colHEX,split=""),function(x)paste(x[1:7],collapse="")),num2hex(vTrans),sep="")
 }
-
-colHEX <- rgb(t(col2rgb(vertex.colors)/255))
-
-vertex.colors <- paste(sapply(strsplit(colHEX,split=""),function(x)paste(x[1:7],collapse="")),num2hex(vTrans),sep="")
-
 
 
 # Vertex size:
@@ -632,10 +675,49 @@ colarray2=array(dim=c(3,bgres,bgres))
  }
 
 # Arrow sizes:
-if (length(asize)==1) asize=rep(asize,length(edgelist.from))
+if (length(asize)==1) asize=rep(asize,length(E$from))
 
-if (length(asize)!=length(edgelist.from)) warning("Length of 'asize' is not equal to the number of edges")
+if (length(asize)!=length(E$from)) warning("Length of 'asize' is not equal to the number of edges")
 
+ 
+
+# Edge labels:
+# Make labels:
+if (is.logical(edge.labels))
+{
+	if (edge.labels)
+	{
+		edge.labels=round(E$weight,2)
+	}
+}
+
+
+
+if (!is.logical(edge.labels))
+{
+	edge.labels=as.character(edge.labels)
+	if (length(edge.labels)!=length(E$from))
+	{
+		warning("Number of edge labels did not correspond to number of edges, edge labes have been ommited")
+		edge.labels=NULL
+	}
+	midX=numeric(0)
+	midY=numeric(0)
+
+	## Set fonts (symbol):
+	strsplE=strsplit(edge.labels,"")
+		
+	greekE=sapply(strsplE,function(x)any(x=="*"))
+	edge.labels=sapply(strsplE,function(x)paste(x[x!="*"],collapse=""))
+	
+	edge.font=rep(1,length(E$from))
+	edge.font[greekE]=5
+	
+	edge.labels[edge.labels=="NA"]=""
+}
+			
+if (!DoNotPlot)
+{
 
 # PLOT:
 par(mar=c(0,0,0,0), bg=background)
@@ -659,128 +741,64 @@ polygon(c(seq[i],seq[i+1],seq[i+1],seq[i]),c(seq[j],seq[j],seq[j+1],seq[j+1]),
 
 } }
 
-}     
-
-# Edge labels:
-# Make labels:
-if (is.logical(edge.labels))
-{
-	if (edge.labels)
-	{
-		edge.labels=round(edgelist.weight,2)
-	}
-}
-
-
-
-if (!is.logical(edge.labels))
-{
-	edge.labels=as.character(edge.labels)
-	if (length(edge.labels)!=length(edgelist.from))
-	{
-		warning("Number of edge labels did not correspond to number of edges, edge labes have been ommited")
-		edge.labels=NULL
-	}
-	midX=numeric(0)
-	midY=numeric(0)
-
-	## Set fonts (symbol):
-	strsplE=strsplit(edge.labels,"")
-		
-	greekE=sapply(strsplE,function(x)any(x=="*"))
-	edge.labels=sapply(strsplE,function(x)paste(x[x!="*"],collapse=""))
-	
-	edge.font=rep(1,length(edgelist.from))
-	edge.font[greekE]=5
-	
-	edge.labels[edge.labels=="NA"]=""
-}
-			
-			
+}    			
 			
 # Plot edges: 
-if (!directed)
-{ 
-	for (i in edgesort) if (abs(edgelist.weight[i])>minimum) 
+if (length(curve)==1) curve=rep(curve,length(edgesort))
+curve[E$from==E$to]=1
+		
+for (i in edgesort)
+{
+	if (abs(E$weight[i])>minimum)
 	{
-		if (edgelist.from[i]!=edgelist.to[i])
-		{
-			points(layout[c(edgelist.from[i],edgelist.to[i]),1],layout[c(edgelist.from[i],edgelist.to[i]),2],lwd=edge.width[i],col=edge.color[i],type='l',lty=lty[i])
-		} else
-		{
-			x1=layout[edgelist.from[i],1]
-			x2=layout[edgelist.to[i],1]
-			y1=layout[edgelist.from[i],2]
-			y2=layout[edgelist.to[i],2]
-			
-			loopX=loop*3*(0.5*vsize[edgelist.to[i]]*0.125*(7/width)*par("cin")[2])
-			spx=c(x1+loopX,x1,x1-loopX)
-			loopY=loop*3*(0.5*vsize[edgelist.to[i]]*0.125*(7/height)*par("cin")[2])
-			spy=c(y1,y1+loopY,y1)
-			spl=xspline(c(x1,spx,x2),c(y1,spy,y2),1,draw=F)
-			
-			lines(spl,lwd=edge.width[i],col=edge.color[i],lty=lty[i])
-		}
+		x1=layout[E$from[i],1]
+		x2=layout[E$to[i],1]
+		y1=layout[E$from[i],2]
+		y2=layout[E$to[i],2]
 		
 		if (!is.logical(edge.labels))
 		{
-			midX[i]=mean(layout[c(edgelist.from[i],edgelist.to[i]),1])
-			midY[i]=mean(layout[c(edgelist.from[i],edgelist.to[i]),2])
+			midX[i]=mean(c(x1,x2))
+			midY[i]=mean(c(y1,y2))
 		}
-	}	
-} else { # Directed edges: 
-	if (length(curve)==1) curve=rep(curve,length(edgesort))
-	curve[edgelist.from==edgelist.to]=1
-	for (i in edgesort)
-	{
-		if (abs(edgelist.weight[i])>=minimum)
+		
+		if (curve[i]==0)
 		{
-			x1=layout[edgelist.from[i],1]
-			x2=layout[edgelist.to[i],1]
-			y1=layout[edgelist.from[i],2]
-			y2=layout[edgelist.to[i],2]
-			
-			if (!is.logical(edge.labels))
+			if (is.logical(arrows) | vTrans < 255) if ((arrows & directed[i]) | vTrans < 255)
 			{
-				midX[i]=mean(c(x1,x2))
-				midY[i]=mean(c(y1,y2))
-			}
-			
-			if (curve[i]==0)
-			{
-				if (is.logical(arrows)) if (arrows & directed)
+				xd=x2-x1
+				yd=y2-y1
+				d2=sqrt(sum(xd^2+yd^2))
+				if (shape[E$to[i]]!="square")
+				{
+					x2=x2-xd*(0.5*vsize[E$to[i]]*0.130*(7/width)*par("cin")[2]/d2)
+					y2=y2-yd*(0.5*vsize[E$to[i]]*0.130*(7/height)*par("cin")[2]/d2)
+				}
+				if (shape[E$to[i]]=="square")
+				{
+					x2=x2-xd*(0.5*vsize[E$to[i]]*0.130*(7/width)*par("cin")[2]/max(abs(c(xd,yd))))
+					y2=y2-yd*(0.5*vsize[E$to[i]]*0.130*(7/height)*par("cin")[2]/max(abs(c(xd,yd))))
+				}
+				if ((any(E$from==E$to[i] & E$to==E$from[i]) & bidirectional[i]) | vTrans < 255)
 				{
 					xd=x2-x1
 					yd=y2-y1
 					d2=sqrt(sum(xd^2+yd^2))
-					if (shape[edgelist.to[i]]!="square")
+					if (shape[E$from[i]]!="square")
 					{
-						x2=x2-xd*(0.5*vsize[edgelist.to[i]]*0.125*(7/width)*par("cin")[2]/d2)
-						y2=y2-yd*(0.5*vsize[edgelist.to[i]]*0.125*(7/height)*par("cin")[2]/d2)
+						x1=x1+xd*(0.5*vsize[E$from[i]]*0.130*(7/width)*par("cin")[2]/d2)
+						y1=y1+yd*(0.5*vsize[E$from[i]]*0.130*(7/height)*par("cin")[2]/d2)
 					}
-					if (shape[edgelist.to[i]]=="square")
+					if (shape[E$from[i]]=="square")
 					{
-						x2=x2-xd*(0.5*vsize[edgelist.to[i]]*0.125*(7/width)*par("cin")[2]/max(abs(c(xd,yd))))
-						y2=y2-yd*(0.5*vsize[edgelist.to[i]]*0.125*(7/height)*par("cin")[2]/max(abs(c(xd,yd))))
-					}
-					if (any(edgelist.from==edgelist.to[i] & edgelist.to==edgelist.from[i]) & bidirectional[i])
-					{
-						xd=x2-x1
-						yd=y2-y1
-						d2=sqrt(sum(xd^2+yd^2))
-						if (shape[edgelist.to[i]]!="square")
-						{
-							x1=x1+xd*(0.5*vsize[edgelist.from[i]]*0.125*(7/width)*par("cin")[2]/d2)
-							y1=y1+yd*(0.5*vsize[edgelist.from[i]]*0.125*(7/height)*par("cin")[2]/d2)
-						}
-						if (shape[edgelist.to[i]]=="square")
-						{
-							x1=x1+xd*(0.5*vsize[edgelist.from[i]]*0.125*(7/width)*par("cin")[2]/max(abs(c(xd,yd))))
-							y1=y1+yd*(0.5*vsize[edgelist.from[i]]*0.125*(7/height)*par("cin")[2]/max(abs(c(xd,yd))))
-						}
+						x1=x1+xd*(0.5*vsize[E$from[i]]*0.130*(7/width)*par("cin")[2]/max(abs(c(xd,yd))))
+						y1=y1+yd*(0.5*vsize[E$from[i]]*0.130*(7/height)*par("cin")[2]/max(abs(c(xd,yd))))
 					}
 				}
-				lines(c(x1,x2),c(y1,y2),lwd=edge.width[i],col=edge.color[i],lty=lty[i])
+			}
+			lines(c(x1,x2),c(y1,y2),lwd=edge.width[i],col=edge.color[i],lty=lty[i])
+			if (directed[i])
+			{
 				if (!is.logical(arrows))
 				{
 					Ax=seq(x1,x2,length=arrows+2)
@@ -791,22 +809,51 @@ if (!directed)
 							col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
 					}
 				}
-								else if (arrows)
+				else if (arrows)
 				{
 					qgraph.arrow(x2,y2,x1,y1,length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
 						col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
-					if (any(edgelist.from==edgelist.to[i] & edgelist.to==edgelist.from[i]) & bidirectional[i])
+					if (any(E$from==E$to[i] & E$to==E$from[i]) & bidirectional[i])
 					{
 						qgraph.arrow(x1,y1,x2,y2,length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
 						col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
 					}
 				}
-			} else {
-				if (edgelist.from[i]==edgelist.to[i])
+			}
+		} else {
+			if (E$from[i]==E$to[i])
+			{
+				loopX=loop*3*(0.5*vsize[E$to[i]]*0.130*(7/width)*par("cin")[2])
+				spx=c(x1+loopX,x1,x1-loopX)
+				loopY=loop*3*(0.5*vsize[E$to[i]]*0.130*(7/height)*par("cin")[2])
+				spy=c(y1,y1+loopY,y1)
+				spl=xspline(c(x1,spx,x2),c(y1,spy,y2),1,draw=F)
+			} else 
+			{
+				midx <- (x1 + x2)/2
+				midy <- (y1 + y2)/2
+				spx <- midx - curve[i] * 1/2 * (y2 - y1)
+				spy <- midy + curve[i] * 1/2 * (x2 - x1)
+				spl=xspline(c(x1,spx,x2),c(y1,spy,y2),-1,draw=F)
+			}	
+			if (is.logical(arrows)| vTrans < 255) if (arrows & directed[i]| vTrans < 255)
+			{
+				xd=x2-spl$x[length(spl$x)-1]
+				yd=y2-spl$y[length(spl$y)-1]
+				d2=sqrt(sum(xd^2+yd^2))
+				if (shape[E$to[i]]!="square")
 				{
-					loopX=loop*3*(0.5*vsize[edgelist.to[i]]*0.125*(7/width)*par("cin")[2])
+					x2=x2-xd*(0.5*vsize[E$to[i]]*0.130*(7/width)*par("cin")[2]/d2)
+					y2=y2-yd*(0.5*vsize[E$to[i]]*0.130*(7/height)*par("cin")[2]/d2)
+				}
+				if (shape[E$to[i]]=="square")
+				{
+					x2=x2-xd*(0.5*vsize[E$to[i]]*0.130*(7/width)*par("cin")[2]/max(abs(c(xd,yd))))
+					y2=y2-yd*(0.5*vsize[E$to[i]]*0.130*(7/height)*par("cin")[2]/max(abs(c(xd,yd))))
+				}
+				if (E$from[i]==E$to[i])
+				{
 					spx=c(x1+loopX,x1,x1-loopX)
-					loopY=loop*3*(0.5*vsize[edgelist.to[i]]*0.125*(7/height)*par("cin")[2])
 					spy=c(y1,y1+loopY,y1)
 					spl=xspline(c(x1,spx,x2),c(y1,spy,y2),1,draw=F)
 				} else 
@@ -816,26 +863,26 @@ if (!directed)
 					spx <- midx - curve[i] * 1/2 * (y2 - y1)
 					spy <- midy + curve[i] * 1/2 * (x2 - x1)
 					spl=xspline(c(x1,spx,x2),c(y1,spy,y2),-1,draw=F)
-				}	
-				if (is.logical(arrows)) if (arrows & directed)
+				}
+				if ((any(E$from==E$to[i] & E$to==E$from[i]) & bidirectional[i])| vTrans < 255)
 				{
-					xd=x2-spl$x[length(spl$x)-1]
-					yd=y2-spl$y[length(spl$y)-1]
+					xd=x2-spl$x[1]
+					yd=y2-spl$y[1]
 					d2=sqrt(sum(xd^2+yd^2))
-					if (shape[edgelist.to[i]]!="square")
+					if (shape[E$from[i]]!="square")
 					{
-						x2=x2-xd*(0.5*vsize[edgelist.to[i]]*0.125*(7/width)*par("cin")[2]/d2)
-						y2=y2-yd*(0.5*vsize[edgelist.to[i]]*0.125*(7/height)*par("cin")[2]/d2)
+						x1=x1+xd*(0.5*vsize[E$from[i]]*0.130*(7/width)*par("cin")[2]/d2)
+						y1=y1+yd*(0.5*vsize[E$from[i]]*0.130*(7/height)*par("cin")[2]/d2)
 					}
-					if (shape[edgelist.to[i]]=="square")
+					if (shape[E$from[i]]=="square")
 					{
-						x2=x2-xd*(0.5*vsize[edgelist.to[i]]*0.125*(7/width)*par("cin")[2]/max(abs(c(xd,yd))))
-						y2=y2-yd*(0.5*vsize[edgelist.to[i]]*0.125*(7/height)*par("cin")[2]/max(abs(c(xd,yd))))
+						x1=x1+xd*(0.5*vsize[E$from[i]]*0.130*(7/width)*par("cin")[2]/max(abs(c(xd,yd))))
+						y1=y1+yd*(0.5*vsize[E$from[i]]*0.130*(7/height)*par("cin")[2]/max(abs(c(xd,yd))))
 					}
-					if (edgelist.from[i]==edgelist.to[i])
+					if (E$from[i]==E$to[i])
 					{
-						spx=c(x1+loopX,x1,x1-loopX)
-						spy=c(y1,y1+loopY,y1)
+						spx=c(x1+loop,x1,x1-loop)
+						spy=c(y1,y1+loop,y1)
 						spl=xspline(c(x1,spx,x2),c(y1,spy,y2),1,draw=F)
 					} else 
 					{
@@ -845,72 +892,44 @@ if (!directed)
 						spy <- midy + curve[i] * 1/2 * (x2 - x1)
 						spl=xspline(c(x1,spx,x2),c(y1,spy,y2),-1,draw=F)
 					}
-					if (any(edgelist.from==edgelist.to[i] & edgelist.to==edgelist.from[i]) & bidirectional[i])
-					{
-						xd=x2-spl$x[1]
-						yd=y2-spl$y[1]
-						d2=sqrt(sum(xd^2+yd^2))
-						if (shape[edgelist.to[i]]!="square")
-						{
-							x1=x1+xd*(0.5*vsize[edgelist.from[i]]*0.125*(7/width)*par("cin")[2]/d2)
-							y1=y1+yd*(0.5*vsize[edgelist.from[i]]*0.125*(7/height)*par("cin")[2]/d2)
-						}
-						if (shape[edgelist.to[i]]=="square")
-						{
-							x1=x1+xd*(0.5*vsize[edgelist.from[i]]*0.125*(7/width)*par("cin")[2]/max(abs(c(xd,yd))))
-							y1=y1+yd*(0.5*vsize[edgelist.from[i]]*0.125*(7/height)*par("cin")[2]/max(abs(c(xd,yd))))
-						}
-						if (edgelist.from[i]==edgelist.to[i])
-						{
-							spx=c(x1+loop,x1,x1-loop)
-							spy=c(y1,y1+loop,y1)
-							spl=xspline(c(x1,spx,x2),c(y1,spy,y2),1,draw=F)
-						} else 
-						{
-							midx <- (x1 + x2)/2
-							midy <- (y1 + y2)/2
-							spx <- midx - curve[i] * 1/2 * (y2 - y1)
-							spy <- midy + curve[i] * 1/2 * (x2 - x1)
-							spl=xspline(c(x1,spx,x2),c(y1,spy,y2),-1,draw=F)
-						}
-					}
-					
 				}
-				lines(spl,lwd=edge.width[i],col=edge.color[i],lty=lty[i])
-				if (!is.logical(edge.labels))
-				{
-					midX[i]=spl$x[length(spl$x)/2]
-					midY[i]=spl$y[length(spl$y)/2]
-				}
-				if (directed)
-				{
-					if (!is.logical(arrows))
-					{
-						Ax=seq(1,length(spl$x),length=arrows+2)
-						Ay=seq(1,length(spl$y),length=arrows+2)
-						for (a in 2:(arrows+1))
-						{
-							qgraph.arrow(spl$x[Ax[a]+1],spl$y[Ay[a]+1],spl$x[Ax[a]],spl$y[Ay[a]],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
-								col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
-						}
-					}
-					else if (arrows)
-					{
-						qgraph.arrow(x2,y2,spl$x[length(spl$x)-3],spl$y[length(spl$y)-3],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
-							col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
-							
-						if (any(edgelist.from==edgelist.to[i] & edgelist.to==edgelist.from[i]) & bidirectional[i])
-						{
-							qgraph.arrow(x1,y1,spl$x[3],spl$y[3],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
-								col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
-						}
-					}
-					
-				}
+				
 			}
-		} 
-	}
+			lines(spl,lwd=edge.width[i],col=edge.color[i],lty=lty[i])
+			if (!is.logical(edge.labels))
+			{
+				midX[i]=spl$x[length(spl$x)/2]
+				midY[i]=spl$y[length(spl$y)/2]
+			}
+			if (directed[i])
+			{
+				if (!is.logical(arrows))
+				{
+					Ax=seq(1,length(spl$x),length=arrows+2)
+					Ay=seq(1,length(spl$y),length=arrows+2)
+					for (a in 2:(arrows+1))
+					{
+						qgraph.arrow(spl$x[Ax[a]+1],spl$y[Ay[a]+1],spl$x[Ax[a]],spl$y[Ay[a]],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+							col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
+					}
+				}
+				else if (arrows)
+				{
+					qgraph.arrow(x2,y2,spl$x[length(spl$x)-3],spl$y[length(spl$y)-3],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+						col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
+						
+					if (any(E$from==E$to[i] & E$to==E$from[i]) & bidirectional[i])
+					{
+						qgraph.arrow(x1,y1,spl$x[3],spl$y[3],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+							col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
+					}
+				}
+				
+			}
+		}
+	} 
 }
+
 
 # Edge labels
 if (!is.logical(edge.labels))
@@ -943,7 +962,7 @@ if (!is.logical(labels))
 		greekV[i]=any(strsplV[[i]]=="*")
 		labels[i]=paste(strsplV[[i]][which(strsplV[[i]]!="*")],collapse="") 
 	}
-	V.font=rep(1,length(edgelist.from))
+	V.font=rep(1,length(E$from))
 	V.font[greekV]=5
 
 	label.cex=vsize
@@ -1021,7 +1040,7 @@ if (filetype%in%c('pdf','png','jpg','jpeg','svg','eps','tiff','tex'))
 	print(paste("Output stored in ",getwd(),"/",filename,".",filetype,sep=""))
 	dev.off()
 }
-
+}
 # Make output list:
 #returnval=list(adj=adj, layout=layout, cut=cut, maximum=maximum, minimum=minimum, groups=groups, weighted=weighted, rescale=rescale, labels=labels, directed=directed, legend=legend, plot=plot, rotation=rotation, layout.control=layout.control, layout.par=layout.par, filetype=filetype, filename=filename, width=width, height=height, pty=pty, res=res, vsize=vsize, esize=esize, color=color, bg=bg, bgcontrol=bgcontrol, bgres=bgres, transparency=transparency, lcolor=lcolor, loop=loop, legend.cex=legend.cex, borders=borders, curve=curve, arrows=arrows, diag=diag, tooltips=tooltips, hyperlinks=hyperlinks)
 
@@ -1029,8 +1048,15 @@ returnval=arguments
 returnval$layout=layout
 returnval$layout.orig=original.layout
 
+E$directed <- directed
+E$bidir <- bidirectional
+E <- as.data.frame(E)
+class(E) <- "qgraphEdgelist"
+
+returnval$qgraphEdgelist <- E
+
 class(returnval)="qgraph"
 
 invisible(returnval)
-}
+}}
  

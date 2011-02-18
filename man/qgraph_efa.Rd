@@ -6,14 +6,20 @@
 This function performs an Exploratory Factor Analysis (EFA) using the \code{\link{factanal}} (stats) function and sends the acquired factor loadings to \code{\link{qgraph.loadings}}.
 }
 \usage{
-qgraph.efa( cor, factors=1, rotation="promax", ...)
+qgraph.efa(dat,factors=1,...,rotation="promax",residuals=TRUE,
+		factorCors=NULL,scores="regression",
+		corMat=nrow(dat)==ncol(dat) && all(dat==t(dat)))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-	\item{cor}{A correlation matrix}
+	\item{dat}{A correlation matrix, data matrix or a "factanal" object}
 	\item{factors}{The number of factors to extract}
 	\item{rotation}{rotation to be used. Can be "varimax", "promax" or "none"}
+	\item{residuals}{Logical indicating if residuals should be plotted. Defaults to TRUE}
+	\item{factorCors}{Logical indicating if correlations of factors should be extracted and plotted. Defaults to FALSE if a correlation matrix is used and TRUE if a data matrix is used.}
 	\item{...}{arguments passed to \code{\link{qgraph.loadings}}}
+	\item{scores}{Method used to extract scores in \code{\link{factanal}}}
+	\item{corMat}{Logical indicating if the 'dat' object is a correlation matrix (TRUE) or data matrix (FALSE) }
 }
 
 \references{
@@ -28,31 +34,13 @@ Sacha Epskamp (s.epskamp@uva.nl)
 \code{\link{qgraph.loadings}}
 }
 \examples{
-\dontrun{
-#### VISUALIZE CORRELATION MATRIX ###
-eta=matrix(rnorm(200*5),ncol=5)
-lam=matrix(0,nrow=100,ncol=5)
-for (i in 1:5) lam[(20*i-19):(20*i),i]=rnorm(20,0.7,0.3)
-eps=matrix(rnorm(200*100),ncol=100)
-Y=eta\%*\%t(lam)+eps
+data(big5)
+data(big5groups)
 
-# Run qgraph:
-qgraph.efa(cor(Y),5,vsize=c(1,10))
+qgraph.efa(big5,5,groups=big5groups,rotation="promax",minimum=0.2,cut=0.4,
+		   vsize=c(1,15),borders=FALSE,asize=0.07,esize=4,vTrans=200)
 
-# Show crossloadings:
-qgraph.efa(cor(Y),5,crossloadings=T,cut=0,vsize=c(1,10))
-
-# Wider plot with larger nodes:
-Q=qgraph.efa(cor(Y),5,vsize=c(2,10),width=17)
-
-# With measurement model:
-groups=list(1:20,21:40,41:60,61:80,81:100)
-names(groups)=LETTERS[1:5]
-
-qgraph.efa(cor(Y),5,vsize=c(2,10),,Q,groups=groups,legend=FALSE)
-
-# Circulair layout:
-qgraph.efa(cor(Y),5,vsize=c(2,10),layout="circle",groups=groups,
-	legend=FALSE)
-}
+# Tree layout:
+qgraph.efa(big5,5,groups=big5groups,rotation="promax",minimum=0.2,cut=0.4,
+		   vsize=c(1,15),borders=FALSE,asize=0.07,esize=4,layout="tree",width=20,filetype="R")
 }

@@ -39,7 +39,7 @@ for (l in layout)
 	{
 		for (c in cut)
 		{
-			L[[s]]=qgraph.layout(adj,layout=l,graph=g,cut=c,nfact=nfact,...)
+			L[[s]]=qgraph(adj,layout=l,graph=g,cut=c,nfact=nfact,DoNotPlot=TRUE,...)
 			s=s+1
 		}
 	}
@@ -176,20 +176,3 @@ for (G in graph)
 	}
 }
 	
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					

@@ -1,3 +1,28 @@
+Changes in Version 0.4.6
+  o New features:
+	o Added more options for the 'directed' argument. When using an edgelist this can be a vector indicating per edge if it is directed or not. If an adjacency matrix is used then this can be a matrix indicating if the element indicates a directed edge.
+	o the output of qgraph() now also contains the edgelist. Running qgraph() on the output of another qgraph() run should now give exactly the same graph.
+	o Added three functions for S3 methods: print.qgraph(), summary.qgraph() and plot.qgraph().
+	o qgraph() now calls qgraph.loadings(), qgraph.efa(), qgraph.pca(), qgraph.sem() and qgraph.semModel() if the first argument is respectively of class "loadings", "factanal", "principal", "sem" and "mod".
+	o Added the 'DoNotPlot' argument to qgraph(). If this is TRUE then nothing will be plotted, but the graph will still be returned as usual.
+	o qgraph.layout() has been removed since the 'DoNotPlot' argument makes it redundant.
+	o Updated examples with big 5 data. Examples are now also executable using example(qgraph).
+  o qgraph.loadings() and its wrappers qgraph.efa() and qgraph.pca() have been revamped:
+	o Residuals can now be plotted in qgraph.loadings() using the 'resid' argument. qgraph.efa() includes residuals by default.
+	o Inter-factor correlations can now be plotted using the 'factorCors' argument.
+	o qgraph.loadings() now runs faster and results in smaller PDF filesizes.
+	o qgraph.loadings() now uses "circle" layout by default.
+	o A "loadings" object can now be passed to qgraph.loadings(), a "factanal" object to qgraph.efa() and a "principal" object to qgraph.pca().
+  o Minor changes to qgraph.sem():
+	o New function added: 'qgraph.semModel()'. This function makes a path diagram based on a sem model.
+	o New argument added to qgraph.sem(), 'panels', which can be assigned a vector indicating which panels should be plotted.
+	o 'filetype' can now be anything but "pdf" to use qgraph.sem() to plot in R.
+  o Bug fixes:
+	o Fixed a bug that caused edges to be plotted several times in directed graphs.
+	o The qgraph() function should now be significantly quicker.
+    o Fixed an issue causing placement of edges to assume a square node as origin.
+
+ 
 Changes in Version 0.4.5
   o Added the Big 5 dataset.
   o layout.orig is now returned as well as layout. This is the original layout (not rescaled) which can be used for constraints

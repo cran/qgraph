@@ -5,8 +5,10 @@ qgraph.sem=function(
 	vsize.man=4,
 	vsize.lat=7,
 	filename="qgraph",
+	filetype="pdf",
 	residuals=TRUE,
 	panels=2,
+	include=1:12,
 	latres=TRUE,
 	curve=0.2,
 	rotation=c(0,0,0,0),
@@ -25,6 +27,8 @@ if (!(panels%in%c(1,2,4,8))) stop("Only 1, 2, 4 and 8 panels are supported")
 
 output=paste(filename,".pdf",sep="")
 
+if (filetype=="pdf")
+{
 if (panels==1) pdf(output,height=height,width=width,onefile=onefile)
 
 if (panels==2) 
@@ -44,10 +48,16 @@ if (panels==4)
 	pdf(output,height=height*2,width=width*2,onefile=onefile)
 	layout(matrix(1:4,nrow=2,byrow=T)) 
 }
+} else
+{
+width <- NULL
+height <- NULL
+}
 
 
 # First pane: Model statistics
-
+if (1%in%include)
+{
 par(mar=c(1,1,1,1))
 plot(1, ann = FALSE, axes = FALSE, xlim = c(0, 100), ylim = c(0, 100),
      type = "n", xaxs = "i", yaxs = "i")
@@ -70,7 +80,7 @@ Tucker-Lewis NNFI:",round(summary(res)$NNFI,5),"
 Bentler CFI:",round(summary(res)$CFI,5),"
 SRMR:",round(summary(res)$SRMR,5),"
 BIC:",round(summary(res)$BIC,5)),pos=1)
-	 
+}	 
 
 # Create E
 E=data.frame(from=as.numeric(res$ram[,3]),to=as.numeric(res$ram[,2]),
@@ -286,6 +296,7 @@ if (!residuals)
 } else diag=FALSE
 
 # RUN QGRAPH FOR MODEL:
+if (2%in%include) DNPL <- FALSE else DNPL <- TRUE
 
 Q=qgraph(
 	edgelist,
@@ -304,11 +315,13 @@ Q=qgraph(
 	esize=1,
 	width=width,
 	height=height,
+	DoNotPlot=DNPL,
 	...)
-title("Specified model",line=-1)
+if (2%in%include) title("Specified model",line=-1)
 
 # RUN QGRAPH FOR ABSOLUTE PARAMETER ESTIMATES:
-
+if (3%in%include)
+{
 qgraph(
 	edgelist,
 	layout=Q$layout,
@@ -329,7 +342,7 @@ qgraph(
 	diag=diag,
 	...)
 title("Unstandardized model",line=-1)
-
+}
 # RUN QGRAPH FOR STANDARDIZED PARAMETER ESTIMATES:
 
 standcoef=round(standardized.coefficients(res)[,2],2)
@@ -343,7 +356,8 @@ if (!residuals)
 	for (i in 1:length(id)) diag[i]=standcoef[id[i]]
 	standcoef=standcoef[residKeep]
 }
-	
+if (4%in%include)
+{	
 qgraph(
 	edgelist,
 	layout=Q$layout,
@@ -364,11 +378,12 @@ qgraph(
 	diag=diag,
 	...)
 title("Standardized model",line=-1)
-
+}
 # RUN QGRAPH FOR WEIGHTED ESTIMATES:
 
 edgelist=cbind(edgelist,E$weight)
-
+if (5%in%include)
+{
 qgraph(
 	edgelist,
 	layout=Q$layout,
@@ -386,9 +401,10 @@ qgraph(
 	diag=diag,
 	...)
 title("Unstandardized model",line=-1)
-
+}
 edgelist[,3]=standcoef
-
+if (6%in%include)
+{
 qgraph(
 	edgelist,
 	layout=Q$layout,
@@ -406,7 +422,7 @@ qgraph(
 	diag=diag,
 	...)
 title("Standardized model",line=-1)
-
+}
 
 # COVARIANCES and CORRELATIONS:
 
@@ -417,6 +433,8 @@ par(mar=c(3,3,3,3))
 res$C=round(res$C,6)
 res$S=round(res$S,6)
 
+if (7%in%include)
+{
 qgraph(
 	res$S, 
 	labels=rownames(res$S), 
@@ -426,6 +444,9 @@ qgraph(
 	...)
 title("Observed covariances",line=-1)
 
+}
+if (8%in%include)
+{
 qgraph(
 	res$C, 
 	labels=rownames(res$C), 
@@ -434,41 +455,53 @@ qgraph(
 	diag="col",
 	...)
 	title("Implied covariances",line=-1)
-
+}
 
 maximum=max(abs(c(cov2cor(res$S)[upper.tri(res$S)],cov2cor(res$C)[upper.tri(res$C)])))	
-	
+
+if (9%in%include)
+{	
 qgraph(round(cov2cor(res$S),5),
 	labels=rownames(res$S), 
 	filetype="",
 	maximum=maximum,
 	...)
 title("Observed correlations",line=-1)
+}
 
+if (10%in%include)
+{
 qgraph(round(cov2cor(res$C),5), 
 	labels=rownames(res$C), 
 	filetype="",
 	maximum=maximum,
 	...)
 title("Implied correlations",line=-1)
+}
 
-
+if (11%in%include)
+{
 qgraph(res$S-res$C, 
 	labels=rownames(res$C), 
 	filetype="",
 	diag="col",
 	...)
 title("Covariance differences",line=-1)
+}
 
 
+if (12%in%include)
+{
 qgraph(round(cov2cor(res$S)-cov2cor(res$C),5),
 	labels=rownames(res$C), 
 	filetype="",
 	...)
 title("Correlation differences",line=-1)
+}
 
-
-
+if (filetype=="pdf")
+{
 dev.off()
 print(paste("Output stored in ",getwd(),"/",output,sep=""))
+}
 }

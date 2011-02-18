@@ -10,7 +10,7 @@ qgraph.loadings( fact, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-	\item{fact}{A matrix containing factor loadings (items per row, factors per column)}
+	\item{fact}{A matrix containing factor loadings (items per row, factors per column) or an "loadings" object}
 	\item{...}{Additional optional arguments passed to \code{\link{qgraph}} and special arguments used in this function (described below).}
 }
 \section{Additional optional arguments}{	
@@ -21,6 +21,9 @@ qgraph.loadings( fact, ...)
 	\item{crossloadings}{Logical, if TRUE then for each manifest variable the strongest loading is omitted (default to FALSE).}
 	\item{groups}{An optional list containing the measurement model, see  \code{\link{qgraph}}}
 	\item{Fname}{When there is only one factor, this is it's name. If there are more factors, the names in the groups list are used only if the factors can be identified.}
+	\item{resid}{Values for the residuals}
+	\item{residSize}{Size of the residuals, defaults to 0.1}
+	\item{factorCors}{Correlation matrix of the factors}
 }}
 
 \references{
@@ -35,34 +38,17 @@ Sacha Epskamp (s.epskamp@uva.nl)
 \code{\link{qgraph.efa}}
 }
 \examples{
-\dontrun{
-#### VISUALIZE CORRELATION MATRIX ###
-eta=matrix(rnorm(200*5),ncol=5)
-lam=matrix(0,nrow=100,ncol=5)
-for (i in 1:5) lam[(20*i-19):(20*i),i]=rnorm(20,0.7,0.3)
-eps=matrix(rnorm(200*100),ncol=100)
-Y=eta\%*\%t(lam)+eps
+# Load big5 dataset:
+data(big5)
+data(big5groups)
 
-loadings=loadings(factanal(covmat=cor(Y),factors=5))[1:100,1:5]
+big5efa <- factanal(big5,factors=5,rotation="promax",scores="regression")
+big5loadings <- loadings(big5efa)
+qgraph.loadings(big5loadings,groups=big5groups,rotation="promax",minimum=0.2,
+				cut=0.4,vsize=c(1,15),borders=FALSE,asize=0.07,esize=4,vTrans=200)
 
-# Run qgraph:
-qgraph.loadings(loadings,vsize=c(1,10))
-
-# Show crossloadings:
-qgraph.loadings(loadings,crossloadings=T,cut=0,vsize=c(1,10))
-
-# Wider plot with larger nodes:
-Q=qgraph.loadings(loadings,vsize=c(2,10),width=17)
-
-# With measurement model:
-groups=list(1:20,21:40,41:60,61:80,81:100)
-names(groups)=LETTERS[1:5]
-
-qgraph.loadings(loadings,Q,groups=groups,legend=FALSE)
-
-# Circulair layout:
-qgraph.loadings(loadings,vsize=c(2,10),layout="circle",groups=groups,
-	legend=FALSE)
-	
-}
+# Tree layout:
+qgraph.loadings(big5loadings,groups=big5groups,rotation="promax",minimum=0.2,
+				cut=0.4,vsize=c(1,15),borders=FALSE,asize=0.07,esize=4,vTrans=200,
+				layout="tree",width=20,filetype="R")
 }
