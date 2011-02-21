@@ -1,3 +1,11 @@
+Changes in Version 0.4.7
+   o Added the qgraph.cfa() function, which performs a confirmatory factor analysis using the sem package
+   o Fixed a bug in qgraph.sem() causing faulty path diagrams if nodes were labelled numerically
+   o Fixed a bug in qgraph() causing misplaced edge labels if some edges are bidirectional
+   o The 'rotation' argument is removed from qgraph.sem() because it should no longer be nescesary
+   o The "circle" layout is now default in qgraph.sem()
+   o Added the 'gray' argument to qgraph(). If this is TRUE the graph will be plotted in grayscale colors.
+   
 Changes in Version 0.4.6
   o New features:
 	o Added more options for the 'directed' argument. When using an edgelist this can be a vector indicating per edge if it is directed or not. If an adjacency matrix is used then this can be a matrix indicating if the element indicates a directed edge.
