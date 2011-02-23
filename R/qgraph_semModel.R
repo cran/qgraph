@@ -3,17 +3,22 @@ qgraph.semModel=function(
 	mod,
 	manifest=NULL,
 	layout="spring",
-	vsize.man=4,
-	vsize.lat=7,
+	vsize.man=3,
+	vsize.lat=6,
 	residuals=TRUE,
 	latres=TRUE,
 	curve=0.2,
-	rotation=c(0,0,0,0),
+	residSize=0.2,
 	...)
 {
 require('sem')
 if (!class(mod)%in%c("mod","sem")) stop("Input must me a 'mod' or 'sem' object")
 
+if (class(mod)=="sem")
+{
+	qgraph.sem(mod,include=2,filetype="",...)
+} else
+{
 arguments=list(...)
 if(is.null(arguments$layout.par)) layout.par=list() else layout.par=arguments$layout.par
 
@@ -123,7 +128,7 @@ V$labels[V$isresidual]=""
 
 # Create layout:
 l=layout
-if (layout=='tree' | layout=="springtree") 
+if (layout=='tree' | layout=="springtree" | layout=="circle") 
 {
 	if (residuals) 
 	{
@@ -174,8 +179,8 @@ if (layout=='tree' | layout=="springtree")
 	{
 
 		l=matrix(0,nrow=nrow(V),ncol=2)
-		l[V$type=='man',2]=-1
-		l[V$type=='lat',2]=1
+		l[V$type=='man',2]=-0.5
+		l[V$type=='lat',2]=0.5
 
 		sum=sum(V$type=='man')
 		l[V$type=='man',1]=seq(-1,1,length=sum+2)[2:(sum+1)]
@@ -206,23 +211,28 @@ if (layout=='tree' | layout=="springtree")
 
 if (layout=='circle' | layout=='circulair') 
 {
-	l=matrix(0,nrow=nrow(V),ncol=2)
+	l2 <- l
+	
+	E$curved <- 0
 
-	tl=sum(V$isresidual & V$type=='man')+1
-	l[V$isresidual & V$type=='man',1]=5*sin(seq(rotation[1],rotation[1]+2*pi, length=tl))[-tl]
-	l[V$isresidual & V$type=='man',2]=5*cos(seq(rotation[1],rotation[1]+2*pi, length=tl))[-tl]
+	tl=sum(l[,2] == -0.5)+1
+	l2[l[,2] == -0.5,1]=sin(seq(0,2*pi, length=tl))[-tl]
+	l2[l[,2] == -0.5,2]=cos(seq(0,2*pi, length=tl))[-tl]
+	
+	tl=sum(l[,2] == 0.5)+1
+	l2[l[,2] == 0.5,1]=0.5*sin(seq(0,2*pi, length=tl)+(pi/(tl-1)))[-tl]
+	l2[l[,2] == 0.5,2]=0.5*cos(seq(0,2*pi, length=tl)+(pi/(tl-1)))[-tl]
 
-	tl=sum(!V$isresidual & V$type=='man')+1
-	l[!V$isresidual & V$type=='man',1]=4*sin(seq(rotation[2],rotation[2]+2*pi, length=tl))[-tl]
-	l[!V$isresidual & V$type=='man',2]=4*cos(seq(rotation[2],rotation[2]+2*pi, length=tl))[-tl]
-
-	tl=sum(!V$isresidual & V$type=='lat')+1
-	l[!V$isresidual & V$type=='lat',1]=2*sin(seq(rotation[3],rotation[3]+2*pi, length=tl))[-tl]
-	l[!V$isresidual & V$type=='lat',2]=2*cos(seq(rotation[3],rotation[3]+2*pi, length=tl))[-tl]
-
-	tl=sum(V$isresidual & V$type=='lat')+1
-	l[V$isresidual & V$type=='lat',1]=1*sin(seq(rotation[4],rotation[4]+2*pi, length=tl))[-tl]
-	l[V$isresidual & V$type=='lat',2]=1*cos(seq(rotation[4],rotation[4]+2*pi, length=tl))[-tl]
+	if (residuals)
+	{
+		srt <- sort(l[l[,2] == -1,1],index.return=TRUE)$ix
+		l2[which(l[,2]==-1)[srt],] <- (1+residSize) * l2[l[,2] == -0.5,]
+		
+		srt <- sort(l[l[,2] == 1,1],index.return=TRUE)$ix
+		l2[which(l[,2] == 1)[srt],] <-  (1-2*residSize) * l2[l[,2] == 0.5,]
+	}
+	
+	l <- l2
 }
 
 #Set shapes
@@ -275,4 +285,5 @@ Q=qgraph(
 	esize=1)
 title("Specified model",line=-1)
 invisible(Q)
+}
 }

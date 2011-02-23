@@ -4,12 +4,12 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{qgraph: Structural Equation Modelling}
 \description{
-This functions uses a 'sem' object from the 'sem' function (from the sem package; Fox, 2010) and outputs a multi-page pdf file containing goodness of fit indices, path diagram, graphs of the parameter estimates and graphs of the implied and observed covariance and correlation matrices.
+This functions uses a "sem" object from the \code{\link{sem}} function (from the sem package; Fox, 2010) and outputs a multi-page pdf file containing goodness of fit indices, path diagram, graphs of the parameter estimates and graphs of the implied and observed covariance and correlation matrices.
 }
 \usage{
-qgraph.sem(res, layout="tree", vsize.man=4, vsize.lat=7, filename="qgraph",
+qgraph.sem(res, layout="circle", vsize.man=3, vsize.lat=6, filename="qgraph",
 	filetype="pdf", residuals=TRUE, panels=2, include=1:12, latres=TRUE, 
-	curve=0.2, rotation=c(0,0,0,0), onefile=TRUE, width = 5, height = 5, ...)
+	curve=0.2, residSize=0.2, onefile=TRUE, width = 10, height = 10, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,7 +24,7 @@ qgraph.sem(res, layout="tree", vsize.man=4, vsize.lat=7, filename="qgraph",
 	\item{include}{A vector indicating which panels should be included in the output}
 	\item{latres}{This is currently not supported, leave to TRUE}
 	\item{curve}{Numerical value indicating the curve of edges that are on the same level in the "tree" layout, See details. This represent an offset from the middle of the straight edge through where the curved edge must be drawn. 0 indicates no curve, and any other value indicates a curve of that strength. Defaults to 0.2}
-	\item{rotation}{A vector of length 4 indicating the rotation of each level in the "circle" layout, in radians}
+	\item{residSize}{Size of the residual arrows}
 	\item{onefile}{Logical indicating if a multi-page pdf should be produced. If FALSE each plot will be a new pdf. Use this only with panels=1 and filename="(Arbitrary name)\%03d".}
 	\item{width}{Width of each panel, in inches}
 	\item{height}{Height of each panel, in inches}
@@ -32,7 +32,7 @@ qgraph.sem(res, layout="tree", vsize.man=4, vsize.lat=7, filename="qgraph",
 }
 
 \details{
-This function uses a 'sem' object and outputs a multi-page pdf file. 
+This function uses a "sem" object and outputs a multi-page pdf file. 
 The function reads the 'sem' file and creates a residual variable for each variable present 
 in the model. The default layout is a tree-layout (layout="tree") in which each variable is 
 placed as a node on one of four vertical levels. At the bottom are the residuals of the 
@@ -67,6 +67,9 @@ Sacha Epskamp (s.epskamp@uva.nl)
 }
 \seealso{
 \code{\link{qgraph}}
+\code{\link{qgraph.cfa}}
+\code{\link{qgraph.semModel}}
+\code{\link{sem}}
 }
 \examples{
 \dontrun{

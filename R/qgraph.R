@@ -147,6 +147,7 @@ if(is.null(arguments$vsize)) vsize=max((-1/72)*(nNodes)+5.35,1) else vsize=argum
 if(is.null(arguments$esize)) esize=max((-1/72)*(nNodes)+5.35,1)  else esize=arguments$esize
 if(is.null(arguments$color)) color=NULL else color=arguments$color
 if(is.null(arguments$bg)) bg=FALSE else bg=arguments$bg
+if(is.null(arguments$gray)) gray=FALSE else gray=arguments$gray
 if(is.null(arguments$bgcontrol)) bgcontrol=6 else bgcontrol=arguments$bgcontrol
 if(is.null(arguments$bgres)) bgres=100 else bgres=arguments$bgres
 if(is.null(arguments$transparency)) transparency=F else transparency=arguments$transparency
@@ -340,7 +341,7 @@ if (edgelist)
 			stop("'directed' must be TRUE or FALSE or a matrix containing TRUE or FALSE for each element of the adjacency matrix") 
 		} else
 		{ 
-		if (!directed) incl <- upper.tri(adj) else incl <- matrix(TRUE,nNodes,nNodes)
+		if (!directed & all(adj==t(adj))) incl <- upper.tri(adj) else incl <- matrix(TRUE,nNodes,nNodes)
 		}
 	}
 
@@ -407,8 +408,6 @@ if (any(bidirectional))
 	E$weight[dub&bidirectional] <- 0
 	rm(dub)
 }	
-
-rm(srt)
 
 # Layout settings:
 if (is.null(layout)) layout="default"
@@ -485,26 +484,53 @@ if (weighted)
 	}
 	col[col>1]=1
 	col[col<0]=0
-
-	if (transparency) 
+	if (!gray)
 	{
-		col=col^(2)
-		neg=col2rgb(rgb(0.75,0,0))/255
-		pos=col2rgb(rgb(0,0.6,0))/255
+		if (transparency) 
+		{
+			col=col^(2)
+			neg=col2rgb(rgb(0.75,0,0))/255
+			pos=col2rgb(rgb(0,0.6,0))/255
 
-		# Set colors for edges over cutoff:
-		edge.color[E$weight< -1* minimum] <- rgb(neg[1],neg[2],neg[3],col[E$weight< -1*minimum])
-		edge.color[E$weight> minimum] <- rgb(pos[1],pos[2],pos[3],col[E$weight> minimum])
-	} else 
+			# Set colors for edges over cutoff:
+			edge.color[E$weight< -1* minimum] <- rgb(neg[1],neg[2],neg[3],col[E$weight< -1*minimum])
+			edge.color[E$weight> minimum] <- rgb(pos[1],pos[2],pos[3],col[E$weight> minimum])
+		} else 
+		{
+			edge.color[E$weight>minimum]=rgb(1-col[E$weight > minimum],1-(col[E$weight > minimum]*0.25),1-col[E$weight > minimum])
+			edge.color[E$weight< -1*minimum]=rgb(1-(col[E$weight < (-1)*minimum]*0.25),1-col[E$weight < (-1)*minimum],1-col[E$weight < (-1)*minimum])
+		}	
+	} else
 	{
-		edge.color[E$weight>minimum]=rgb(1-col[E$weight > minimum],1-(col[E$weight > minimum]*0.25),1-col[E$weight > minimum])
-		edge.color[E$weight< -1*minimum]=rgb(1-(col[E$weight < (-1)*minimum]*0.25),1-col[E$weight < (-1)*minimum],1-col[E$weight < (-1)*minimum])
+		if (transparency) 
+		{
+			col=col^(2)
+			neg="gray10"
+			pos="gray10"
+
+			# Set colors for edges over cutoff:
+			edge.color[E$weight< -1* minimum] <- rgb(neg[1],neg[2],neg[3],col[E$weight< -1*minimum])
+			edge.color[E$weight> minimum] <- rgb(pos[1],pos[2],pos[3],col[E$weight> minimum])
+		} else 
+		{
+			edge.color[E$weight>minimum]=rgb(1-col[E$weight > minimum],1-(col[E$weight > minimum]),1-col[E$weight > minimum])
+			edge.color[E$weight< -1*minimum]=rgb(1-(col[E$weight < (-1)*minimum]),1-col[E$weight < (-1)*minimum],1-col[E$weight < (-1)*minimum])
+		}
 	}
 	if (cut!=0)
 	{
-		# Set colors for edges over cutoff:
-		edge.color[E$weight<= -1*cut] <- "red"
-		edge.color[E$weight>= cut] <- "darkgreen"
+		if (!gray)
+		{
+			# Set colors for edges over cutoff:
+			edge.color[E$weight<= -1*cut] <- "red"
+			edge.color[E$weight>= cut] <- "darkgreen"
+		} else
+		{
+			# Set colors for edges over cutoff:
+			edge.color[E$weight<= -1*cut] <- "black"
+			edge.color[E$weight>= cut] <- "black"
+
+		}
 	}
 
 } else
@@ -516,7 +542,11 @@ if (weighted)
 
 
 # Vertex color:
-if (is.null(color) & !is.null(groups)) color=rainbow(length(groups))
+if (is.null(color) & !is.null(groups))
+{
+	if (!gray) color=rainbow(length(groups))
+	if (gray) color <- rgb(seq(0,1,length=length(groups)),seq(0,1,length=length(groups)),seq(0,1,length=length(groups)))
+}
 
 if (is.null(groups)) groups=list(1:nNodes)
 if (is.null(color))	color="white"
@@ -742,6 +772,7 @@ polygon(c(seq[i],seq[i+1],seq[i+1],seq[i]),c(seq[j],seq[j],seq[j+1],seq[j+1]),
 } }
 
 }    			
+
 			
 # Plot edges: 
 if (length(curve)==1) curve=rep(curve,length(edgesort))
@@ -930,11 +961,11 @@ for (i in edgesort)
 	} 
 }
 
-
 # Edge labels
 if (!is.logical(edge.labels))
 {
-	text(midX,midY,edge.labels,font=edge.font,cex=edge.label.cex)
+	if (length(edge.label.cex)==1) edge.label.cex <- rep(edge.label.cex,length(E$from))
+	text(midX,midY,edge.labels[!(duplicated(srt)&bidirectional)],font=edge.font[!(duplicated(srt)&bidirectional)],cex=edge.label.cex[!(duplicated(srt)&bidirectional)])
 }			
 
 # Plot nodes:

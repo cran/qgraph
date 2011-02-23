@@ -56,6 +56,7 @@ qgraph( adj, ... )
 	\item{vTranse}{Transparency of the nodes, must be an integer between 0 and 255, 255 indicating no transparancy. Defaults to 255}
 	\item{directed}{Logical indicating if edges are directed or not. Can be TRUE or FALSE to indicate if all edges are directed, a logical vector (when using edgelists) or a logical matrix (when using adjacency matrix)}
 	\item{DoNotPlot}{Runs qgraph but does not plot. Useful for saving the output (i.e. layout) without plotting}
+	\item{gray}{Logical, set to TRUE to plot the graph in grayscale colors}
 }}
 
 \details{

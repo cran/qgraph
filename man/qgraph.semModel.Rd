@@ -8,7 +8,7 @@ qgraph: SEM model pathdiagram
 This is a watered down version of \code{\link{qgraph.sem}} that only plots a diagram. It is called if a "mod" object is supplied to \code{\link{qgraph}}}
 
 \usage{
-qgraph.semModel(mod, manifest = NULL, layout = "spring", vsize.man = 4, vsize.lat = 7, residuals = TRUE, latres = TRUE, curve = 0.2, rotation = c(0, 0, 0, 0), ...)
+qgraph.semModel(mod, manifest = NULL, layout = "spring", vsize.man = 3, vsize.lat = 6, residuals = TRUE, latres = TRUE, curve = 0.2, residSize = 0.2,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,7 +20,7 @@ qgraph.semModel(mod, manifest = NULL, layout = "spring", vsize.man = 4, vsize.la
   \item{residuals}{Logical indicating if the residuals should be included in the path diagram. If this is FALSE then residual variances will be shown as colors on the nodes. Default is TRUE}
   \item{latres}{This is currently not supported, leave to TRUE}
   \item{curve}{Numerical value indicating the curve of edges that are on the same level in the "tree" layout, See details. This represent an offset from the middle of the straight edge through where the curved edge must be drawn. 0 indicates no curve, and any other value indicates a curve of that strength. Defaults to 0.2}
-  \item{rotation}{A vector of length 4 indicating the rotation of each level in the "circle" layout, in radians}
+  \item{residSize}{Size of the residual arrows}
   \item{\dots}{Arguments passed to \code{\link{qgraph}}}
 }
 
