@@ -10,6 +10,9 @@ if (any(class(adj)=="factanal") )
 } else if (any(class(adj)=="principal") )
 {
 	qgraph.pca(adj,...)
+} else if (any(class(adj)=="lavaan"))
+{
+	qgraph.lavaan(adj,edge.labels=TRUE,include=6,filetype="",...)
 } else if (any(class(adj)=="sem"))
 {
 	qgraph.sem(adj,edge.labels=TRUE,include=6,filetype="",...)
@@ -49,19 +52,70 @@ if (!is.null(arguments$qgraphEdgelist)&class(adj)=="qgraph")
 	adj <- cbind(arguments$qgraphEdgelist$from,arguments$qgraphEdgelist$to,arguments$qgraphEdgelist$weight)
 	if (is.null(arguments$directed)) arguments$directed <- arguments$qgraphEdgelist$directed
 }
-	
+
+if (class(adj) %in% c("graphNEL","pcAlgo"))
+{
+	if (class(adj) == "pcAlgo") graphNEL <- adj@graph else graphNEL <- adj
+	arguments$bidirectional <- TRUE
+	arguments$labels <- graphNEL@nodes
+	weights <- sapply(graphNEL@edgeData@data,'[[','weight')
+
+	adj <- laply(strsplit(names(weights),split="|"),'[',c(1,3))
+	adj <- apply(adj,2,as.numeric)
+	if (any(weights!=1)) adj <- cbind(adj,weights)
+}
+
+adj <- as.matrix(adj)
+
+# Set mode:
+sigSign <- FALSE
+if(is.null(arguments$graph)) graph="association" else graph=arguments$graph
+if (graph %in% c("sig2","significance2"))
+{
+	graph <- "sig"
+	sigSign <- TRUE
+}
+if (graph %in% c("sig","significance"))
+{
+	if (!require("fdrtool")) stop("`fdrtool' package not found, is it installed?") 
+	arguments[['mode']] <- "sig"
+}
+if(is.null(arguments[['alpha']])) alpha <- c(0.0001,0.001,0.01,0.05) else alpha <- arguments[['alpha']]
+if (length(alpha) > 4) stop("`alpha' can not have length > 4")
+
+if(is.null(arguments[['mode']])) mode <- "strength" else mode <- arguments[['mode']]
+if(is.null(arguments$sigScale)) sigScale <- function(x)0.7*(1-x)^(log(0.4/0.7,1-0.05)) else sigScale <- arguments$sigScale
+if (!mode%in%c("strength","sig")) stop("Mode must be 'sig' or 'strength'")	
+if(is.null(arguments$bonf)) bonf=FALSE else bonf=arguments$bonf
+if(is.null(arguments$OmitInsig)) OmitInsig=FALSE else OmitInsig <- arguments$OmitInsig
 # Settings for the edgelist
 if(is.null(arguments$edgelist)) 
 {
 	if (nrow(adj)!=ncol(adj)) edgelist=TRUE else edgelist=FALSE 
 } else edgelist=arguments$edgelist
+if(is.null(arguments$labels)) labels <- TRUE else labels <- arguments$labels
+
+if (edgelist)
+{
+	if (is.character(adj))
+	{
+		if(!is.logical(labels)) allNodes <- labels else allNodes <- unique(c(adj[,1:2]))
+		adj[,1:2] <- match(adj[,1:2],allNodes)
+		adj <- apply(adj,2,as.numeric)
+		if (is.logical(labels) && labels) labels <- allNodes
+	}
+}
+
+
 if(is.null(arguments$nNodes)) 
 {
-	if (edgelist) nNodes=max(c(adj[,1:2])) else nNodes=nrow(adj)
+	if (edgelist)
+	{
+	  if (!is.logical(labels)) nNodes <- length(labels) else nNodes <- max(c(adj[,1:2])) 
+	} else nNodes=nrow(adj)
 } else nNodes=arguments$nNodes
 
-# Default for fact cut and groups:
-if(is.null(arguments$graph)) graph="association" else graph=arguments$graph
+# Default for fact cut and groups
 if (graph=="factorial") fact=TRUE else fact=FALSE
 if (fact & edgelist) stop('Factorial graph needs a correlation matrix')
 if (graph=="concentration") partial=TRUE else partial=FALSE
@@ -69,9 +123,12 @@ if(is.null(arguments$cut))
 {
 	if (nNodes<50) cut=0 
 	if (nNodes>=50 | fact) cut=0.3
-} else cut=arguments$cut
+	if (mode=="sig") cut <- ifelse(length(alpha)>1,sigScale(alpha[length(alpha)-1]),sigScale(alpha[length(alpha)]))
+} else if (mode != "sig") cut <- arguments$cut else cut <- ifelse(length(alpha)>1,sigScale(alpha[length(alpha)-1]),sigScale(alpha[length(alpha)]))
 
 if(is.null(arguments$groups)) groups=NULL else groups=arguments$groups
+
+if (is.factor(groups) | is.character(groups)) groups <- tapply(1:length(groups),groups,function(x)x)
 
 # Factorial graph:
 if(is.null(arguments$nfact))
@@ -108,10 +165,10 @@ if(is.null(arguments$minimum))
 {
 if (nNodes<50)  minimum=0
 if (nNodes>=50)  minimum=0.1
-}	else minimum=arguments$minimum
+if (mode=="sig") minimum <- ifelse(length(alpha)>1,sigScale(alpha[length(alpha)]),0)
+} else if (mode!="sig") minimum=arguments$minimum else minimum <- ifelse(length(alpha)>1,sigScale(alpha[length(alpha)]),0)
 if(is.null(arguments$weighted)) weighted=NULL else weighted=arguments$weighted
 if(is.null(arguments$rescale)) rescale=TRUE else rescale=arguments$rescale
-if(is.null(arguments$labels)) labels=TRUE else labels=arguments$labels
 if(is.null(arguments$edge.labels)) edge.labels=FALSE else edge.labels=arguments$edge.labels
 if(is.null(arguments$edge.label.cex)) edge.label.cex=1 else edge.label.cex=arguments$edge.label.cex
 if(is.null(arguments$directed))
@@ -129,6 +186,20 @@ if(is.null(arguments$layout.par)) layout.par=list() else layout.par=arguments$la
 if(is.null(arguments$details)) details=FALSE else details=arguments$details
 
 # Output arguments:
+if(is.null(arguments$bg)) bg=FALSE else bg=arguments$bg
+background="white"
+if (is.character(bg)) background=bg
+
+#if (!DoNotPlot & !is.null(dev.list()[dev.cur()]))
+#{
+#	par(mar=c(0,0,0,0), bg=background)
+#	if (plot)
+#	{
+#		plot(1, ann = FALSE, axes = FALSE, xlim = c(-1.2, 1.2), ylim = c(-1.2 ,1.2),type = "n", xaxs = "i", yaxs = "i")
+#		plot <- FALSE
+#	}
+#}
+
 if(is.null(arguments$filetype)) filetype="default" else filetype=arguments$filetype
 if(is.null(arguments$filename)) filename="qgraph" else filename=arguments$filename
 if(is.null(arguments$width))
@@ -146,7 +217,6 @@ if(is.null(arguments$res)) res=320 else res=arguments$res
 if(is.null(arguments$vsize)) vsize=max((-1/72)*(nNodes)+5.35,1) else vsize=arguments$vsize
 if(is.null(arguments$esize)) esize=max((-1/72)*(nNodes)+5.35,1)  else esize=arguments$esize
 if(is.null(arguments$color)) color=NULL else color=arguments$color
-if(is.null(arguments$bg)) bg=FALSE else bg=arguments$bg
 if(is.null(arguments$gray)) gray=FALSE else gray=arguments$gray
 if(is.null(arguments$bgcontrol)) bgcontrol=6 else bgcontrol=arguments$bgcontrol
 if(is.null(arguments$bgres)) bgres=100 else bgres=arguments$bgres
@@ -162,6 +232,8 @@ if(is.null(arguments$scores)) scores=NULL else scores=arguments$scores
 if(is.null(arguments$scores.range)) scores.range=NULL else scores.range=arguments$scores.range
 if(is.null(arguments$lty)) lty=NULL else lty=arguments$lty
 if(is.null(arguments$vTrans)) vTrans=255 else vTrans=arguments$vTrans
+if(is.null(arguments[['overlay']])) overlay <- FALSE else overlay <- arguments[['overlay']]
+if(is.null(arguments[['overlaySize']])) overlaySize <- 0.5 else overlaySize <- arguments[['overlaySize']]
 
 # Arguments for directed graphs:
 if(is.null(arguments$curve)) curve=NULL else curve=arguments$curve
@@ -205,7 +277,7 @@ if (filetype=="svg")
 {
 	if (R.Version()$arch=="x64") stop("RSVGTipsDevice is not available for 64bit versions of R.")
 	require("RSVGTipsDevice")
-	devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
+	RSVGTipsDevice:::devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
 }
 if (filetype=="tex")
 {
@@ -219,7 +291,7 @@ if (filetype=="tex")
     "\\newcommand\\tooltip[1]{\\pdfstartlink user{/Subtype /Text/Contents  (#1)/AP <</N \\emptyicon\\space 0 R >>}\\tooltiptarget\\pdfendlink}"
 	)
 	
-	place_PDF_tooltip = function(x, y, text)
+	place_PDF_tooltip <- function(x, y, text)
 	{
 
 		# Calculate coordinates
@@ -236,7 +308,7 @@ if (filetype=="tex")
 	
 	print("NOTE: Using 'tex' as filetype will take longer to run than other filetypes")
 	
-	tikz(paste(filename,".tex",sep=""), standAlone = standAlone, width=width, height=height, packages=opt)
+	tikzDevice:::tikz(paste(filename,".tex",sep=""), standAlone = standAlone, width=width, height=height, packages=opt)
 }
 }	
 	#if (!filetype%in%c('pdf','png','jpg','jpeg','svg','R','eps','tiff')) warning(paste("File type",filetype,"is not supported")) 
@@ -278,9 +350,7 @@ if (!edgelist)
 	}
 }
   
-background="white"
-     
-if (is.character(bg)) background=bg
+
     # Partial graph:
 if (partial) 
 {
@@ -328,6 +398,41 @@ if (edgelist)
 	E$to=adj[,2]
 	if (ncol(adj)>2) E$weight=adj[,3] else E$weight=rep(1,length(E$from))
 	if (length(directed)==1) directed=rep(directed,length(E$from))
+	if (graph %in% c("sig","significance"))
+	{
+		if (sigSign)
+		{
+			E$weight <- sign(E$weight) * fdrtool(E$weight,"correlation",plot=FALSE, color.figure=FALSE, verbose=FALSE)$pval
+		} else E$weight <- fdrtool(E$weight,"correlation",plot=FALSE, color.figure=FALSE, verbose=FALSE)$pval
+	}
+	if (bonf)
+	{
+		if (mode=="sig") 
+		{
+			E$weight <- E$weight * length(E$weight)
+			E$weight[E$weight > 1] <- 1
+			E$weight[E$weight < -1] <- -1
+		} else warning("Bonferonni correction is only applied if mode='sig'")
+	}
+	if (mode=="sig" & any(E$weight < -1 | E$weight > 1))
+	{
+		warning("Weights under -1 adjusted to -1 and weights over 1 adjusted to 1")
+		E$weight[E$weight< -1] <- -1
+		E$weight[E$weight>1] <- 1
+	}
+
+	if (mode=="sig") 
+	{
+		Pvals <- E$weight
+		E$weight <- sign(E$weight) * sigScale(abs(E$weight))
+	}
+	if (OmitInsig)
+	{
+	if (!require("fdrtool")) stop("`fdrtool' package not found, is it installed?")
+	if (mode != "sig") Pvals <- fdrtool(E$weight,"correlation",plot=FALSE, color.figure=FALSE, verbose=FALSE)$pval
+	E$weight[abs(Pvals) > alpha[length(alpha)]] <- 0
+	}
+
 } else
 {
 	if (is.matrix(directed))
@@ -357,12 +462,65 @@ if (edgelist)
 	E$from <- E$from[c(incl)]
 	E$to <- E$to[c(incl)]
 	E$weight <- E$weight[c(incl)]
+if (graph %in% c("sig","significance"))
+{
+	if (sigSign)
+	{
+		E$weight <- sign(E$weight) * fdrtool(E$weight,"correlation",plot=FALSE, color.figure=FALSE, verbose=FALSE)$pval
+	} else E$weight <- fdrtool(E$weight,"correlation",plot=FALSE, color.figure=FALSE, verbose=FALSE)$pval
+}
+if (bonf)
+{
+	if (mode=="sig") 
+	{
+		E$weight <- E$weight * length(E$weight)
+		E$weight[E$weight > 1] <- 1
+		E$weight[E$weight < -1] <- -1
+	} else warning("Bonferonni correction is only applied if mode='sig'")
+}
+if (mode=="sig" & any(E$weight < -1 | E$weight > 1))
+{
+	warning("Weights under -1 adjusted to -1 and weights over 1 adjusted to 1")
+	E$weight[E$weight < -1] <- -1
+	E$weight[E$weight > 1] <- 1
+}
+
+if (mode=="sig") 
+{
+	Pvals <- E$weight
+	E$weight <- sign(E$weight) * sigScale(abs(E$weight))
+}
+
+if (OmitInsig)
+{
+	if (!require("fdrtool")) stop("`fdrtool' package not found, is it installed?")
+	if (mode != "sig") Pvals <- fdrtool(E$weight,"correlation",plot=FALSE, color.figure=FALSE, verbose=FALSE)$pval
+	E$weight[abs(Pvals) > alpha[length(alpha)]] <- 0
+}	
 	
+	if (is.matrix(curve))
+	{
+		curve <- curve[c(incl)]
+		curve <- curve[E$weight!=0]
+	}
+	if (is.matrix(bidirectional))
+	{
+		bidirectional <- bidirectional[c(incl)]
+		bidirectional <- bidirectional[E$weight!=0]
+	}
+	if (is.matrix(lty))
+	{
+		lty <- lty[c(incl)]
+		lty <- lty[E$weight!=0]
+	}
 
 	E$from=E$from[E$weight!=0]
 	E$to=E$to[E$weight!=0]
+	if (mode=="sig") Pvals <- Pvals[E$weight != 0]
 	E$weight=E$weight[E$weight!=0]
 }
+
+
 
 if (length(directed)==1) 
 {
@@ -442,9 +600,17 @@ if (layout=="default" | layout=="circular")
 	}
 } else if (layout=="spring")
 {
+	if (mode != "sig")
+	{
 	layout=qgraph.layout.fruchtermanreingold(cbind(E$from,E$to),abs(E$weight/max(abs(E$weight)))^2,nNodes,rotation=rotation,layout.control=layout.control,
 		niter=layout.par$niter,max.delta=layout.par$max.delta,area=layout.par$area,cool.exp=layout.par$cool.exp,repulse.rad=layout.par$repulse.rad,init=layout.par$init,
 			constraints=layout.par$constraints)
+	} else
+	{
+	layout=qgraph.layout.fruchtermanreingold(cbind(E$from,E$to),abs(E$weight),nNodes,rotation=rotation,layout.control=layout.control,
+		niter=layout.par$niter,max.delta=layout.par$max.delta,area=layout.par$area,cool.exp=layout.par$cool.exp,repulse.rad=layout.par$repulse.rad,init=layout.par$init,
+			constraints=layout.par$constraints)
+	} 
 }
 }
 # Layout matrix:
@@ -455,7 +621,7 @@ if (is.matrix(layout)) if (ncol(layout)>2)
 	LmatY=seq(1,-1,length=nrow(Lmat))
 	layout=matrix(0,nrow=nNodes,ncol=2)
 	
-	loc <- which(Lmat==1:nNodes,arr.ind=TRUE)
+	loc <- t(sapply(1:nNodes,function(x)which(Lmat==x,arr.ind=T)))
 	layout <- cbind(LmatX[loc[,2]],LmatY[loc[,1]])
 	
 }
@@ -474,57 +640,100 @@ if (weighted)
 	edge.width[edge.width<1]=1
 
 	#Edge color:
-	edge.color="#00000000"
-	if (cut==0) 
+	edge.color=rep("#00000000",length(E$from))
+
+		
+	if (mode=="strength")
 	{
-		col=(abs(E$weight)-minimum)/(maximum-minimum)
-	} else 
-	{
-		col=(abs(E$weight)-minimum)/(cut-minimum)
+		if (cut==0) 
+		{
+			col=(abs(E$weight)-minimum)/(maximum-minimum)
+		} else 
+		{
+			col=(abs(E$weight)-minimum)/(cut-minimum)
+		}
+		col[col>1]=1
+		col[col<0]=0
+		if (!gray)
+		{
+			if (transparency) 
+			{
+				col=col^(2)
+				neg=col2rgb(rgb(0.75,0,0))/255
+				pos=col2rgb(rgb(0,0.6,0))/255
+
+				# Set colors for edges over cutoff:
+				edge.color[E$weight< -1* minimum] <- rgb(neg[1],neg[2],neg[3],col[E$weight< -1*minimum])
+				edge.color[E$weight> minimum] <- rgb(pos[1],pos[2],pos[3],col[E$weight> minimum])
+			} else 
+			{
+				edge.color[E$weight>minimum]=rgb(1-col[E$weight > minimum],1-(col[E$weight > minimum]*0.25),1-col[E$weight > minimum])
+				edge.color[E$weight< -1*minimum]=rgb(1-(col[E$weight < (-1)*minimum]*0.25),1-col[E$weight < (-1)*minimum],1-col[E$weight < (-1)*minimum])
+			}	
+		} else
+		{
+			if (transparency) 
+			{
+				col=col^(2)
+				neg="gray10"
+				pos="gray10"
+
+				# Set colors for edges over cutoff:
+				edge.color[E$weight< -1* minimum] <- rgb(neg[1],neg[2],neg[3],col[E$weight< -1*minimum])
+				edge.color[E$weight> minimum] <- rgb(pos[1],pos[2],pos[3],col[E$weight> minimum])
+			} else 
+			{
+				edge.color[E$weight>minimum]=rgb(1-col[E$weight > minimum],1-(col[E$weight > minimum]),1-col[E$weight > minimum])
+				edge.color[E$weight< -1*minimum]=rgb(1-(col[E$weight < (-1)*minimum]),1-col[E$weight < (-1)*minimum],1-col[E$weight < (-1)*minimum])
+			}
+		}
 	}
-	col[col>1]=1
-	col[col<0]=0
-	if (!gray)
-	{
-		if (transparency) 
+	if (mode == "sig")
+	{	
+		
+		if (!gray)
 		{
-			col=col^(2)
-			neg=col2rgb(rgb(0.75,0,0))/255
-			pos=col2rgb(rgb(0,0.6,0))/255
+			
+			# Set colors for edges over sig > 0.01 :
+			if (length(alpha) > 3) edge.color[Pvals > 0 & Pvals < alpha[4]  & E$weight > minimum] <- "cadetblue1"	
+			# Set colors for edges over sig > 0.01 :
+			if (length(alpha) > 2) edge.color[Pvals > 0 & Pvals < alpha[3]  & E$weight > minimum] <- "#6495ED"
+			# Set colors for edges over sig > 0.01 :
+			if (length(alpha) > 1) edge.color[Pvals > 0 & Pvals < alpha[2]  & E$weight > minimum] <- "blue"				
+			# Set colors for edges over sig < 0.01 :
+			edge.color[Pvals > 0 & Pvals < alpha[1]  & E$weight > minimum] <- "darkblue"
 
-			# Set colors for edges over cutoff:
-			edge.color[E$weight< -1* minimum] <- rgb(neg[1],neg[2],neg[3],col[E$weight< -1*minimum])
-			edge.color[E$weight> minimum] <- rgb(pos[1],pos[2],pos[3],col[E$weight> minimum])
-		} else 
-		{
-			edge.color[E$weight>minimum]=rgb(1-col[E$weight > minimum],1-(col[E$weight > minimum]*0.25),1-col[E$weight > minimum])
-			edge.color[E$weight< -1*minimum]=rgb(1-(col[E$weight < (-1)*minimum]*0.25),1-col[E$weight < (-1)*minimum],1-col[E$weight < (-1)*minimum])
-		}	
-	} else
-	{
-		if (transparency) 
-		{
-			col=col^(2)
-			neg="gray10"
-			pos="gray10"
+			# Set colors for edges over sig > 0.01 :
+			if (length(alpha) > 3) edge.color[Pvals < 0 & Pvals > (-1 * alpha[4])  & E$weight < -1 * minimum] <- rgb(1,0.8,0.4) 	
+			# Set colors for edges over sig > 0.01 :
+			if (length(alpha) > 2) edge.color[Pvals < 0 & Pvals > (-1 * alpha[3])  & E$weight < -1 * minimum] <- "orange"
+			# Set colors for edges over sig > 0.01 :
+			if (length(alpha) > 1) edge.color[Pvals < 0 & Pvals > (-1 * alpha[2])  & E$weight < -1 * minimum] <- "darkorange"				
+			# Set colors for edges over sig < 0.01 :
+			edge.color[Pvals < 0 & Pvals > (-1 * alpha[1])  & E$weight < -1 * minimum] <- "darkorange2"
 
-			# Set colors for edges over cutoff:
-			edge.color[E$weight< -1* minimum] <- rgb(neg[1],neg[2],neg[3],col[E$weight< -1*minimum])
-			edge.color[E$weight> minimum] <- rgb(pos[1],pos[2],pos[3],col[E$weight> minimum])
-		} else 
+				
+				
+			
+		} else
 		{
-			edge.color[E$weight>minimum]=rgb(1-col[E$weight > minimum],1-(col[E$weight > minimum]),1-col[E$weight > minimum])
-			edge.color[E$weight< -1*minimum]=rgb(1-(col[E$weight < (-1)*minimum]),1-col[E$weight < (-1)*minimum],1-col[E$weight < (-1)*minimum])
+		Pvals <- abs(Pvals)
+							# Set colors for edges over sig < 0.01 :
+			if (length(alpha) > 3) edge.color[Pvals > 0 & Pvals < alpha[4]  & E$weight > minimum] <- rgb(0.7,0.7,0.7)
+			if (length(alpha) > 2) edge.color[Pvals > 0 & Pvals < alpha[3]  & E$weight > minimum] <- rgb(0.5,0.5,0.5)
+			if (length(alpha) > 1) edge.color[Pvals > 0 & Pvals < alpha[2]  & E$weight > minimum] <- rgb(0.3,0.3,0.3)
+			edge.color[Pvals > 0 & Pvals < alpha[1]  & E$weight > minimum] <- "black"
+			
 		}
 	}
 	if (cut!=0)
 	{
-		if (!gray)
+		if (!gray & mode=="strength")
 		{
 			# Set colors for edges over cutoff:
 			edge.color[E$weight<= -1*cut] <- "red"
 			edge.color[E$weight>= cut] <- "darkgreen"
-		} else
+		} else if (gray)
 		{
 			# Set colors for edges over cutoff:
 			edge.color[E$weight<= -1*cut] <- "black"
@@ -545,7 +754,7 @@ if (weighted)
 if (is.null(color) & !is.null(groups))
 {
 	if (!gray) color=rainbow(length(groups))
-	if (gray) color <- rgb(seq(0,1,length=length(groups)),seq(0,1,length=length(groups)),seq(0,1,length=length(groups)))
+	if (gray) color <- sapply(seq(0.2,0.8,length=length(groups)),function(x)rgb(x,x,x))
 }
 
 if (is.null(groups)) groups=list(1:nNodes)
@@ -972,7 +1181,7 @@ if (!is.logical(edge.labels))
 points(layout,cex=vsize,col=vertex.colors,pch=pch1)
 if (borders) points(layout,cex=vsize,lwd=2,pch=pch2,col=border.colors)
 
-	
+
 # Make labels:
 if (is.logical(labels))
 {
@@ -1014,7 +1223,24 @@ if (!is.logical(labels))
 }
 
 
+### Overlay:
+if (overlay)
+{
+# Transparance in vertex colors:
+	num2hex <- function(x)
+	{
+		hex=unlist(strsplit("0123456789ABCDEF",split=""))
+		return(paste(hex[(x-x%%16)/16+1],hex[x%%16+1],sep=""))
+	}
 
+	colHEX <- rgb(t(col2rgb(color)/255))
+
+	fillCols <- paste(sapply(strsplit(colHEX,split=""),function(x)paste(x[1:7],collapse="")),num2hex(25),sep="")
+
+for (i in 1:length(groups)) polygon(ellipse(cov(l[groups[[i]],]),centre=colMeans(l[groups[[i]],]),level=overlaySize),border=color[i],col=fillCols[i])
+}
+
+if (is.null(names(groups))) names(groups) <- LETTERS[1:length(groups)]
 
 # Plot Legend:
 if (legend)
@@ -1023,9 +1249,39 @@ if (legend)
 	{
 		legend.cex=legend.cex*2
 		plot(1, ann = FALSE, axes = FALSE, xlim = c(-1, 1), ylim = c(-1 ,1 ),type = "n", xaxs = "i", yaxs = "i")
-
-		legend (0,0, names(groups), col= color ,pch = 19, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
-		legend (0,0, names(groups), col= "black" ,pch = 1, xjust=0.5, ,yjust=0.5, cex=legend.cex, bty='n') 
+		if (mode=="sig")
+		{
+			legend (0,0.5, names(groups), col= color ,pch = 19, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
+			legend (0,0.5, names(groups), col= "black" ,pch = 1, xjust=0.5, ,yjust=0.5, cex=legend.cex, bty='n') 
+			if (gray)
+			{
+			legend(0,-0.5,paste("p <",alpha[length(alpha):1]),
+				col = c(rgb(0.7,0.7,0.7),rgb(0.5,0.5,0.5),rgb(0.3,0.3,0.3),"black")[(5-length(alpha)):4],
+				lty=1, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
+			} else
+			{
+				if (any(Pvals < 0))
+				{
+					legend(-0.5,-0.5,paste("p <",alpha[length(alpha):1]),
+						col = c("cadetblue1","#6495ED","blue","darkblue")[(5-length(alpha)):4],
+						lty=1, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
+						
+					legend(0.5,-0.5,paste("p <",alpha[length(alpha):1]),
+						col = c(rgb(1,0.8,0.4) ,"orange","darkorange","darkorange2")[(5-length(alpha)):4],
+						lty=1, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
+				
+				} else
+				{
+					legend(0,-0.5,paste("p <",alpha[length(alpha):1]),
+						col = c("cadetblue1","#6495ED","blue","darkblue")[(5-length(alpha)):4],
+						lty=1, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
+				}
+			}
+		} else
+		{
+			legend (0,0, names(groups), col= color ,pch = 19, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
+			legend (0,0, names(groups), col= "black" ,pch = 1, xjust=0.5, ,yjust=0.5, cex=legend.cex, bty='n') 
+		}
 	}
 	if (!is.null(scores))
 	{
@@ -1089,5 +1345,6 @@ returnval$qgraphEdgelist <- E
 class(returnval)="qgraph"
 
 invisible(returnval)
-}}
+}
+}
  

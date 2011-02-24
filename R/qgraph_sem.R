@@ -2,6 +2,7 @@
 qgraph.sem=function(
 	res,
 	layout="circle",
+	...,
 	vsize.man=3,
 	vsize.lat=6,
 	filename="qgraph",
@@ -10,14 +11,14 @@ qgraph.sem=function(
 	panels=2,
 	include=1:12,
 	latres=TRUE,
-	curve=0.2,
+	curve=0,
 	residSize=0.2,
 	onefile=TRUE,
 	width=10,
-	height=10,
-	...)
+	height=10)
 {
-require('sem')
+#reqTest <- require("sem")
+#if (!reqTest) stop("sem could not be loaded, is this package installed?")
 if (class(res)!="sem") stop("Input must me a 'sem' object")
 
 arguments=list(...)
@@ -235,7 +236,7 @@ if (layout=='circle' | layout=='circulair')
 {
 	l2 <- l
 	
-	E$curved <- 0
+	#E$curved <- 0
 
 	tl=sum(l[,2] == -0.5)+1
 	l2[l[,2] == -0.5,1]=sin(seq(0,2*pi, length=tl))[-tl]
@@ -255,6 +256,10 @@ if (layout=='circle' | layout=='circulair')
 	}
 	
 	l <- l2
+}else
+{
+	l[l[,2]==-1,2] <- -0.5 - residSize
+	l[l[,2]==1,2] <- 0.5 + residSize
 }
 
 #Set shapes
@@ -440,6 +445,7 @@ par(mar=c(3,3,3,3))
 
 res$C=round(res$C,6)
 res$S=round(res$S,6)
+
 
 if (7%in%include)
 {

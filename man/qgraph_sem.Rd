@@ -7,14 +7,15 @@
 This functions uses a "sem" object from the \code{\link{sem}} function (from the sem package; Fox, 2010) and outputs a multi-page pdf file containing goodness of fit indices, path diagram, graphs of the parameter estimates and graphs of the implied and observed covariance and correlation matrices.
 }
 \usage{
-qgraph.sem(res, layout="circle", vsize.man=3, vsize.lat=6, filename="qgraph",
+qgraph.sem(res, layout="circle",  ..., vsize.man=3, vsize.lat=6, filename="qgraph",
 	filetype="pdf", residuals=TRUE, panels=2, include=1:12, latres=TRUE, 
-	curve=0.2, residSize=0.2, onefile=TRUE, width = 10, height = 10, ...)
+	curve=0, residSize=0.2, onefile=TRUE, width = 10, height = 10)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 	\item{res}{The output from the 'sem' function. See details for extra details on specifying the model}
 	\item{layout}{The layout used for the path diagram. Can be "tree", "spring", "circle" and "springtree"}
+	\item{...}{arguments passed to \code{\link{qgraph}}. This is both for the path diagram and for the correlation/covariance plots.}
 	\item{vsize.man}{Size of the manifest variables in the path diagram}
 	\item{vsize.lat}{Size of the latent variables in the path diagram}
 	\item{filename}{Name of the file (will be extended with the filetype)}
@@ -28,7 +29,6 @@ qgraph.sem(res, layout="circle", vsize.man=3, vsize.lat=6, filename="qgraph",
 	\item{onefile}{Logical indicating if a multi-page pdf should be produced. If FALSE each plot will be a new pdf. Use this only with panels=1 and filename="(Arbitrary name)\%03d".}
 	\item{width}{Width of each panel, in inches}
 	\item{height}{Height of each panel, in inches}
-	\item{...}{arguments passed to \code{\link{qgraph}}. This is both for the path diagram and for the correlation/covariance plots.}
 }
 
 \details{
