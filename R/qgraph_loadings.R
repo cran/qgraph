@@ -35,6 +35,7 @@ if(is.null(arguments$residSize)) residSize=0.2 else residSize=arguments$residSiz
 if(is.null(arguments$filetype)) filetype="default" else filetype=arguments$filetype
 if(is.null(arguments$vsize)) vsize=max((-1/72)*(nrow(fact))+5.35,1) else vsize=arguments$vsize
 if(is.null(arguments$groups)) groups=NULL else groups=arguments$groups
+if (is.factor(groups) | is.character(groups)) groups <- tapply(1:length(groups),groups,function(x)x)
 if(is.null(arguments$color)) color=NULL else color=arguments$color
 if(is.null(arguments$model)) model="none" else model=arguments$model
 if(is.null(arguments$crossloadings)) crossloadings=FALSE else crossloadings=arguments$crossloadings

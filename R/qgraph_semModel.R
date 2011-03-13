@@ -11,7 +11,8 @@ qgraph.semModel=function(
 	residSize=0.2,
 	...)
 {
-require('sem')
+#reqTest <- require("sem")
+#if (!reqTest) stop("sem could not be loaded, is this package installed?")
 if (!class(mod)%in%c("mod","sem")) stop("Input must me a 'mod' or 'sem' object")
 
 if (class(mod)=="sem")

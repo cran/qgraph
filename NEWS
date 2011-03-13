@@ -1,3 +1,26 @@
+Changes in Version 0.4.8
+   o The 'groups' argument can now be assigned a factor as well as a list.
+   o qgraph.cfa should now correctly call only the sem package version of sem().
+   o In qgraph.sem(), connections between variables at the same level (e.g. regression among factors) can now be curved in the circular layout.
+   o Simular to 'directed', the qgraph() arguments 'curve', 'lty' and 'bidirectional' can now also be supplied in matrix form.
+   o qgraph.cfa() can now also use the lavaan package
+   o qgraph.cfa() now has a 'pkg' argument indicating which package should be used for estimation. Defaults to "sem" and can also be "lavaan"
+   o Added the qgraph.lavaan() function which creates an output document to the results of a lavaan fit simulair to what qgraph.sem() does for the sem package
+   o Arguments in the qgraph() help file are now divided into multiple sections
+   o Added the argument 'overlay' to qgraph(). Set this to true to plot a venn-diagram like overlay over the graph.
+   o Several packages are now imported rather than suggested/depended
+   o New feature: Significance graphs:
+     o qgraph() can now be used to plot significance levels (p-values). To do this set mode="sig". This will result in a graph in which two nodes are connected if p<0.05. Different shades of blue indicate different levels of significance. A bonferonni correction can also be applied. Also works with gray=TRUE.     
+	 o Added the argument 'mode' to qgraph() which specifies what the edge weights mean. Currently this can be "strength" (default) or "sig" (see below)
+     o The 'graph' argument in qgraph() can now be set to "sig" or "significance". If so, the p-value for each correlation is calculated (using the fdrtool package), and a significance mode graph is made.
+	 o The `bonf' argument in qgraph() can be set to TRUE to apply a bonferonni correction by multiplying all p-values by the number of p-values
+     o The `alpha' argument in qgraph() can be used to set significance levels of interest
+   o The `OmitInsig'  argument can be used to omit all correlations/p-values with a p-value above the lowest value in `alpha'.
+   o Using `OmitInsig = TRUE' and `gray = TRUE' with a correlation matrix will create an unweighted graph in which only significant correlations are connected.
+   o Using edgelists as input for qgraph() can now also be done with a dataframe and contain characters. These characters will be used as edge labels	 
+   o qgraph() now also moderatly supports "graphNEL" objects (Rgraphviz) and "pcAlgo" objects (pcalg). See example
+	 
+	 
 Changes in Version 0.4.7
    o Added the qgraph.cfa() function, which performs a confirmatory factor analysis using the sem package
    o Fixed a bug in qgraph.sem() causing faulty path diagrams if nodes were labelled numerically
