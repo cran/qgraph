@@ -31,7 +31,7 @@ if (length(arguments)>0)
 # SET DEFAULT ARGUMENTS:
 if(is.null(arguments$resid)) resid=NULL else resid=arguments$resid
 if(is.null(arguments$factorCors)) factorCors=NULL else factorCors=arguments$factorCors
-if(is.null(arguments$residSize)) residSize=0.2 else residSize=arguments$residSize
+if(is.null(arguments$residSize)) residSize=0.1 else residSize=arguments$residSize
 if(is.null(arguments$filetype)) filetype="default" else filetype=arguments$filetype
 if(is.null(arguments$vsize)) vsize=max((-1/72)*(nrow(fact))+5.35,1) else vsize=arguments$vsize
 if(is.null(arguments$groups)) groups=NULL else groups=arguments$groups

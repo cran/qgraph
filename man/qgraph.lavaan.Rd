@@ -11,6 +11,7 @@ qgraph.lavaan(
 	fit,
 	...,
 	layout="circle",
+	groups=NULL,
 	vsize.man=3,
 	vsize.lat=6,
 	filename="qgraph",
@@ -29,6 +30,7 @@ qgraph.lavaan(
 	\item{fit}{A \code{"\linkS4class{lavaan}"} object containing the fit of a SEM model (obtained from e.g. \code{\link[lavaan]{sem}} and \code{\link[lavaan]{cfa}})}
 	\item{...}{arguments passed to \code{\link{qgraph}}. This is both for the path diagram and for the correlation/covariance plots.}
 	\item{layout}{The layout used for the path diagram. Can be "tree", "spring", "circle" and "springtree"}
+	\item{groups}{An optional list containing the measurement model, see  \code{\link{qgraph}}}
 	\item{vsize.man}{Size of the manifest variables in the path diagram}
 	\item{vsize.lat}{Size of the latent variables in the path diagram}
 	\item{filename}{Name of the file (will be extended with the filetype)}

@@ -32,15 +32,8 @@ Sacha Epskamp
 \code{\link{qgraph.svg}}
 }
 \examples{
-\dontrun{
-#### VISUALIZE CORRELATION MATRIX ###
-eta=matrix(rnorm(200*5),ncol=5)
-lam=matrix(0,nrow=100,ncol=5)
-for (i in 1:5) lam[(20*i-19):(20*i),i]=rnorm(20,0.7,0.3)
-eps=matrix(rnorm(200*100),ncol=100)
-Y=eta\%*\%t(lam)+eps
+data(big5)
+data(big5groups)
 
-## run qgraph:
-qgraph.panel(cor(Y),groups=list(1:20,21:40,41:60,61:80,81:100),cut=0.4,vsize=3)
-}
+qgraph.panel(cor(big5),groups=big5groups,minimum=0.2,borders=FALSE,vsize=1,cut=0.3)
 }

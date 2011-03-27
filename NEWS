@@ -1,3 +1,12 @@
+Changes in Version 0.4.9
+   o Fixed a critical bug in making svg images
+   o The legend now takes less space by default.
+   o Added the argument 'GLratio' to qgraph() which specifies the relative size of the graph compared to the layout.
+   o 'legend.cex' now defaults to 0.6
+   o qgraph.panel() now omits the legend by default as it couldn't handle legends anyway.
+   o qgraph.panel() now uses better options for the layout of the factorial graph
+   o Fixed a bug in qgraph.sem() causing the spring layout to malfunction.
+	
 Changes in Version 0.4.8
    o The 'groups' argument can now be assigned a factor as well as a list.
    o qgraph.cfa should now correctly call only the sem package version of sem().

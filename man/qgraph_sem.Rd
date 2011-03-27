@@ -9,7 +9,7 @@ This functions uses a "sem" object from the \code{\link{sem}} function (from the
 \usage{
 qgraph.sem(res, layout="circle",  ..., vsize.man=3, vsize.lat=6, filename="qgraph",
 	filetype="pdf", residuals=TRUE, panels=2, include=1:12, latres=TRUE, 
-	curve=0, residSize=0.2, onefile=TRUE, width = 10, height = 10)
+	curve=0, residSize=0.2, onefile=TRUE, width = 7, height = 7)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -124,10 +124,10 @@ model.thur <- specify.model()
 sem.thur <- sem(model.thur, R.thur, 213)
 
 # Run qgraph:
-qgraph.sem(sem.thur,filename="Thurstone tree",edge.label.cex=0.6,curve=0.4)
+qgraph.sem(sem.thur,filename="Thurstone tree",layout="tree",edge.label.cex=0.6,curve=0.4,width=8,height=5)
 
 # Spring layout:
-qgraph.sem(sem.thur,filename="Thurstone spring",layout="spring",residuals=FALSE)}
+qgraph.sem(sem.thur,filename="Thurstone spring",layout="spring",residuals=FALSE,width=5,height=5)}
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

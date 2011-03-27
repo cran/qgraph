@@ -3,6 +3,7 @@ qgraph.lavaan <- function(
 	fit,
 	...,
 	layout="circle",
+	groups=NULL,
 	vsize.man=3,
 	vsize.lat=6,
 	filename="qgraph",
@@ -62,6 +63,15 @@ if (fit@Sample@ngroups > 1) stop("qgraph.lavaan currently does not support model
 
 # Create model matrix:
 #E$model <- 1*E$adj!=0
+
+if (is.factor(groups) | is.character(groups)) groups <- tapply(1:length(groups),groups,function(x)x)
+
+if (!is.null(groups))
+{
+	reorder <- as.vector(unlist(groups))
+	groups <- lapply(groups,match,reorder)
+
+}
 
 if (class(fit)!="lavaan") stop("Input must me a 'lavaan' object")
 
@@ -411,9 +421,11 @@ corImp <- round(cov2cor(covImp),6)
 covObs <- round(as.matrix(fit@Sample@cov[[1]]),6)
 corObs <- round(cov2cor(covObs),6)
 
-
-gr <- as.factor(subset(pars,op=="=~" & rhs%in%varNames)$lhs)
-if (length(gr) != nrow(covObs)) gr <- NULL
+if (is.null(groups))
+{
+	gr <- as.factor(subset(pars,op=="=~" & rhs%in%varNames)$lhs)
+	if (length(gr) != nrow(covObs)) gr <- NULL
+} else gr <- groups
 
 maximum=max(abs(c(covObs[upper.tri(covObs)],covImp[upper.tri(covImp)])))	
 

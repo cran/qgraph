@@ -36,10 +36,10 @@ if (filetype=="tex") stop("Tex is not yet supported in qgraph.panel")
 
 layout(matrix(1:4,nrow=2,ncol=2))
 
-qgraph(adj,filetype="",Q,layout="circular",graph="association")
-qgraph(adj,layout="spring",filetype="",Q,graph="association")
-qgraph(adj,graph="concentration",layout="spring",filetype="",Q)
-qgraph(adj,graph="factorial",layout="spring",filetype="",Q)
+qgraph(adj,filetype="",Q,layout="circular",graph="association",legend=FALSE)
+qgraph(adj,layout="spring",filetype="",Q,graph="association",legend=FALSE)
+qgraph(adj,graph="concentration",layout="spring",filetype="",Q,legend=FALSE)
+qgraph(adj,graph="factorial",layout="spring",filetype="",Q,legend=FALSE,layout.par=list(area=nrow(adj)^2.3,repulse.rad=nrow(adj)^2.8))
 
 if (filetype%in%c('pdf','png','jpg','jpeg','svg','eps','tiff','tex')) 
 {

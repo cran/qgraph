@@ -14,8 +14,8 @@ qgraph.sem=function(
 	curve=0,
 	residSize=0.2,
 	onefile=TRUE,
-	width=10,
-	height=10)
+	width=7,
+	height=7)
 {
 #reqTest <- require("sem")
 #if (!reqTest) stop("sem could not be loaded, is this package installed?")
@@ -256,7 +256,7 @@ if (layout=='circle' | layout=='circulair')
 	}
 	
 	l <- l2
-}else
+} else if (layout != "spring")
 {
 	l[l[,2]==-1,2] <- -0.5 - residSize
 	l[l[,2]==1,2] <- 0.5 + residSize
