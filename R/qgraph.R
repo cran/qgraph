@@ -223,7 +223,7 @@ if(is.null(arguments$bgres)) bgres=100 else bgres=arguments$bgres
 if(is.null(arguments$transparency)) transparency=F else transparency=arguments$transparency
 if(is.null(arguments$lcolor)) lcolor="black" else lcolor=arguments$lcolor
 if(is.null(arguments$loop)) loop=1 else loop=arguments$loop
-if(is.null(arguments$legend.cex)) legend.cex=1 else legend.cex=arguments$legend.cex
+if(is.null(arguments$legend.cex)) legend.cex=0.6 else legend.cex=arguments$legend.cex
 if(is.null(arguments$borders)) borders=TRUE else borders=arguments$borders
 if(is.null(arguments$border.colors)) border.colors=NULL else border.colors=arguments$border.colors
 if(is.null(arguments$shape)) shape="circle" else shape=arguments$shape
@@ -234,6 +234,7 @@ if(is.null(arguments$lty)) lty=NULL else lty=arguments$lty
 if(is.null(arguments$vTrans)) vTrans=255 else vTrans=arguments$vTrans
 if(is.null(arguments[['overlay']])) overlay <- FALSE else overlay <- arguments[['overlay']]
 if(is.null(arguments[['overlaySize']])) overlaySize <- 0.5 else overlaySize <- arguments[['overlaySize']]
+if(is.null(arguments[['GLratio']])) GLratio <- 2.5 else GLratio <- arguments[['GLratio']]
 
 # Arguments for directed graphs:
 if(is.null(arguments$curve)) curve=NULL else curve=arguments$curve
@@ -259,7 +260,7 @@ if (is.null(legend))
 }
 if (legend & filetype!='pdf' & filetype!='eps')
 {
-	width=width*1.5
+	width=width*(1+(1/GLratio))
 }
 
 if (!DoNotPlot)
@@ -277,7 +278,7 @@ if (filetype=="svg")
 {
 	if (R.Version()$arch=="x64") stop("RSVGTipsDevice is not available for 64bit versions of R.")
 	require("RSVGTipsDevice")
-	RSVGTipsDevice:::devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
+	devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
 }
 if (filetype=="tex")
 {
@@ -322,7 +323,7 @@ if (pty=='s')
 # Legend setting 2
 if (legend & filetype!='pdf')
 {
-	layout(t(c(1,1,2)))
+	layout(t(1:2),widths=c(GLratio,1))
 }
 
 # Weighted settings:

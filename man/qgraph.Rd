@@ -35,6 +35,7 @@ qgraph( adj, ... )
 \item{color}{A vector with a color for each element in the groups list, or a color for each node. Defaults to "white" without groups list and rainbow(length(groups)) with a groups list.}
 	\item{legend}{Logical value indicating if a legend should be plotted}
 	\item{legend.cex}{Scalar of the legend. defaults to 1}
+	\item{GLratio}{Relative size of the graph compared to the layout. Defaults to 4}
 	\item{vsize}{A value indicating the size of the nodes. Can also be a vector of length 2 (nodes are scaled to degree) or a size for each node.}
 	\item{esize}{Size of the largest edge (or what it would be if there was an edge with weight maximum).}
 	\item{labels}{If FALSE, no labels are plotted. If TRUE, order in adjacency matrix is used as labels. This can also be a vector with a label for each node. Defaults to TRUE. If a label contains an asterisk (e.g. "x1*") then the asterisk will be omitted and the label will be printed in symbol font (use this for Greek letters)}
