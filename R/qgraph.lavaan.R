@@ -159,17 +159,16 @@ E <- rbind(E,transform(subset(E,bidir),from=to,to=from))
 l <- layout
 if (layout=='tree' | layout=="springtree" | layout=="circle") 
 { 
-	
 	l <- matrix(0,nrow=2*(n+k),ncol=2)
-	l[n+k+1:n,2] <- -1
-	l[1:n,2] <- -0.5
-	l[n+1:k,2] <- 0.5
-	l[2*n+k+1:k,2] <- 1
+	l[n+k+seq_len(n),2] <- -1
+	l[seq_len(n),2] <- -0.5
+	l[n+seq_len(k),2] <- 0.5
+	l[2*n+k+seq_len(k),2] <- 1
 
-	l[n+k+1:n,1]=seq(-1,1,length=n+2)[2:(n+1)]
-	l[1:n,1]=seq(-1,1,length=n+2)[2:(n+1)]
-	l[n+1:k,1]=seq(-1,1,length=k+2)[2:(k+1)]
-	l[2*n+k+1:k,1]=seq(-1,1,length=k+2)[2:(k+1)]
+	l[n+k+seq_len(n),1]=seq(-1,1,length=n+2)[-c(1,n+2)]
+	l[seq_len(n),1]=seq(-1,1,length=n+2)[-c(1,n+2)]
+	l[n+seq_len(k),1]=seq(-1,1,length=k+2)[-c(1,k+2)]
+	l[2*n+k+seq_len(k),1]=seq(-1,1,length=k+2)[-c(1,k+2)]
 
 	#E$curved=0
 	#E$fromtype=0

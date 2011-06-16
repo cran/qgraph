@@ -24,7 +24,7 @@ qgraph( adj, ... )
 
 \section{Output arguments}{
 \describe{
-	\item{filetype}{A character containing the file type to save the output in. "R" outputs in a new R window, "pdf" creates a pdf file. "svg" creates a svg file (requires RSVGTipsDevice). 'jpg', 'tiff' and 'png' can also be used. If this is given any other string (e.g. filetype="") no device is opened. Defaults to 'R' if the current devide is the NULL-device or no new device if there already is an open device.}
+	\item{filetype}{A character containing the file type to save the output in. "R" and "x11" outputs in a new R window ("x11" is prefered for Rstudio), "pdf" creates a pdf file. "svg" creates a svg file (requires RSVGTipsDevice). 'jpg', 'tiff' and 'png' can also be used. If this is given any other string (e.g. filetype="") no device is opened. Defaults to 'R' if the current devide is the NULL-device or no new device if there already is an open device.}
 	\item{filename}{Name of the file, if outputting in pdf}
 	\item{width}{Width of the plot, in inches}
 	\item{height}{Height of the plot, in inches}
@@ -437,6 +437,7 @@ qgraph(model.thur,layout="tree",manifest=c('Sen','Voc','SC','FL','4LW','Suf','LS
 sem.thur <- sem(model.thur, R.thur, 213)
 qgraph(sem.thur,layout="tree",curve=0.4)
 
+\dontrun{
 ### pcalg support ###
 # Example from pcalg vignette:
 library("pcalg")
@@ -446,6 +447,7 @@ pc.fit <- pc(suffStat, indepTest=gaussCItest,
 p = ncol(gmI$x), alpha = 0.01)
 
 qgraph(pc.fit)
+}
 }
 
 
