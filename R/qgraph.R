@@ -200,16 +200,12 @@ if (is.character(bg)) background=bg
 #	}
 #}
 
+PlotOpen <- !is.null(dev.list()[dev.cur()])
+
 if(is.null(arguments$filetype)) filetype="default" else filetype=arguments$filetype
 if(is.null(arguments$filename)) filename="qgraph" else filename=arguments$filename
-if(is.null(arguments$width))
-{
-	if (is.null(dev.list()[dev.cur()])) width=7 else {par(mar=c(0,0,0,0));width=par('pin')[1]}
-} else width=arguments$width
-if(is.null(arguments$height))
-{
-	if (is.null(dev.list()[dev.cur()])) height=7 else {par(mar=c(0,0,0,0));height=par('pin')[2]}
-} else height=arguments$height
+if(is.null(arguments$width)) width <- 7 else width <- arguments[['width']]
+if(is.null(arguments$height)) height <- 7 else height <- arguments[['height']]
 if(is.null(arguments$pty)) pty='m' else pty=arguments$pty
 if(is.null(arguments$res)) res=320 else res=arguments$res
 
@@ -258,7 +254,7 @@ if (is.null(legend))
 {
 	if (is.null(groups)) legend=FALSE else legend=TRUE
 }
-if (legend & filetype!='pdf' & filetype!='eps')
+if ((legend & filetype!='pdf' & filetype!='eps') | filetype=="svg")
 {
 	width=width*(1+(1/GLratio))
 }
@@ -269,6 +265,7 @@ if (!DoNotPlot)
 # Start output:
 if (filetype=='default') if (is.null(dev.list()[dev.cur()])) dev.new(rescale="fixed",width=width,height=height)
 if (filetype=='R') dev.new(rescale="fixed",width=width,height=height)
+if (filetype=='X11' | filetype=='x11') x11(width=width,height=height)
 if (filetype=='eps') postscript(paste(filename,".eps",sep=""),height=height,width=width, horizontal=FALSE)
 if (filetype=='pdf') pdf(paste(filename,".pdf",sep=""),height=height,width=width)
 if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),unit='in',res=res,height=height,width=width)
@@ -314,14 +311,9 @@ if (filetype=="tex")
 }	
 	#if (!filetype%in%c('pdf','png','jpg','jpeg','svg','R','eps','tiff')) warning(paste("File type",filetype,"is not supported")) 
 
-# Rescale dims:
-if (pty=='s')
-{
-	width=height=min(c(width,height))
-}
 
 # Legend setting 2
-if (legend & filetype!='pdf')
+if ((legend & filetype!='pdf') | filetype=="svg")
 {
 	layout(t(1:2),widths=c(GLratio,1))
 }
@@ -341,6 +333,7 @@ if (is.null(weighted))
 if (!weighted) cut=0
 
 # par settings:
+parOrig <- par(no.readonly=TRUE)
 par(pty=pty)
 
 if (!edgelist)
@@ -966,6 +959,18 @@ if (plot)
 	plot(1, ann = FALSE, axes = FALSE, xlim = c(-1.2, 1.2), ylim = c(-1.2 ,1.2),type = "n", xaxs = "i", yaxs = "i")
 }
 
+if (PlotOpen) 
+{
+	width <- par('pin')[1]
+	height <- par('pin')[2]
+	
+	# Rescale dims:
+	if (pty=='s')
+	{
+		width=height=min(c(width,height))
+	}
+}
+
 if (is.logical(bg)) if (bg){
 
 
@@ -1178,6 +1183,7 @@ if (!is.logical(edge.labels))
 	text(midX,midY,edge.labels[!(duplicated(srt)&bidirectional)],font=edge.font[!(duplicated(srt)&bidirectional)],cex=edge.label.cex[!(duplicated(srt)&bidirectional)])
 }			
 
+if (nNodes==1) layout=matrix(0,1,2)
 # Plot nodes:
 points(layout,cex=vsize,col=vertex.colors,pch=pch1)
 if (borders) points(layout,cex=vsize,lwd=2,pch=pch2,col=border.colors)
@@ -1242,6 +1248,8 @@ for (i in 1:length(groups)) polygon(ellipse(cov(l[groups[[i]],]),centre=colMeans
 }
 
 if (is.null(names(groups))) names(groups) <- LETTERS[1:length(groups)]
+
+if (!legend && filetype=="svg") plot(1, ann = FALSE, axes = FALSE, xlim = c(-1, 1), ylim = c(-1 ,1 ),type = "n", xaxs = "i", yaxs = "i")
 
 # Plot Legend:
 if (legend)
@@ -1344,6 +1352,8 @@ class(E) <- "qgraphEdgelist"
 returnval$qgraphEdgelist <- E
 
 class(returnval)="qgraph"
+
+par(mar=c(5, 4, 4, 2) +  0.1)
 
 invisible(returnval)
 }
