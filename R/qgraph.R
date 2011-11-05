@@ -12,7 +12,7 @@ if (any(class(adj)=="factanal") )
 	qgraph.pca(adj,...)
 } else if (any(class(adj)=="lavaan"))
 {
-	qgraph.lavaan(adj,edge.labels=TRUE,include=6,filetype="",...)
+	qgraph.lavaan(adj,edge.labels=TRUE,include=8,filetype="",...)
 } else if (any(class(adj)=="sem"))
 {
 	qgraph.sem(adj,edge.labels=TRUE,include=6,filetype="",...)
@@ -431,7 +431,7 @@ if (edgelist)
 {
 	if (is.matrix(directed))
 	{
-		incl <- directed|upper.tri(adj)
+		incl <- directed|upper.tri(adj,diag=TRUE)
 		directed <- directed[incl]
 	} else
 	{
@@ -440,7 +440,7 @@ if (edgelist)
 			stop("'directed' must be TRUE or FALSE or a matrix containing TRUE or FALSE for each element of the adjacency matrix") 
 		} else
 		{ 
-		if (!directed & all(adj==t(adj))) incl <- upper.tri(adj) else incl <- matrix(TRUE,nNodes,nNodes)
+		if (!directed & all(adj==t(adj))) incl <- upper.tri(adj,diag=TRUE) else incl <- matrix(TRUE,nNodes,nNodes)
 		}
 	}
 
@@ -521,7 +521,10 @@ if (length(directed)==1)
 	directed <- rep(directed,length(E$from))
 }
 
-maximum=max(abs(c(maximum,max(abs(E$weight)),cut,abs(diagWeights))))
+if (length(E$from) > 0)
+{
+  maximum=max(abs(c(maximum,max(abs(E$weight)),cut,abs(diagWeights))))
+} else maximum = 1
 if (cut==0)
 {
 	avgW=(abs(E$weight)-minimum)/(maximum-minimum)
@@ -562,6 +565,10 @@ if (any(bidirectional))
 }	
 
 # Layout settings:
+if (nNodes == 1)
+{
+  layout <- matrix(0,1,2)
+} else {
 if (is.null(layout)) layout="default"
 if (!is.numeric(layout))
 {
@@ -594,17 +601,34 @@ if (layout=="default" | layout=="circular")
 	}
 } else if (layout=="spring")
 {
-	if (mode != "sig")
-	{
-	layout=qgraph.layout.fruchtermanreingold(cbind(E$from,E$to),abs(E$weight/max(abs(E$weight)))^2,nNodes,rotation=rotation,layout.control=layout.control,
-		niter=layout.par$niter,max.delta=layout.par$max.delta,area=layout.par$area,cool.exp=layout.par$cool.exp,repulse.rad=layout.par$repulse.rad,init=layout.par$init,
-			constraints=layout.par$constraints)
-	} else
-	{
-	layout=qgraph.layout.fruchtermanreingold(cbind(E$from,E$to),abs(E$weight),nNodes,rotation=rotation,layout.control=layout.control,
-		niter=layout.par$niter,max.delta=layout.par$max.delta,area=layout.par$area,cool.exp=layout.par$cool.exp,repulse.rad=layout.par$repulse.rad,init=layout.par$init,
-			constraints=layout.par$constraints)
-	} 
+  if (length(E$weight) > 0)
+  {
+  	if (mode != "sig")
+  	{
+  	layout=qgraph.layout.fruchtermanreingold(cbind(E$from,E$to),abs(E$weight/max(abs(E$weight)))^2,nNodes,rotation=rotation,layout.control=layout.control,
+  		niter=layout.par$niter,max.delta=layout.par$max.delta,area=layout.par$area,cool.exp=layout.par$cool.exp,repulse.rad=layout.par$repulse.rad,init=layout.par$init,
+  			constraints=layout.par$constraints)
+  	} else
+  	{
+  	layout=qgraph.layout.fruchtermanreingold(cbind(E$from,E$to),abs(E$weight),nNodes,rotation=rotation,layout.control=layout.control,
+  		niter=layout.par$niter,max.delta=layout.par$max.delta,area=layout.par$area,cool.exp=layout.par$cool.exp,repulse.rad=layout.par$repulse.rad,init=layout.par$init,
+  			constraints=layout.par$constraints)
+  	}
+  } else
+  {
+    if (mode != "sig")
+  	{
+  	layout=qgraph.layout.fruchtermanreingold(cbind(E$from,E$to),numeric(0),nNodes,rotation=rotation,layout.control=layout.control,
+  		niter=layout.par$niter,max.delta=layout.par$max.delta,area=layout.par$area,cool.exp=layout.par$cool.exp,repulse.rad=layout.par$repulse.rad,init=layout.par$init,
+  			constraints=layout.par$constraints)
+  	} else
+  	{
+  	layout=qgraph.layout.fruchtermanreingold(cbind(E$from,E$to),numeric(0),nNodes,rotation=rotation,layout.control=layout.control,
+  		niter=layout.par$niter,max.delta=layout.par$max.delta,area=layout.par$area,cool.exp=layout.par$cool.exp,repulse.rad=layout.par$repulse.rad,init=layout.par$init,
+  			constraints=layout.par$constraints)
+  	}
+  }
+  
 }
 }
 # Layout matrix:
@@ -619,13 +643,22 @@ if (is.matrix(layout)) if (ncol(layout)>2)
 	layout <- cbind(LmatX[loc[,2]],LmatY[loc[,1]])
 	
 }
+}
 
 # Rescale layout:
 l=original.layout=layout
 if (rescale) {
-l[,1]=(l[,1]-min(l[,1]))/(max(l[,1])-min(l[,1]))*2-1
-l[,2]=(l[,2]-min(l[,2]))/(max(l[,2])-min(l[,2]))*2-1 }
+if (length(unique(l[,1]))>1)
+{
+  l[,1]=(l[,1]-min(l[,1]))/(max(l[,1])-min(l[,1]))*2-1
+} else l[,1] <- 0
+if (length(unique(l[,2]))>1)
+{
+  l[,2]=(l[,2]-min(l[,2]))/(max(l[,2])-min(l[,2]))*2-1 
+} else l[,2] <- 0
 layout=l
+}
+
 
 
 if (weighted) 
@@ -1183,10 +1216,15 @@ if (!is.logical(edge.labels))
 	text(midX,midY,edge.labels[!(duplicated(srt)&bidirectional)],font=edge.font[!(duplicated(srt)&bidirectional)],cex=edge.label.cex[!(duplicated(srt)&bidirectional)])
 }			
 
-if (nNodes==1) layout=matrix(0,1,2)
+#if (nNodes==1) layout=matrix(0,1,2)
 # Plot nodes:
 points(layout,cex=vsize,col=vertex.colors,pch=pch1)
-if (borders) points(layout,cex=vsize,lwd=2,pch=pch2,col=border.colors)
+
+if(length(borders) == 1) borders <- rep(borders,nNodes)
+
+if (any(borders) & nNodes > 1) points(layout[borders,],cex=vsize[borders],lwd=2,pch=pch2[borders],col=border.colors[borders])
+
+if (any(borders) & nNodes == 1) points(layout,cex=vsize[borders],lwd=2,pch=pch2[borders],col=border.colors[borders])
 
 
 # Make labels:
