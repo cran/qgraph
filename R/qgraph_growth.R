@@ -1,6 +1,6 @@
 
 
-qgraph.growth <- function(adj,ind=NULL,...,titles=NULL,sleep=0)
+qgraph.animate <- function(adj,ind=NULL,...,constraint=10,growth="order",titles=NULL,sleep=0)
 {
 
 
@@ -27,38 +27,96 @@ if (length(arguments)>0)
 	}
 }
 
+# Extract labels:
+if(is.null(arguments[['labels']])) labels <- NULL else labels <- arguments[['labels']]
+
+# Check if list:
 adjIsList <- is.list(adj)
 
-
+# Check for correct input:
 if (!adjIsList && nrow(adj)!=ncol(adj)) stop("input must be an adjacency matrix or list of adjacency matrices")
+if (!(growth %in% c("order","degree"))) stop("Incorrect growth")
 
-n <- nrow(adj)
+# Check for dimensions of list:
+if (adjIsList)
+{
+  adjList <- adj
+  if (any(sapply(adj,nrow)-sapply(adj,ncol) != 0)) stop("If adj is a list, it must contain only square matrices of the same dimesions")
+}
+
+
+# Number of nodes:
+if (adjIsList) n <- nrow(adj[[1]]) else n <- nrow(adj)
+
+# Make labels:
+if (length(labels) == 0) if (is.null(labels)) labels <- 1:n
+
+# Convert ind as matrix:
 if (is.data.frame(ind)) ind <- as.matrix(ind)
 
-if (is.null(ind) & !adjIsList)
+# Default growth:
+if (is.null(ind) & adjIsList)
 {
-	degs <- order((rowSums(adj)+colSums(adj))/2,decreasing=TRUE)
+    ind <- matrix(TRUE,length(adjList),n)
+}
+    if (is.null(ind) & !adjIsList)
+{
 	ind <- matrix(FALSE,n,n)
 
-	for (i in seq(n)) ind[i, degs[seq(i)]] <- TRUE
+  if (growth == "order")
+	{
+    ind <- lower.tri(ind,diag=TRUE)
+  } else if (growth == "degree")
+  {
+    degs <- order((rowSums(adj)+colSums(adj))/2,decreasing=TRUE)
+	  for (i in seq(n)) ind[i, degs[seq(i)]] <- TRUE
+  }
 }
 
-if (is.logical(ind) && length(ind)==n)
+# If ind is logical vector of length n, start with subset and increase normal:
+if (!adjIsList & is.logical(ind) && length(ind)==n)
 {
-	sub <- ind
-	meanDeg <- (rowSums(adj)+colSums(adj))/2
-	meanDeg[sub] <- -Inf
-	degs <- order(meanDeg,decreasing=TRUE)
+  sub <- ind
+  ind <- matrix(FALSE,n - sum(sub) + 1,n)
+  ind[1,] <- sub
 
-	ind <- matrix(FALSE,n-sum(sub)+1,n)
-	
-	ind[,sub] <- TRUE
-
-	for (i in seq(n-sum(sub))) ind[i+1, degs[seq(i)]] <- TRUE
+  if (sum(sub)<n)
+  {
+    if (growth == "order")
+  	{
+      for (i in 2:(sum(!ind[1,])+1))
+      {
+        ind[i,] <- ind[i-1,] | (1:10)==which.min(ind[i-1,])
+      }
+    } else if (growth == "degree")
+    {
+      degs <- order((rowSums(adj)+colSums(adj))/2,decreasing=TRUE)
+      for (i in 2:(sum(!ind[1,])+1))
+      {
+        ind[i,] <- ind[i-1,] | (1:10)== degs[!degs%in%which(ind[i-1,])][1]
+      }
+    }
+  }
+# 	sub <- ind
+# 	meanDeg <- (rowSums(adj)+colSums(adj))/2
+# 	meanDeg[sub] <- -Inf
+# 	degs <- order(meanDeg,decreasing=TRUE)
+# 
+# 	ind <- matrix(FALSE,n-sum(sub)+1,n)
+# 	
+# 	ind[,sub] <- TRUE
+# 
+# 	for (i in seq(n-sum(sub))) ind[i+1, degs[seq(i)]] <- TRUE
+}
+if (adjIsList & is.logical(ind) && length(ind)==n)
+{
+  ind <- matrix(ind,1,n)
 }
 
-if (is.numeric(ind)) ind <- as.list(ind)
+# If numeric vector, treat as if each node is added:
+if (is.numeric(ind) & length(dim(ind)) == 1) ind <- as.list(ind)
 
+# If list, add nodes in each step:
 if (is.list(ind))
 {
 	indList <- ind
@@ -67,36 +125,41 @@ if (is.list(ind))
 	for (i in seq(nrow(ind))) ind[seq(i,nrow(ind)),indList[[i]]] <- TRUE
 }
 
-
+# Checks:
 if (!is.logical(ind)) stop("ind must be logical")
 if (ncol(ind) != n) stop("Number of columns in ind must correspond to total number of nodes")
+if (adjIsList) if (nrow(ind)!=length(adjList)) stop("Number of frames according to length of adj different than according to length of ind")
+
 
 # Start the loop:
 sub <- NULL
 
 for (i in seq(nrow(ind)))
 {
-
+  if (adjIsList) adj <- adjList[[i]]
 	subOld <- sub
 	sub <- ind[i,]
 	
 	adjSub <- adj[sub,sub]
 	
 	initNew <- matrix(rnorm(2*sum(sub)),sum(sub),2)
-	if (!is.null(subOld)) initNew[subOld[sub],] <- init
+	if (!is.null(subOld)) initNew[subOld[sub],] <- init[sub[subOld]]
 	
 	layout.par <- list(max.delta = rep(n,sum(sub)), area = n^2.3, repulse.rad = n^2.8,
 		init = initNew)
 	
-	if (!is.null(subOld)) layout.par$max.delta[subOld[sub]] <- n/10
+	if (!is.null(subOld)) layout.par$max.delta[subOld[sub]] <- n/constraint
 	
 	arg2 <- lapply(arguments,function(x)if(length(x)==n)x[sub] else if (is.matrix(x) && ncol(x)==n&&nrow(x)==n)x[sub,sub] else x)
 	class(arg2) <- "qgraph"
 
 	# Run qgraph:
-	init <- qgraph(adjSub,layout="spring",layout.par=layout.par,arg2)$layout.orig
+	if (length(labels) ==n) init <- qgraph(adjSub,layout="spring",layout.par=layout.par,arg2,labels=labels[sub])$layout.orig
+  else init <- qgraph(adjSub,layout="spring",layout.par=layout.par,arg2,labels=labels)$layout.orig
 	
 	if (!is.null(titles)) title(titles[i],line=-1)
 	Sys.sleep(sleep)
 }
 }
+
+

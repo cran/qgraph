@@ -1,7 +1,13 @@
+Chainges in Version 0.5.1
+   o Fixed some minor bugs
+   o Fixed issues with the qgraph.lavaan() function
+   o Added the qgraph.animate() function for animating network growth and change! Check out its help page for more details.
+   o Fixed bugs with arbitrary small networks. Such as single node networks, networks with no edges, and layouts with no variance in x or y coordinates.
+
 Changes in Version 0.5.0
    o Graphs containing only one node can now be plotted
    o Fixed a bug that caused weird arrows and wrong graph shapes if one of the opened windows contained a graph with a legend
-	o Added "x11" and "X11" as options for the fyletype argument, usefull for use with Rstudio
+	o Added "x11" and "X11" as options for the filetype argument, usefull for use with Rstudio
 	o qgraph() now exits with previous par() settings restored.
 	o Removed 'pcalg' from the suggests list because it isn't actually usedin qgraph and gave errors in R CMD CHECK
 

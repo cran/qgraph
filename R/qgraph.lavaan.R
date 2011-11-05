@@ -120,7 +120,7 @@ if (filetype=="pdf")
 
 
 # Extract parameter estimates:
-pars <- parameterEstimates(fit)
+pars <- parameterEstimates(fit,standardized=TRUE)
 
 # Extract variable and factor names:
 varNames <- fit@Model@dimNames$lambda[[1]]
@@ -137,8 +137,9 @@ E <- data.frame(
 	from = match(pars$lhs,c(varNames,factNames)),
 	to = match(pars$rhs,c(varNames,factNames)),
 	weight = pars$est,
-	stand = pars$est.std,
-	standAll = pars$est.std.all,
+	stand = pars$std.lv,
+	standAll = pars$std.all,
+  standNox = pars$std.nox,
 	lty = 1,
 	curved = 0,
 	bidir = FALSE
@@ -309,7 +310,7 @@ qgraph(
 	diag=diag,
 	groups=NULL,
 	...)
-if (titles) title("Standardized model",line=-1)
+if (titles) title("Standardized model (std.lv)",line=-1)
 }
 
 if (4%in%include)
@@ -335,12 +336,38 @@ qgraph(
 	diag=diag,
 	groups=NULL,
 	...)
-if (titles) title("Standardized model (all)",line=-1)
+if (titles) title("Standardized model (std.all)",line=-1)
+}
+
+if (5%in%include)
+{
+  
+qgraph(
+	edgelist,
+	layout=Q$layout,
+	curve=E$curved,
+	labels=V$labels,
+	shape=V$shape,
+	vsize=V$size,
+	lty=E$lty,
+	border.colors=as.character(V$border.colors),
+	layout.par=layout.par,
+	directed=TRUE,
+	bidirectional=E$bidir,
+	filetype="",
+	esize=1,
+	edge.labels=round(E$standNox,2),
+	width=width,
+	height=height,
+	diag=diag,
+	groups=NULL,
+	...)
+if (titles) title("Standardized model (std.nox)",line=-1)
 }
 
 # RUN QGRAPH FOR WEIGHTED ESTIMATES:
 
-if (5%in%include)
+if (6%in%include)
 {
 edgelist <- as.matrix(cbind(E$from,E$to,E$weight))
 qgraph(
@@ -364,7 +391,7 @@ qgraph(
 if (titles) title("Unstandardized model",line=-1)
 }
 
-if (6%in%include)
+if (7%in%include)
 {
 edgelist <- as.matrix(cbind(E$from,E$to,E$stand))
 qgraph(
@@ -385,10 +412,10 @@ qgraph(
 	diag=diag,
 	groups=NULL,
 	...)
-if (titles) title("Standardized model",line=-1)
+if (titles) title("Standardized model (std.lv)",line=-1)
 }
 
-if (7%in%include)
+if (8%in%include)
 {
 edgelist <- as.matrix(cbind(E$from,E$to,E$standAll))
 qgraph(
@@ -409,8 +436,33 @@ qgraph(
 	diag=diag,
 	groups=NULL,
 	...)
-if (titles) title("Standardized model (all)",line=-1)
+if (titles) title("Standardized model (std.all)",line=-1)
 }
+
+if (9%in%include)
+{
+edgelist <- as.matrix(cbind(E$from,E$to,E$standNox))
+qgraph(
+  edgelist,
+	layout=Q$layout,
+	curve=E$curved,
+	labels=V$labels,
+	shape=V$shape,
+	vsize=V$size,
+	lty=E$lty,
+	border.colors=as.character(V$border.colors),
+	layout.par=layout.par,
+	directed=TRUE,
+	bidirectional=E$bidir,
+	filetype="",
+	width=width,
+	height=height,
+	diag=diag,
+	groups=NULL,
+	...)
+if (titles) title("Standardized model (std.nox)",line=-1)
+}
+
 
 
 # COVARIANCES and CORRELATIONS:
@@ -428,13 +480,13 @@ if (is.null(groups))
 
 maximum=max(abs(c(covObs[upper.tri(covObs)],covImp[upper.tri(covImp)])))	
 
-if (any(8:10 %in% include))
+if (any(10:12 %in% include))
 {
 	layout(t(1:2))
 	par(pty="s")
 }
 
-if (8%in%include)
+if (10%in%include)
 {
 qgraph(
 	covObs, 
@@ -462,7 +514,7 @@ if (titles) title("Implied covariances",line=-1)
 
 maximum=max(abs(c(corObs[upper.tri(corObs)],corImp[upper.tri(corImp)])))	
 
-if (9%in%include)
+if (11%in%include)
 {
 qgraph(
 	corObs, 
@@ -488,7 +540,7 @@ if (titles) title("Implied correlations",line=-1)
 covResids <- covObs - covImp
 corResids <- corObs - corImp
 
-if (10%in%include)
+if (12%in%include)
 {
 qgraph(
 	covResids, 

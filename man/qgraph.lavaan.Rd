@@ -73,7 +73,7 @@ Carter T. Butts <buttsc@uci.edu> (2010). sna: Tools for Social Network Analysis.
 
 Yves Rosseel <Yves.Rosseel@UGent.be> (2011). lavaan: Latent Variable Analysis. R package version 0.4-7. http://CRAN.R-project.org/package=lavaan
   
-Fruchterman, T. & Reingold, E. (1991). Graph drawing by force-directed placement. Software - Pract. Exp. 21, 1129–1164.
+Fruchterman, T. & Reingold, E. (1991). Graph drawing by force-directed placement. Software - Pract. Exp. 21, 1129?1164.
 }
 \author{
 Sacha Epskamp (s.epskamp@uva.nl)
@@ -115,11 +115,11 @@ require("lavaan")
 
 # Plot standardized model (numerical):
 qgraph.lavaan(fit,layout="tree",vsize.man=5,vsize.lat=10,
-	filetype="",include=3,curve=-0.4,edge.label.cex=0.6)
+	filetype="",include=4,curve=-0.4,edge.label.cex=0.6)
 
 # Plot standardized model (graphical):
 qgraph.lavaan(fit,layout="tree",vsize.man=5,vsize.lat=10,
-	filetype="",include=6,curve=-0.4,edge.label.cex=0.6)
+	filetype="",include=8,curve=-0.4,edge.label.cex=0.6)
 
 # Create output document:
 qgraph.lavaan(fit,layout="spring",vsize.man=5,vsize.lat=10,
