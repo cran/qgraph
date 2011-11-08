@@ -233,7 +233,7 @@ Korbinian Strimmer (2009). fdrtool: Estimation and Control of (Local) False Disc
 
 Plate, T. <tplate@acm.org> and based on RSvgDevice by T Jake Luciani <jakeluciani@yahoo.com> (2009). RSVGTipsDevice: An R SVG graphics device with dynamic tips and hyperlinks. R package version 1.0-1.
 
-Fruchterman, T. & Reingold, E. (1991). Graph drawing by force-directed placement. Software - Pract. Exp. 21, 1129–1164.
+Fruchterman, T. & Reingold, E. (1991). Graph drawing by force-directed placement. Software - Pract. Exp. 21, 1129?1164.
 
 }
 \author{
@@ -358,7 +358,7 @@ library('sem')
 # ----------------------- Thurstone data ---------------------------------------
 #  Second-order confirmatory factor analysis, from the SAS manual for PROC CALIS
 
-R.thur <- read.moments(diag=FALSE, names=c('Sen','Voc',
+R.thur <- readMoments(diag=FALSE, names=c('Sen','Voc',
         'SC','FL','4LW','Suf',
         'LS','Ped', 'LG'))
     .828                                              
@@ -370,7 +370,7 @@ R.thur <- read.moments(diag=FALSE, names=c('Sen','Voc',
     .541   .537    .534   .35    .367   .32   .555        
     .38   .358    .359   .424    .446   .325   .598   .452  
             
-model.thur <- specify.model()
+model.thur <- specifyModel()
     F1 -> Sen,               *l11, NA
     F1 -> Voc,               *l21, NA
     F1 -> SC,                *l31, NA
@@ -426,7 +426,7 @@ model.thur <- structure(c("F1 -> Sen", "F1 -> Voc", "F1 -> SC", "F2 -> FL",
 "*l73", "*l83", "*l93", "*g1", "*g2", "*g3", "q*1", "q*2", "q*3", 
 "q*4", "q*5", "q*6", "q*7", "q*8", "q*9", NA, NA, NA, NA, NA, 
 NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 
-NA, NA, NA, NA, "1", "1", "1", "1"), .Dim = c(25L, 3L), class = "mod")
+NA, NA, NA, NA, "1", "1", "1", "1"), .Dim = c(25L, 3L), class = "semmod")
 }
 
 # Path diagram of the model:
