@@ -60,7 +60,7 @@ Carter T. Butts <buttsc@uci.edu> (2010). sna: Tools for Social Network Analysis.
 
 John Fox with contributions from Adam Kramer <jfox@mcmaster.ca> and Michael Friendly (2010). sem: Structural Equation Models. R package version 0.9-21. http://CRAN.R-project.org/package=sem
 
-Fruchterman, T. & Reingold, E. (1991). Graph drawing by force-directed placement. Software - Pract. Exp. 21, 1129–1164.
+Fruchterman, T. & Reingold, E. (1991). Graph drawing by force-directed placement. Software - Pract. Exp. 21, 1129?1164.
 }
 \author{
 Sacha Epskamp (s.epskamp@uva.nl)
@@ -82,7 +82,7 @@ require('sem')
 # ----------------------- Thurstone data ---------------------------------------
 #  Second-order confirmatory factor analysis, from the SAS manual for PROC CALIS
 
-R.thur <- read.moments(diag=FALSE, names=c('Sen','Voc',
+R.thur <- readMoments(diag=FALSE, names=c('Sen','Voc',
         'SC','FL','4LW','Suf',
         'LS','Ped', 'LG'))
     .828                                              
@@ -94,7 +94,7 @@ R.thur <- read.moments(diag=FALSE, names=c('Sen','Voc',
     .541   .537    .534   .35    .367   .32   .555        
     .38   .358    .359   .424    .446   .325   .598   .452  
             
-model.thur <- specify.model()
+model.thur <- specifyModel()
     F1 -> Sen,               *l11, NA
     F1 -> Voc,               *l21, NA
     F1 -> SC,                *l31, NA

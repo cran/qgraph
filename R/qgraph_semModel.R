@@ -13,9 +13,9 @@ qgraph.semModel=function(
 {
 #reqTest <- require("sem")
 #if (!reqTest) stop("sem could not be loaded, is this package installed?")
-if (!class(mod)%in%c("mod","sem")) stop("Input must me a 'mod' or 'sem' object")
+if (!any(class(mod)%in%c("semmod","sem"))) stop("Input must be a 'semmod' or 'sem' object")
 
-if (class(mod)=="sem")
+if ("sem"%in%class(mod))
 {
 	qgraph.sem(mod,include=2,filetype="",...)
 } else
@@ -24,7 +24,7 @@ arguments=list(...)
 if(is.null(arguments$layout.par)) layout.par=list() else layout.par=arguments$layout.par
 
  # Transform model to sem:
-if (class(mod)=="mod")
+if (class(mod)=="semmod")
 {
 if (is.null(manifest) & layout=="tree") stop("Tree-layout can't be created if 'manifest' is not assigned")
 

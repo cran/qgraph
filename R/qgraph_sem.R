@@ -19,7 +19,7 @@ qgraph.sem=function(
 {
 #reqTest <- require("sem")
 #if (!reqTest) stop("sem could not be loaded, is this package installed?")
-if (class(res)!="sem") stop("Input must me a 'sem' object")
+if (!any(class(res)%in%c("sem","semmod"))) stop("Input must be a 'sem' object")
 
 arguments=list(...)
 if(is.null(arguments$layout.par)) layout.par=list() else layout.par=arguments$layout.par
@@ -59,6 +59,8 @@ height <- NULL
 # First pane: Model statistics
 if (1%in%include)
 {
+  
+semSum <- summary(res,analytic.se=FALSE)
 par(mar=c(1,1,1,1))
 plot(1, ann = FALSE, axes = FALSE, xlim = c(0, 100), ylim = c(0, 100),
      type = "n", xaxs = "i", yaxs = "i")
@@ -72,15 +74,15 @@ Number of fixed exogenous variables:",res$n.fix,"
 Iterations:",res$iterations,"
 
 Goodness of Fit:
-Chisq:",round(summary(res)$chisq,5),", df:",summary(res)$df,", p=",round(1-pchisq(summary(res)$chisq,summary(res)$df),5),"
-RMSEA:",round(summary(res)$RMSEA[1],5)," (",summary(res)$RMSEA[4]*100,"% CI:",round(summary(res)$RMSEA[2],5)," - ",round(summary(res)$RMSEA[3],5),")
-Goodness-of-fit index:",round(summary(res)$GFI,5),"
-Adjusted goodness-of-fit index:",round(summary(res)$AGFI,5),"
-Bentler-Bonnett NFI:",round(summary(res)$NFI,5),"
-Tucker-Lewis NNFI:",round(summary(res)$NNFI,5),"
-Bentler CFI:",round(summary(res)$CFI,5),"
-SRMR:",round(summary(res)$SRMR,5),"
-BIC:",round(summary(res)$BIC,5)),pos=1)
+Chisq:",round(semSum$chisq,5),", df:",semSum$df,", p=",round(1-pchisq(semSum$chisq,semSum$df),5),"
+RMSEA:",round(semSum$RMSEA[1],5)," (",semSum$RMSEA[4]*100,"% CI:",round(semSum$RMSEA[2],5)," - ",round(semSum$RMSEA[3],5),")
+Goodness-of-fit index:",round(semSum$GFI,5),"
+Adjusted goodness-of-fit index:",round(semSum$AGFI,5),"
+Bentler-Bonnett NFI:",round(semSum$NFI,5),"
+Tucker-Lewis NNFI:",round(semSum$NNFI,5),"
+Bentler CFI:",round(semSum$CFI,5),"
+SRMR:",round(semSum$SRMR,5),"
+BIC:",round(semSum$BIC,5)),pos=1)
 }	 
 
 # Create E
@@ -326,7 +328,7 @@ Q=qgraph(
 	DoNotPlot=DNPL,
 	groups=NULL,
 	...)
-if (2%in%include) title("Specified model",line=-1)
+if (2%in%include) title("Specified model",line=NA)
 
 # RUN QGRAPH FOR ABSOLUTE PARAMETER ESTIMATES:
 if (3%in%include)
@@ -351,11 +353,11 @@ qgraph(
 	diag=diag,
 	groups=NULL,
 	...)
-title("Unstandardized model",line=-1)
+title("Unstandardized model",line=NA)
 }
 # RUN QGRAPH FOR STANDARDIZED PARAMETER ESTIMATES:
 
-standcoef=round(standardized.coefficients(res)[,2],2)
+standcoef=round(standardizedCoefficients(res)[,2],2)
 if (sum(biHeads>0)) 
 {
 	standcoef=c(standcoef,standcoef[biHeads])
@@ -388,7 +390,7 @@ qgraph(
 	diag=diag,
 	groups=NULL,
 	...)
-title("Standardized model",line=-1)
+title("Standardized model",line=NA)
 }
 # RUN QGRAPH FOR WEIGHTED ESTIMATES:
 
@@ -412,7 +414,7 @@ qgraph(
 	diag=diag,
 	groups=NULL,
 	...)
-title("Unstandardized model",line=-1)
+title("Unstandardized model",line=NA)
 }
 edgelist[,3]=standcoef
 if (6%in%include)
@@ -434,7 +436,7 @@ qgraph(
 	diag=diag,
 	groups=NULL,
 	...)
-title("Standardized model",line=-1)
+title("Standardized model",line=NA)
 }
 
 # COVARIANCES and CORRELATIONS:
@@ -456,7 +458,7 @@ qgraph(
 	maximum=maximum,
 	diag="col",
 	...)
-title("Observed covariances",line=-1)
+title("Observed covariances",line=NA)
 
 }
 if (8%in%include)
@@ -468,7 +470,7 @@ qgraph(
 	maximum=maximum,
 	diag="col",
 	...)
-	title("Implied covariances",line=-1)
+	title("Implied covariances",line=NA)
 }
 
 maximum=max(abs(c(cov2cor(res$S)[upper.tri(res$S)],cov2cor(res$C)[upper.tri(res$C)])))	
@@ -480,7 +482,7 @@ qgraph(round(cov2cor(res$S),5),
 	filetype="",
 	maximum=maximum,
 	...)
-title("Observed correlations",line=-1)
+title("Observed correlations",line=NA)
 }
 
 if (10%in%include)
@@ -490,7 +492,7 @@ qgraph(round(cov2cor(res$C),5),
 	filetype="",
 	maximum=maximum,
 	...)
-title("Implied correlations",line=-1)
+title("Implied correlations",line=NA)
 }
 
 if (11%in%include)
@@ -500,7 +502,7 @@ qgraph(res$S-res$C,
 	filetype="",
 	diag="col",
 	...)
-title("Covariance differences",line=-1)
+title("Covariance differences",line=NA)
 }
 
 
@@ -510,7 +512,7 @@ qgraph(round(cov2cor(res$S)-cov2cor(res$C),5),
 	labels=rownames(res$C), 
 	filetype="",
 	...)
-title("Correlation differences",line=-1)
+title("Correlation differences",line=NA)
 }
 
 if (filetype=="pdf")

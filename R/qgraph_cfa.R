@@ -73,7 +73,7 @@ qgraph.cfa <- function( S, N, groups=NULL, ..., pkg = "sem", labels=NULL, fun = 
 
 		if (deparse(substitute(fun)) == "qgraph.loadings")
 		{
-			standCoef <- standardized.coefficients(res)
+			standCoef <- standardizedCoefficients(res)
 			loads <- matrix(0,n,k)
 			c <- 1
 			for (i in 1:k) 

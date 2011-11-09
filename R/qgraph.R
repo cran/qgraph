@@ -19,7 +19,7 @@ if (any(class(adj)=="factanal") )
 } else if (any(class(adj)=="loadings"))
 {
 	qgraph.loadings(adj,...)
-}  else if (any(class(adj)=="mod"))
+}  else if (any(class(adj)=="semmod"))
 {
 	qgraph.semModel(adj,...)
 } else {
