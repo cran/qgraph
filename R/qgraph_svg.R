@@ -1,12 +1,12 @@
 
 
-qgraph.svg=function( adj, 
+qgraph.svg=function( input, 
 	layout=c( "circular", "spring" ), 
 	graph=c( "association", "concentration", "factorial" ),
 	cut=c( 0, 0.2, 0.3, 0.5),
 	filename="qgraph",
 	title="qgraph output",
-	nfact=round(ncol(adj)/2,0),
+	nfact=round(ncol(input)/2,0),
 	tooltips=NULL,
 	... )
 {
@@ -14,6 +14,7 @@ qgraph.svg=function( adj,
 if (R.Version()$arch=="x64") stop("RSVGTipsDevice is not available for 64bit versions of R.")
 
 fn=unlist(strsplit(filename,"/"))
+filename <- fn[length(fn)]
 folder=paste(fn[-length(fn)],collapse="/")
 cat("This function will now make a battery of SVG files in the folloing folder: \n")
 cat(paste(getwd(),"/",folder,sep=""))
@@ -39,7 +40,7 @@ for (l in layout)
 	{
 		for (c in cut)
 		{
-			L[[s]]=qgraph(adj,layout=l,graph=g,cut=c,nfact=nfact,DoNotPlot=TRUE,...)
+			L[[s]]=qgraph(input,layout=l,graph=g,cut=c,nfact=nfact,DoNotPlot=TRUE,...)$layout
 			s=s+1
 		}
 	}
@@ -56,7 +57,7 @@ for (G in graph)
 		{
 			for (c in cut)
 			{
-				devSVGTips(paste(filename,G,l,g,c,".svg",sep=""),width=16,height=10,title=filename)
+				devSVGTips(paste(folder,ifelse(folder=="","","/"),filename,G,l,g,c,".svg",sep=""),width=16,height=10,title=filename)
 				
 				layout.mat=matrix(0,ncol=14,nrow=10,byrow=T)
 				
@@ -87,7 +88,7 @@ for (G in graph)
 				}
 				
 				# Plot graph:
-				qgraph(adj,layout=L[[s]],graph=G,cut=c,nfact=nfact,filetype="",
+				qgraph(input,layout=L[[s]],graph=G,cut=c,nfact=nfact,filetype="",
 					SVGtooltips=tooltips,legend=F,...)
 
 					

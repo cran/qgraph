@@ -64,6 +64,9 @@ if (fit@Sample@ngroups > 1) stop("qgraph.lavaan currently does not support model
 # Create model matrix:
 #E$model <- 1*E$adj!=0
 
+# Let's fool R CMD check!
+to <- from <- rhs <- bidir <- op <- NULL
+
 if (is.factor(groups) | is.character(groups)) groups <- tapply(1:length(groups),groups,function(x)x)
 
 if (!is.null(groups))
@@ -122,6 +125,10 @@ if (filetype=="pdf")
 # Extract parameter estimates:
 pars <- parameterEstimates(fit,standardized=TRUE)
 
+# Remove mean structure (TEMP SOLUTION)
+meanstructure <- pars$op=="~1"
+pars <- pars[!meanstructure,]
+
 # Extract variable and factor names:
 varNames <- fit@Model@dimNames$lambda[[1]]
 factNames <- fit@Model@dimNames$lambda[[2]]
@@ -145,16 +152,19 @@ E <- data.frame(
 	bidir = FALSE
 )
 
+curve <- -1 * curve
+
 # Some more transformations of the edge dataframe:
 E$from[pars$op=="~~"] <- E$from[pars$op=="~~"]+n+k
 E$to[pars$op=="~~" & pars$lhs != pars$rhs] <- E$to[pars$op=="~~" & pars$lhs != pars$rhs]+n+k
 E$bidir[pars$op=="~~"  & pars$lhs != pars$rhs] <- TRUE
-E$curved[pars$op=="~"] <- curve
+E$curved[pars$op=="~" & ((pars$lhs %in% varNames & pars$rhs %in% varNames) | (pars$lhs %in% factNames & pars$rhs %in% factNames))] <- curve
 E[pars$op=="~",1:2] <- E[pars$op=="~",2:1]
 if (layout=="tree") E$curved[pars$op=="~~"  & pars$lhs != pars$rhs] <- curve
-E$lty[fit@User$free==0] <- 2
+E$lty[fit@User$free[!meanstructure]==0] <- 2
 
 E <- rbind(E,transform(subset(E,bidir),from=to,to=from))
+#E <- rbind(E,transform(E[E$bidir,],from=to,to=from))
 
 # Create layout:
 l <- layout
@@ -171,6 +181,8 @@ if (layout=='tree' | layout=="springtree" | layout=="circle")
 	l[n+seq_len(k),1]=seq(-1,1,length=k+2)[-c(1,k+2)]
 	l[2*n+k+seq_len(k),1]=seq(-1,1,length=k+2)[-c(1,k+2)]
 
+  E$curved[E$curved!=0 & l[E$from,2] > 0 & l[E$to,2] > 0 ] <- -1 * E$curved[E$curved!=0 & l[E$from,2] > 0 & l[E$to,2] > 0 ]
+  
 	#E$curved=0
 	#E$fromtype=0
 	#E$totype=0
@@ -475,6 +487,7 @@ corObs <- round(cov2cor(covObs),6)
 if (is.null(groups))
 {
 	gr <- as.factor(subset(pars,op=="=~" & rhs%in%varNames)$lhs)
+  #gr <- as.factor(pars[pars$op=="=~" & pars$rhs%in%varNames,]$lhs)
 	if (length(gr) != nrow(covObs)) gr <- NULL
 } else gr <- groups
 

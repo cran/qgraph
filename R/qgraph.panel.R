@@ -1,5 +1,5 @@
 
-qgraph.panel=function(adj, ...)
+qgraph.panel=function(input, ...)
 {
 Q=list(...)
 class(Q)="qgraph"
@@ -36,10 +36,10 @@ if (filetype=="tex") stop("Tex is not yet supported in qgraph.panel")
 
 layout(matrix(1:4,nrow=2,ncol=2))
 
-qgraph(adj,filetype="",Q,layout="circular",graph="association",legend=FALSE)
-qgraph(adj,layout="spring",filetype="",Q,graph="association",legend=FALSE)
-qgraph(adj,graph="concentration",layout="spring",filetype="",Q,legend=FALSE)
-qgraph(adj,graph="factorial",layout="spring",filetype="",Q,legend=FALSE,layout.par=list(area=nrow(adj)^2.3,repulse.rad=nrow(adj)^2.8))
+qgraph(input,filetype="",Q,layout="circular",graph="association",legend=FALSE)
+qgraph(input,layout="spring",filetype="",Q,graph="association",legend=FALSE)
+qgraph(input,graph="concentration",layout="spring",filetype="",Q,legend=FALSE)
+qgraph(input,graph="factorial",layout="spring",filetype="",Q,legend=FALSE,layout.par=list(area=nrow(input)^2.3,repulse.rad=nrow(input)^2.8))
 
 if (filetype%in%c('pdf','png','jpg','jpeg','svg','eps','tiff','tex')) 
 {
