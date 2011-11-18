@@ -8,11 +8,11 @@ qgraph.panel
 Creates a 4-panel graph. See details. The usage is the same as \code{\link{qgraph}}
 }
 \usage{
-qgraph.panel(adj, ...)
+qgraph.panel(input, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{adj}{The adjacency matrix or edgelist. See \code{\link{qgraph}}. Correlation matrix is recommended.}
+  \item{input}{The weights matrix or edgelist. See \code{\link{qgraph}}. Correlation matrix is recommended.}
   \item{\dots}{Optional additional arguments (only 'layout' and 'graph' are omitted). See \code{\link{qgraph}}.}
 }
 \details{

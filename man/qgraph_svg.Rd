@@ -10,14 +10,14 @@ The arguments are the same as \code{\link{qgraph}} except that some arguments
 can be assigned a vector with multiple options.
 }
 \usage{
-qgraph.svg( adj, layout=c( "circular", "spring" ), 
+qgraph.svg( input, layout=c( "circular", "spring" ), 
 	graph=c( "association", "concentration", "factorial" ),	
 	cut=c( 0, 0.2, 0.3, 0.5), filename="qgraph", title="qgraph output",	
-	nfact=round(ncol(adj)/2,0),	tooltips=NULL,	... )
+	nfact=round(ncol(input)/2,0),	tooltips=NULL,	... )
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-	\item{adj}{An adjacency matrix (correlation matrix is recommended). See \code{\link{qgraph}}}
+	\item{input}{A weights matrix (correlation matrix is recommended). See \code{\link{qgraph}}}
 	\item{layout}{The layout of the graph, see \code{\link{qgraph}}, unlike \code{\link{qgraph}} it is not possible to assign a specific layout.}
 	\item{graph}{The graph to be made based on the correlation matrix. See \code{\link{qgraph}}}
 	\item{cut}{The cutoff score. See \code{\link{qgraph}}}
@@ -53,7 +53,7 @@ for (i in 1:5) lam[(20*i-19):(20*i),i]=rnorm(20,0.7,0.3)
 eps=matrix(rnorm(200*100),ncol=100)
 Y=eta\%*\%t(lam)+eps
 
-Tooltips=paste("item",1:100)
+tooltips=paste("item",1:100)
 groups=list(1:20,21:40,41:60,61:80,81:100)
 names(groups)=paste("Factor",LETTERS[1:5])
 # Run qgraph:

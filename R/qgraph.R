@@ -1,30 +1,35 @@
 # Main qgraph function
 
-qgraph =function( adj, ... )
+qgraph =function( input, ... )
 {
+
+if (class(input)=="qgraph") arguments <- list(...,input) else arguments=list(...)
+
+if(!is.null(arguments$adj))
+{
+  stop("'adj' argument is no longer supported. Please use 'input'")
+}
 
 # S3 object methods:
-if (any(class(adj)=="factanal") )
+if (any(class(input)=="factanal") )
 {
-	qgraph.efa(adj,...)
-} else if (any(class(adj)=="principal") )
+	qgraph.efa(input,...)
+} else if (any(class(input)=="principal") )
 {
-	qgraph.pca(adj,...)
-} else if (any(class(adj)=="lavaan"))
+	qgraph.pca(input,...)
+} else if (any(class(input)=="lavaan"))
 {
-	qgraph.lavaan(adj,edge.labels=TRUE,include=8,filetype="",...)
-} else if (any(class(adj)=="sem"))
+	qgraph.lavaan(input,edge.labels=TRUE,include=8,filetype="",...)
+} else if (any(class(input)=="sem"))
 {
-	qgraph.sem(adj,edge.labels=TRUE,include=6,filetype="",...)
-} else if (any(class(adj)=="loadings"))
+	qgraph.sem(input,edge.labels=TRUE,include=6,filetype="",...)
+} else if (any(class(input)=="loadings"))
 {
-	qgraph.loadings(adj,...)
-}  else if (any(class(adj)=="semmod"))
+	qgraph.loadings(input,...)
+}  else if (any(class(input)=="semmod"))
 {
-	qgraph.semModel(adj,...)
+	qgraph.semModel(input,...)
 } else {
-
-if (class(adj)=="qgraph") arguments <- list(...,adj) else arguments=list(...)
 
 if (length(arguments)>0)
 {
@@ -47,25 +52,25 @@ if (length(arguments)>0)
 	}
 }
 
-if (!is.null(arguments$qgraphEdgelist)&class(adj)=="qgraph") 
+if (!is.null(arguments$qgraphEdgelist)&class(input)=="qgraph") 
 {
-	adj <- cbind(arguments$qgraphEdgelist$from,arguments$qgraphEdgelist$to,arguments$qgraphEdgelist$weight)
+	input <- cbind(arguments$qgraphEdgelist$from,arguments$qgraphEdgelist$to,arguments$qgraphEdgelist$weight)
 	if (is.null(arguments$directed)) arguments$directed <- arguments$qgraphEdgelist$directed
 }
 
-if (class(adj) %in% c("graphNEL","pcAlgo"))
+if (class(input) %in% c("graphNEL","pcAlgo"))
 {
-	if (class(adj) == "pcAlgo") graphNEL <- adj@graph else graphNEL <- adj
+	if (class(input) == "pcAlgo") graphNEL <- input@graph else graphNEL <- input
 	arguments$bidirectional <- TRUE
 	arguments$labels <- graphNEL@nodes
 	weights <- sapply(graphNEL@edgeData@data,'[[','weight')
 
-	adj <- laply(strsplit(names(weights),split="|"),'[',c(1,3))
-	adj <- apply(adj,2,as.numeric)
-	if (any(weights!=1)) adj <- cbind(adj,weights)
+	input <- laply(strsplit(names(weights),split="|"),'[',c(1,3))
+	input <- apply(input,2,as.numeric)
+	if (any(weights!=1)) input <- cbind(input,weights)
 }
 
-adj <- as.matrix(adj)
+input <- as.matrix(input)
 
 # Set mode:
 sigSign <- FALSE
@@ -91,17 +96,28 @@ if(is.null(arguments$OmitInsig)) OmitInsig=FALSE else OmitInsig <- arguments$Omi
 # Settings for the edgelist
 if(is.null(arguments$edgelist)) 
 {
-	if (nrow(adj)!=ncol(adj)) edgelist=TRUE else edgelist=FALSE 
+	if (nrow(input)!=ncol(input)) edgelist=TRUE else edgelist=FALSE 
 } else edgelist=arguments$edgelist
-if(is.null(arguments$labels)) labels <- TRUE else labels <- arguments$labels
-
+if(is.null(arguments$labels))
+{
+  labels <- TRUE
+  if (!edgelist && !is.null(colnames(input)) && !is.null(rownames(input)))
+  {
+    if (nrow(input) <= 20 & all(colnames(input)==rownames(input)))
+    {
+      labels <- abbreviate(colnames(input),3)
+    }
+  }
+} else labels <- arguments$labels
+   
+   
 if (edgelist)
 {
-	if (is.character(adj))
+	if (is.character(input))
 	{
-		if(!is.logical(labels)) allNodes <- labels else allNodes <- unique(c(adj[,1:2]))
-		adj[,1:2] <- match(adj[,1:2],allNodes)
-		adj <- apply(adj,2,as.numeric)
+		if(!is.logical(labels)) allNodes <- labels else allNodes <- unique(c(input[,1:2]))
+		input[,1:2] <- match(input[,1:2],allNodes)
+		input <- apply(input,2,as.numeric)
 		if (is.logical(labels) && labels) labels <- allNodes
 	}
 }
@@ -111,8 +127,8 @@ if(is.null(arguments$nNodes))
 {
 	if (edgelist)
 	{
-	  if (!is.logical(labels)) nNodes <- length(labels) else nNodes <- max(c(adj[,1:2])) 
-	} else nNodes=nrow(adj)
+	  if (!is.logical(labels)) nNodes <- length(labels) else nNodes <- max(c(input[,1:2])) 
+	} else nNodes=nrow(input)
 } else nNodes=arguments$nNodes
 
 # Default for fact cut and groups
@@ -140,19 +156,19 @@ if (fact)
 {
 	if (is.null(nfact)) 
 	{
-		if (is.null(groups)) nfact=sum(eigen(adj)$values>1) else nfact=length(groups)
+		if (is.null(groups)) nfact=sum(eigen(input)$values>1) else nfact=length(groups)
 	}
 	
-	loadings=loadings(factanal(factors=nfact,covmat=adj,rotation="promax"))
+	loadings=loadings(factanal(factors=nfact,covmat=input,rotation="promax"))
 
 	loadings=loadings[1:nrow(loadings),1:ncol(loadings)]
 
 	loadings[loadings<cut]=0
 	loadings[loadings>=cut]=1
 
-	adj=(loadings%*%t(loadings)>0)*1
+	input=(loadings%*%t(loadings)>0)*1
 
-	diag(adj)=0
+	diag(input)=0
 }
 
 
@@ -179,6 +195,7 @@ if(is.null(arguments$legend))
 {
 	if (!is.null(groups) & !is.null(names(groups))) legend=TRUE else legend=FALSE
 } else legend=arguments$legend
+if (is.null(groups)) legend <- FALSE
 if(is.null(arguments$plot)) plot=TRUE else plot=arguments$plot
 if(is.null(arguments$rotation)) rotation=NULL else rotation=arguments$rotation
 if(is.null(arguments$layout.control)) layout.control=0.5 else layout.control=arguments$layout.control
@@ -281,7 +298,7 @@ if (filetype=="tex")
 {
 	# Special thanks to Charlie Sharpsteen for supplying these tikz codes on stackoverflow.com !!!
 	
-	require(tikzDevice)
+	if (!suppressPackageStartupMessages(require(tikzDevice,quietly=TRUE))) stop("tikzDevice must be installed to use filetype='tex'")
 	opt= c( 
 	getOption('tikzLatexPackages'),  
     "\\def\\tooltiptarget{\\phantom{\\rule{1mm}{1mm}}}",
@@ -313,7 +330,7 @@ if (filetype=="tex")
 
 
 # Legend setting 2
-if ((legend & filetype!='pdf') | filetype=="svg")
+if (legend & !is.null(scores))
 {
 	layout(t(1:2),widths=c(GLratio,1))
 }
@@ -323,11 +340,11 @@ if (is.null(weighted))
 {
 	if (edgelist)
 	{
-		if (ncol(adj)==2) weighted=FALSE else weighted=TRUE
+		if (ncol(input)==2) weighted=FALSE else weighted=TRUE
 	}
 	if (!edgelist)
 	{
-		if (length(unique(c(adj)))>2) weighted=TRUE else weighted=FALSE
+		if (length(unique(c(input)))>2) weighted=TRUE else weighted=FALSE
 	}
 }		
 if (!weighted) cut=0
@@ -340,7 +357,7 @@ if (!edgelist)
 {
 	if (!is.logical(directed)) if (is.null(directed))
 	{
-		if (!all(adj==t(adj))) directed=TRUE else directed=FALSE
+		if (!all(input==t(input))) directed=TRUE else directed=FALSE
 	}
 }
   
@@ -349,15 +366,15 @@ if (!edgelist)
 if (partial) 
 {
 	if (edgelist) stop("Concentration graph requires correlation matrix")
-	mi=solve(adj)
-	for (i in 1:nrow(adj)) 
+	mi=solve(input)
+	for (i in 1:nrow(input)) 
 	{
-		for (j in 1:nrow(adj)) 
+		for (j in 1:nrow(input)) 
 		{
-			adj[i,j]=-1*mi[i,j]/sqrt(mi[i,i]*mi[j,j]) 
+			input[i,j]=-1*mi[i,j]/sqrt(mi[i,i]*mi[j,j]) 
 		}
 	} 
-	adj=round(adj,7) 
+	input=round(input,7) 
 }
 
 # Diag:
@@ -367,7 +384,7 @@ if (is.character(diag))
 {
 	if (diag=="col" & !edgelist)
 	{
-		diagWeights=diag(adj)
+		diagWeights=diag(input)
 		diagCols=TRUE
 		diag=FALSE
 	}
@@ -380,7 +397,7 @@ if (is.numeric(diag))
 	diagCols=TRUE
 	diag=FALSE
 }
-if (is.logical(diag)) if (!diag & !edgelist) diag(adj)=0
+if (is.logical(diag)) if (!diag & !edgelist) diag(input)=0
 	
 # CREATE EDGELIST:
 
@@ -388,9 +405,9 @@ E <- list()
 
 if (edgelist)
 {
-	E$from=adj[,1]
-	E$to=adj[,2]
-	if (ncol(adj)>2) E$weight=adj[,3] else E$weight=rep(1,length(E$from))
+	E$from=input[,1]
+	E$to=input[,2]
+	if (ncol(input)>2) E$weight=input[,3] else E$weight=rep(1,length(E$from))
 	if (length(directed)==1) directed=rep(directed,length(E$from))
 	if (graph %in% c("sig","significance"))
 	{
@@ -410,7 +427,7 @@ if (edgelist)
 	}
 	if (mode=="sig" & any(E$weight < -1 | E$weight > 1))
 	{
-		warning("Weights under -1 adjusted to -1 and weights over 1 adjusted to 1")
+		warning("Weights under -1 inputusted to -1 and weights over 1 inputusted to 1")
 		E$weight[E$weight< -1] <- -1
 		E$weight[E$weight>1] <- 1
 	}
@@ -431,16 +448,16 @@ if (edgelist)
 {
 	if (is.matrix(directed))
 	{
-		incl <- directed|upper.tri(adj,diag=TRUE)
+		incl <- directed|upper.tri(input,diag=TRUE)
 		directed <- directed[incl]
 	} else
 	{
 		if (length(directed)>1) 
 		{
-			stop("'directed' must be TRUE or FALSE or a matrix containing TRUE or FALSE for each element of the adjacency matrix") 
+			stop("'directed' must be TRUE or FALSE or a matrix containing TRUE or FALSE for each element of the inputacency matrix") 
 		} else
 		{ 
-		if (!directed & all(adj==t(adj))) incl <- upper.tri(adj,diag=TRUE) else incl <- matrix(TRUE,nNodes,nNodes)
+		if (!directed & all(input==t(input))) incl <- upper.tri(input,diag=TRUE) else incl <- matrix(TRUE,nNodes,nNodes)
 		}
 	}
 
@@ -448,9 +465,9 @@ if (edgelist)
 	E$to=numeric(0)
 	E$weight=numeric(0)
 
-	E$from=rep(1:nrow(adj),times=nrow(adj))
-	E$to=rep(1:nrow(adj),each=nrow(adj))
-	E$weight=c(adj)
+	E$from=rep(1:nrow(input),times=nrow(input))
+	E$to=rep(1:nrow(input),each=nrow(input))
+	E$weight=c(input)
 
 	
 	E$from <- E$from[c(incl)]
@@ -474,7 +491,7 @@ if (bonf)
 }
 if (mode=="sig" & any(E$weight < -1 | E$weight > 1))
 {
-	warning("Weights under -1 adjusted to -1 and weights over 1 adjusted to 1")
+	warning("Weights under -1 inputusted to -1 and weights over 1 inputusted to 1")
 	E$weight[E$weight < -1] <- -1
 	E$weight[E$weight > 1] <- 1
 }
@@ -872,11 +889,11 @@ if (vTrans<255)
 
 # Vertex size:
 if (length(vsize)==1) vsize=rep(vsize,nNodes)
-if (!edgelist) Vsums=rowSums(abs(adj))+colSums(abs(adj))
+if (!edgelist) Vsums=rowSums(abs(input))+colSums(abs(input))
 if (edgelist)
 {
 	Vsums=numeric(0)
-	for (i in 1:nNodes) Vsums[i]=sum(c(adj[,1:2])==i)
+	for (i in 1:nNodes) Vsums[i]=sum(c(input[,1:2])==i)
 }
 if (length(vsize)==2 & nNodes>2 & length(unique(Vsums))>1) vsize=vsize[1] + (vsize[2]-vsize[1]) * (Vsums-min(Vsums))/(max(Vsums)-min(Vsums))
 if (length(vsize)==2 & nNodes>2 & length(unique(Vsums))==1) vsize=rep(mean(vsize),nNodes)
@@ -989,7 +1006,7 @@ if (!DoNotPlot)
 par(mar=c(0,0,0,0), bg=background)
 if (plot)
 {
-	plot(1, ann = FALSE, axes = FALSE, xlim = c(-1.2, 1.2), ylim = c(-1.2 ,1.2),type = "n", xaxs = "i", yaxs = "i")
+	plot(1, ann = FALSE, axes = FALSE, xlim = c(-1.2, 1.2 + (((legend&is.null(scores))|(filetype=="svg")) * 2.4/GLratio)), ylim = c(-1.2 ,1.2),type = "n", xaxs = "i", yaxs = "i")
 }
 
 if (PlotOpen) 
@@ -1287,7 +1304,7 @@ for (i in 1:length(groups)) polygon(ellipse(cov(l[groups[[i]],]),centre=colMeans
 
 if (is.null(names(groups))) names(groups) <- LETTERS[1:length(groups)]
 
-if (!legend && filetype=="svg") plot(1, ann = FALSE, axes = FALSE, xlim = c(-1, 1), ylim = c(-1 ,1 ),type = "n", xaxs = "i", yaxs = "i")
+#if (!legend && filetype=="svg") plot(1, ann = FALSE, axes = FALSE, xlim = c(-1, 1), ylim = c(-1 ,1 ),type = "n", xaxs = "i", yaxs = "i")
 
 # Plot Legend:
 if (legend)
@@ -1295,44 +1312,44 @@ if (legend)
 	if (is.null(scores))
 	{
 		legend.cex=legend.cex*2
-		plot(1, ann = FALSE, axes = FALSE, xlim = c(-1, 1), ylim = c(-1 ,1 ),type = "n", xaxs = "i", yaxs = "i")
+		#plot(1, ann = FALSE, axes = FALSE, xlim = c(-1, 1), ylim = c(-1 ,1 ),type = "n", xaxs = "i", yaxs = "i")
 		if (mode=="sig")
 		{
-			legend (0,0.5, names(groups), col= color ,pch = 19, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
-			legend (0,0.5, names(groups), col= "black" ,pch = 1, xjust=0.5, ,yjust=0.5, cex=legend.cex, bty='n') 
+			legend (1.2 + 0.5 * 2.4/GLratio,0, names(groups), col= color ,pch = 19, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
+			legend (1.2 + 0.5 * 2.4/GLratio,0, names(groups), col= "black" ,pch = 1, xjust=0.5, ,yjust=0.5, cex=legend.cex, bty='n') 
 			if (gray)
 			{
-			legend(0,-0.5,paste("p <",alpha[length(alpha):1]),
+			legend(1.2 + 0.5 * 2.4/GLratio,-0.5,paste("p <",alpha[length(alpha):1]),
 				col = c(rgb(0.7,0.7,0.7),rgb(0.5,0.5,0.5),rgb(0.3,0.3,0.3),"black")[(5-length(alpha)):4],
 				lty=1, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
 			} else
 			{
 				if (any(Pvals < 0))
 				{
-					legend(-0.5,-0.5,paste("p <",alpha[length(alpha):1]),
+					legend(1.2 + 0.25 * 2.4/GLratio,-0.5,paste("p <",alpha[length(alpha):1]),
 						col = c("cadetblue1","#6495ED","blue","darkblue")[(5-length(alpha)):4],
 						lty=1, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
 						
-					legend(0.5,-0.5,paste("p <",alpha[length(alpha):1]),
+					legend(1.2 + 0.75 * 2.4/GLratio,-0.5,paste("p <",alpha[length(alpha):1]),
 						col = c(rgb(1,0.8,0.4) ,"orange","darkorange","darkorange2")[(5-length(alpha)):4],
 						lty=1, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
 				
 				} else
 				{
-					legend(0,-0.5,paste("p <",alpha[length(alpha):1]),
+					legend(1.2 + 0.5 * 2.4/GLratio,-0.5,paste("p <",alpha[length(alpha):1]),
 						col = c("cadetblue1","#6495ED","blue","darkblue")[(5-length(alpha)):4],
 						lty=1, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
 				}
 			}
 		} else
 		{
-			legend (0,0, names(groups), col= color ,pch = 19, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
-			legend (0,0, names(groups), col= "black" ,pch = 1, xjust=0.5, ,yjust=0.5, cex=legend.cex, bty='n') 
+			legend (1.2 + 0.5 * 2.4/GLratio,0, names(groups), col= color ,pch = 19, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
+			legend (1.2 + 0.5 * 2.4/GLratio,0, names(groups), col= "black" ,pch = 1, xjust=0.5, ,yjust=0.5, cex=legend.cex, bty='n') 
 		}
 	}
 	if (!is.null(scores))
 	{
-	plot(1, ann = FALSE, axes = FALSE, xlim = c(0.5, scores.range[2]-scores.range[1]+8), ylim = c(0.5, length(groups)+2),
+	plot(1, ann = FALSE, axes = FALSE, xlim = c(-0.5, scores.range[2]-scores.range[1]+8), ylim = c(0.5, length(groups)+2),
      type = "n", xaxs = "i", yaxs = "i")
 	
 	for (i in 1:length(groups)) {
@@ -1348,13 +1365,13 @@ if (legend)
 
 	for (j in scores.range[1]:scores.range[2]-scores.range[1]) {
 	
-		polygon(c(j,j,j+1,j+1),c(i+0.05,i+0.95,i+0.95,i+0.05),col=groupcols[j],border=border.colors[i],lwd=2)
+		polygon(c(j,j,j+1,j+1),c(i+0.05,i+0.95,i+0.95,i+0.05),col=groupcols[j+1],border=border.colors[i],lwd=2)
 		
 		} 
 	text(j+1.5,i+0.5,names(groups)[i],pos=4)
 		}
 
-for (i in scores.range[1]:scores.range[2]-scores.range[1]) text(i+1.5,length(groups)+1.5,i/2)
+for (i in scores.range[1]:scores.range[2]-scores.range[1]) text(i+0.5,length(groups)+1.5,i+scores.range[1])
 
 	
 	}
@@ -1376,7 +1393,7 @@ if (filetype%in%c('pdf','png','jpg','jpeg','svg','eps','tiff','tex'))
 }
 }
 # Make output list:
-#returnval=list(adj=adj, layout=layout, cut=cut, maximum=maximum, minimum=minimum, groups=groups, weighted=weighted, rescale=rescale, labels=labels, directed=directed, legend=legend, plot=plot, rotation=rotation, layout.control=layout.control, layout.par=layout.par, filetype=filetype, filename=filename, width=width, height=height, pty=pty, res=res, vsize=vsize, esize=esize, color=color, bg=bg, bgcontrol=bgcontrol, bgres=bgres, transparency=transparency, lcolor=lcolor, loop=loop, legend.cex=legend.cex, borders=borders, curve=curve, arrows=arrows, diag=diag, tooltips=tooltips, hyperlinks=hyperlinks)
+#returnval=list(input=input, layout=layout, cut=cut, maximum=maximum, minimum=minimum, groups=groups, weighted=weighted, rescale=rescale, labels=labels, directed=directed, legend=legend, plot=plot, rotation=rotation, layout.control=layout.control, layout.par=layout.par, filetype=filetype, filename=filename, width=width, height=height, pty=pty, res=res, vsize=vsize, esize=esize, color=color, bg=bg, bgcontrol=bgcontrol, bgres=bgres, transparency=transparency, lcolor=lcolor, loop=loop, legend.cex=legend.cex, borders=borders, curve=curve, arrows=arrows, diag=diag, tooltips=tooltips, hyperlinks=hyperlinks)
 
 returnval=arguments
 returnval$layout=layout

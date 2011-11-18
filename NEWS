@@ -1,4 +1,17 @@
-Chainges in Version 0.5.1
+Changes in Version 0.5.3
+   o The labels argument now attempts to extract label names from the adjacency matrix for small graphs (<= 20 nodes)
+   o With legend=TRUE a check is now made to see if the groups list is not NULL. Else legend=FALSE is forced
+   o Legends are now plotted in the same window of the graph instead of a seperate plot window. This should fix many issues with plots remaining partitioned after runing qgraph as well as allow users to incorperate legends in partitioned plots.
+   o Fixed issues with the legend of the scores argument. This should now work as expected.
+   o Fixed issues with the qgraph.svg() function. This should now work again.
+   o Significantly changed the qgraph() help page. It should now be much clearer.
+   o Fixed an issue where lavaan objects with a mean structure would result in an error when using qgraph.lavaan(). Mean structure is now ignored in qgraph.lavaan().
+   o Changed the first argument of qgraph from 'adj' to 'input'. The help files no properly mention Weights matrices instead of Adjacency matrices.
+
+Changes in Version 0.5.2
+   o This version was aimed at fixing compatibility issues with sem 2.0.0
+
+Changes in Version 0.5.1
    o Fixed some minor bugs
    o Fixed issues with the qgraph.lavaan() function
    o Added the qgraph.animate() function for animating network growth and change! Check out its help page for more details.
