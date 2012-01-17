@@ -130,8 +130,12 @@ meanstructure <- pars$op=="~1"
 pars <- pars[!meanstructure,]
 
 # Extract variable and factor names:
-varNames <- fit@Model@dimNames$lambda[[1]]
-factNames <- fit@Model@dimNames$lambda[[2]]
+# varNames <- fit@Model@dimNames$lambda[[1]]
+# factNames <- fit@Model@dimNames$lambda[[2]]
+Lambda <- inspect(fit,"coef")$lambda
+varNames <- rownames(Lambda)
+factNames <- colnames(Lambda)
+rm(Lambda)
 
 factNames <- factNames[!factNames%in%varNames]
 

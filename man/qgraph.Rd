@@ -96,6 +96,11 @@ qgraph( input, ... )
 	\item{scores.range}{Vector of length two indicating the range of the scores, if scores is assigned.}
 }}
 
+\section{Arguments for manually defining graphs}{
+\describe{
+  \item{mode}{The mode argument (see section on significance graph arguments) can also be used to make the weights matrix correspond directly to the width of the edges (as in lwd of plot()). To do this, set mode to "direct".}
+	\item{edge.color}{This argument can be used to overwrite the colors. Can be either a single value to make all edges the same color, a matrix with a color for each edge (when using a weights matrix) or a vector with a color for each edge (when using an edgelist)}
+}}
 
 \section{Additional arguments}{	
 \describe{
@@ -104,6 +109,8 @@ qgraph( input, ... )
 	\item{DoNotPlot}{Runs qgraph but does not plot. Useful for saving the output (i.e. layout) without plotting}
 	\item{plot}{Logical. Should a new plot be made? Defaults to TRUE. Set to FALSE to add the graph to the existing plot.}
 	\item{rescale}{Logical. Defines if the layout should be rescaled to fit the -1 to 1 x and y area. Defaults to TRUE. Can best be used in combination with plot=FALSE.}
+    \item{layoutScale}{A vector with a scalar for respectivally the x and y coordinates of the layout (which default plotting area is from -1 to 1 on both x and y axis). Setting this to e.g. c(2,2) would make the plot twice as big. Use this in combination with 'layoutOffset' and 'plot' arguments to define the graph placement on an existing plot.}
+    \item{layoutOffset}{A vector with the offset to the x and  coordinates of the center of the graph (defaults to (0,0)). Use this in combination with 'layoutScale' and 'plot' arguments to define the graph placement on an existing plot.}
 }}
 
 \details{
@@ -155,6 +162,10 @@ The graphs can also be outputted in an SVG file using the RSVGTipsDevice package
 IMPORTANT NOTE: RSVGTipsDevice is a 32-bit only package, so SVG functionality is not available in 64bit versions of R.
 
 Finally, the filetype 'tex' can be used. This uses the tikzDevice package to create a LaTeX file that can then be compiled in your LaTeX compiler to create a pdf file. The main benefit of this over plotting directly in a pdf file is that tooltips can be added which can be viewed in several PDF document readers (Adobe Reader is recommended for the best result).}
+
+\section{Manual specification of color and width}{
+In qgraph the widths and colors of each edge can also be manually controlled. To directly specify the width of each edge set the 'mode'' argument to "direct". This will then use the absolute edge weights as the width of each edge (negative values can still be used to make red edges). To manually set the color of each edge, set the 'edge.color' argument to a matrix with colors for each edge (when using a weights matrix) or a vector with a color for each edge (when using an edgelist).
+}
 
 \section{Additional information}{
 By default, edges will be straight between two nodes unless there are two edges between two nodes. To overwrite this the 'bidirectional' argument can be set to TRUE, which will turn two edges between two nodes into one bidirectional edge. 'bidirectional' can alsobe a vector with TRUE or FALSE for each edge.
@@ -308,6 +319,9 @@ qgraph(dat.3,layout=L.3,directed=FALSE,edge.labels=TRUE,esize=14,minimum=0.1,max
 	cut=0.4,details=TRUE)
 title("details=TRUE",line=2.5)
 
+# Trivial example of manually specifying edge color and widths:
+E <- as.matrix(data.frame(from=rep(1:3,each=3),to=rep(1:3,3),width=1:9))
+qgraph(E,mode="direct",edge.color=rainbow(9))
 
 ### STRUCTURAL EQUATION MODELLING ###
 \dontrun{

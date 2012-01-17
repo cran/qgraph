@@ -34,17 +34,25 @@ if (filetype=="svg")
 }
 if (filetype=="tex") stop("Tex is not yet supported in qgraph.panel")
 
-layout(matrix(1:4,nrow=2,ncol=2))
+#layout(matrix(1:4,nrow=2,ncol=2))
+### PLOT
+parOrig <- par(no.readonly=TRUE)
+par(mar=c(0,0,0,0))
+plot(1, ann = FALSE, axes = FALSE, xlim = c(-2.4, 2.4), ylim = c(-2.4 ,2.4),type = "n", xaxs = "i", yaxs = "i")
 
-qgraph(input,filetype="",Q,layout="circular",graph="association",legend=FALSE)
-qgraph(input,layout="spring",filetype="",Q,graph="association",legend=FALSE)
-qgraph(input,graph="concentration",layout="spring",filetype="",Q,legend=FALSE)
-qgraph(input,graph="factorial",layout="spring",filetype="",Q,legend=FALSE,layout.par=list(area=nrow(input)^2.3,repulse.rad=nrow(input)^2.8))
+width <- par('pin')[1]
+height <- par('pin')[2]
+
+qgraph(input,filetype="",Q,layout="circular",graph="association",legend=FALSE,layoutOffset=c(-1.2,1.2),plot=FALSE,width=width,height=height)
+qgraph(input,layout="spring",filetype="",Q,graph="association",legend=FALSE,layoutOffset=c(-1.2,-1.2),plot=FALSE,width=width,height=height)
+qgraph(input,graph="concentration",layout="spring",filetype="",Q,legend=FALSE,layoutOffset=c(1.2,1.2),plot=FALSE,width=width,height=height)
+qgraph(input,graph="factorial",layout="spring",filetype="",Q,legend=FALSE,layout.par=list(area=nrow(input)^2.3,repulse.rad=nrow(input)^2.8),layoutOffset=c(1.2,-1.2),plot=FALSE,width=width,height=height)
 
 if (filetype%in%c('pdf','png','jpg','jpeg','svg','eps','tiff','tex')) 
 {
 	print(paste("Output stored in ",getwd(),"/",filename,".",filetype,sep=""))
 	dev.off()
 }
+par(parOrig)
 invisible(Q)
 }

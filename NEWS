@@ -1,3 +1,11 @@
+Changes in Version 1.0.0
+  o Because this was already the case for imported packages, qgraph is now Byte-Compiled and depends on R version 2.14.
+  o Added the centrality() function to compute node centrality statistics.
+  o It is now possible to manually set the edge width and color. See the added section on this in the qgraph help page.
+  o Added the arguments 'layoutScale' and 'layoutOffset' to qgraph(). These can be used to define the coordinates range of the graph.
+  o Changed the way qgraph.panel() works. Instead of partitioning the plot in 4 sections with layout() the function now makes only one plot containing 4 graphs. This should fix all issues with the partition persisting after using this function.
+  o If qgraph.efa() or qgraph.pca() is used on a dataset with 20 or less variables the variablenames (abbreviated to 3 characters) is used as label for the nodes.
+
 Changes in Version 0.5.3
    o The labels argument now attempts to extract label names from the adjacency matrix for small graphs (<= 20 nodes)
    o With legend=TRUE a check is now made to see if the groups list is not NULL. Else legend=FALSE is forced

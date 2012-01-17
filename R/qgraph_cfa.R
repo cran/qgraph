@@ -101,7 +101,7 @@ qgraph.cfa <- function( S, N, groups=NULL, ..., pkg = "sem", labels=NULL, fun = 
 		model <- paste(facts," =~ ",lapply(groups,function(x)paste(labels[x],collapse=" + ")),collapse=" \n ")
 		model <- paste(model,"\n")
 
-		fit <- do.call("cfa",c(list(model.syntax = model, sample.cov = S, sample.nobs = N),opts))
+		fit <- do.call("cfa",c(list(model = model, sample.cov = S, sample.nobs = N),opts))
 
 		fun(fit,...)
 		return(fit)
