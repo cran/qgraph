@@ -27,6 +27,7 @@ if (length(arguments)>0)
 	}
 }
 
+if (is.null(rownames(fact))) rownames(fact) <- 1:nrow(fact)
 
 # SET DEFAULT ARGUMENTS:
 if(is.null(arguments$resid)) resid=NULL else resid=arguments$resid
@@ -39,7 +40,15 @@ if (is.factor(groups) | is.character(groups)) groups <- tapply(1:length(groups),
 if(is.null(arguments$color)) color=NULL else color=arguments$color
 if(is.null(arguments$model)) model="none" else model=arguments$model
 if(is.null(arguments$crossloadings)) crossloadings=FALSE else crossloadings=arguments$crossloadings
-if(is.null(arguments$labels)) labels=TRUE else labels=arguments$labels
+if(is.null(arguments$labels))
+{
+  labels <- TRUE
+  if (nrow(fact) <= 20)
+  {
+    labels <- abbreviate(rownames(fact),3)
+  }
+
+} else labels <- arguments$labels
 if(is.null(arguments$Fname)) Fname=NULL else Fname=arguments$Fname
 if(is.null(arguments$layout)) layout="circle" else layout=arguments$layout
 if(is.null(arguments$legend))
