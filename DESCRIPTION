@@ -1,8 +1,8 @@
 Package: qgraph
 Type: Package
 Title: Network representations of relationships in data
-Version: 1.0.0
-Date: 2012-01-17
+Version: 1.0.1
+Date: 2012-02-19
 Author: Sacha Epskamp, Angelique O. J. Cramer, Lourens J. Waldorp,
         Verena D. Schmittmann and Denny Borsboom
 Maintainer: Sacha Epskamp <sacha.epskamp@gmail.com>
@@ -15,6 +15,6 @@ Description: The qgraph package can be used to visualize data as
 URL: http://sites.google.com/site/qgraphproject
 License: GPL-2
 LazyLoad: yes
-Packaged: 2012-01-17 21:00:33 UTC; sacha
+Packaged: 2012-02-19 18:18:42 UTC; sacha
 Repository: CRAN
-Date/Publication: 2012-01-18 06:52:01
+Date/Publication: 2012-02-19 20:58:12

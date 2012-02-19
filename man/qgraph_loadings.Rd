@@ -16,7 +16,7 @@ qgraph.loadings( fact, ...)
 \section{Additional optional arguments}{	
 \describe{
 	\item{layout}{If "default" a standard layout for factor models will be made. If this is "circle" the default layout is circled (factors in the centre, items at the edge). No other layouts are currently supported.}
-	\item{factors}{A vector where the first value indicates the size of manifest variables and the second value indicates the size of latent variables.}
+	\item{vsize}{A vector where the first value indicates the size of manifest variables and the second value indicates the size of latent variables.}
 	\item{model}{"reflective" to have arrows go to manifest variables, "formative" to have arrows go to latent variables or "none" (default) for no arrows}
 	\item{crossloadings}{Logical, if TRUE then for each manifest variable the strongest loading is omitted (default to FALSE).}
 	\item{groups}{An optional list containing the measurement model, see  \code{\link{qgraph}}}

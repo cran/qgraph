@@ -1,4 +1,7 @@
 Changes in Version 1.0.0
+  o Fixed a bug with using the 'directed' argument as a matrix.
+
+Changes in Version 1.0.0
   o Because this was already the case for imported packages, qgraph is now Byte-Compiled and depends on R version 2.14.
   o Added the centrality() function to compute node centrality statistics.
   o It is now possible to manually set the edge width and color. See the added section on this in the qgraph help page.
