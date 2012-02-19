@@ -80,9 +80,9 @@ if (filetype=='default') if (is.null(dev.list()[dev.cur()])) dev.new(rescale="fi
 if (filetype=='R') dev.new(rescale="fixed",width=width,height=height)
 if (filetype=='eps') postscript(paste(filename,".eps",sep=""),height=height,width=width, horizontal=FALSE)
 if (filetype=='pdf') pdf(paste(filename,".pdf",sep=""),height=height,width=width)
-if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),unit='in',res=res,height=height,width=width)
-if (filetype=='png') png(paste(filename,".png",sep=""),unit='in',res=res,height=height,width=width)
-if (filetype=='jpg' | filetype=='jpeg') jpeg(paste(filename,".jpg",sep=""),unit='in',res=res,height=height,width=width)
+if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),units='in',res=res,height=height,width=width)
+if (filetype=='png') png(paste(filename,".png",sep=""),units='in',res=res,height=height,width=width)
+if (filetype=='jpg' | filetype=='jpeg') jpeg(paste(filename,".jpg",sep=""),units='in',res=res,height=height,width=width)
 if (filetype=="svg")
 {
 	if (R.Version()$arch=="x64") stop("RSVGTipsDevice is not available for 64bit versions of R.")
@@ -211,7 +211,7 @@ if (identified)
 # Set layout:
 if (layout!="circle")
 {
-	l2=l=matrix(0,nc=2,nr=n+k)
+	l2=l=matrix(0,ncol=2,nrow=n+k)
 	l2[,2]=c(rep(-1,n),rep(0,k))
 	l2[,1]=c(seq(-1,1,length=n),seq(-1,1,length=k+2)[2:(k+1)])
 
@@ -229,7 +229,7 @@ if (layout!="circle")
 }
 if (layout=="circle")
 {
-	l2=l=matrix(0,nc=2,nr=n+k)
+	l2=l=matrix(0,ncol=2,nrow=n+k)
 	tl=n+1
 	l2[1:n,1]=sin(seq(0,2*pi, length=tl))[-tl]
 	l2[1:n,2]=cos(seq(0,2*pi, length=tl))[-tl]

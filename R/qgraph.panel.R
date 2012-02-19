@@ -23,9 +23,9 @@ if (filetype=='default') if (is.null(dev.list()[dev.cur()])) dev.new(rescale="fi
 if (filetype=='R') dev.new(rescale="fixed",width=width*2,height=height*2)
 if (filetype=='eps') postscript(paste(filename,".eps",sep=""),height=height*2,width=width*2, horizontal=FALSE)
 if (filetype=='pdf') pdf(paste(filename,".pdf",sep=""),height=height*2,width=width*2)
-if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),unit='in',res=res,height=height*2,width=width*2)
-if (filetype=='png') png(paste(filename,".png",sep=""),unit='in',res=res,height=height*2,width=width*2)
-if (filetype=='jpg' | filetype=='jpeg') jpeg(paste(filename,".jpg",sep=""),unit='in',res=res,height=height*2,width=width*2)
+if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),units='in',res=res,height=height*2,width=width*2)
+if (filetype=='png') png(paste(filename,".png",sep=""),units='in',res=res,height=height*2,width=width*2)
+if (filetype=='jpg' | filetype=='jpeg') jpeg(paste(filename,".jpg",sep=""),units='in',res=res,height=height*2,width=width*2)
 if (filetype=="svg")
 {
 	if (R.Version()$arch=="x64") stop("RSVGTipsDevice is not available for 64bit versions of R.")

@@ -290,9 +290,9 @@ if (filetype=='R') dev.new(rescale="fixed",width=width,height=height)
 if (filetype=='X11' | filetype=='x11') x11(width=width,height=height)
 if (filetype=='eps') postscript(paste(filename,".eps",sep=""),height=height,width=width, horizontal=FALSE)
 if (filetype=='pdf') pdf(paste(filename,".pdf",sep=""),height=height,width=width)
-if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),unit='in',res=res,height=height,width=width)
-if (filetype=='png') png(paste(filename,".png",sep=""),unit='in',res=res,height=height,width=width)
-if (filetype=='jpg' | filetype=='jpeg') jpeg(paste(filename,".jpg",sep=""),unit='in',res=res,height=height,width=width)
+if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),units='in',res=res,height=height,width=width)
+if (filetype=='png') png(paste(filename,".png",sep=""),units='in',res=res,height=height,width=width)
+if (filetype=='jpg' | filetype=='jpeg') jpeg(paste(filename,".jpg",sep=""),units='in',res=res,height=height,width=width)
 if (filetype=="svg")
 {
 	if (R.Version()$arch=="x64") stop("RSVGTipsDevice is not available for 64bit versions of R.")
@@ -454,7 +454,6 @@ if (edgelist)
 	if (is.matrix(directed))
 	{
 		incl <- directed|upper.tri(input,diag=TRUE)
-		directed <- directed[incl]
 	} else
 	{
 		if (length(directed)>1) 
@@ -462,9 +461,24 @@ if (edgelist)
 			stop("'directed' must be TRUE or FALSE or a matrix containing TRUE or FALSE for each element of the input matrix") 
 		} else
 		{ 
-		if (!directed & all(input==t(input))) incl <- upper.tri(input,diag=TRUE) else incl <- matrix(TRUE,nNodes,nNodes)
+      if (directed)
+      {
+        incl <- matrix(TRUE,nNodes,nNodes)
+      } else
+      {
+    		if (all(input==t(input))) 
+        {
+  
+          incl <- upper.tri(input,diag=TRUE)
+        } else 
+        {
+           incl <- matrix(TRUE,nNodes,nNodes)
+        }
+      }  
+  		directed <- matrix(directed,nNodes,nNodes)
 		}
 	}
+	directed <- directed[incl]
 
 	E$from=numeric(0)
 	E$to=numeric(0)
@@ -536,12 +550,12 @@ if (OmitInsig)
 		lty <- lty[c(incl)]
 		lty <- lty[E$weight!=0]
 	}
-
+}	
+  keep <- E$weight!=0
 	E$from=E$from[E$weight!=0]
 	E$to=E$to[E$weight!=0]
 	if (mode=="sig") Pvals <- Pvals[E$weight != 0]
 	E$weight=E$weight[E$weight!=0]
-}
 
 
 
@@ -549,6 +563,7 @@ if (length(directed)==1)
 {
 	directed <- rep(directed,length(E$from))
 }
+directed <- directed[keep]
 
 if (length(E$from) > 0)
 {
@@ -1436,7 +1451,6 @@ returnval=arguments
 returnval$layout=layout
 returnval$layout.orig=original.layout
 returnval$nNodes <- nNodes
-  
 E$directed <- directed
 E$bidir <- bidirectional
 E <- as.data.frame(E)
