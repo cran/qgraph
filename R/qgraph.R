@@ -65,7 +65,7 @@ if (class(input) %in% c("graphNEL","pcAlgo"))
 	arguments$labels <- graphNEL@nodes
 	weights <- sapply(graphNEL@edgeData@data,'[[','weight')
 
-	input <- laply(strsplit(names(weights),split="|"),'[',c(1,3))
+	input <- laply(strsplit(names(weights),split="\\|"),'[',c(1,2))
 	input <- apply(input,2,as.numeric)
 	if (any(weights!=1)) input <- cbind(input,weights)
 }
@@ -276,7 +276,8 @@ if (is.null(legend))
 {
 	if (is.null(groups)) legend=FALSE else legend=TRUE
 }
-if ((legend & filetype!='pdf' & filetype!='eps') | filetype=="svg")
+#if ((legend & filetype!='pdf' & filetype!='eps') | filetype=="svg")
+if (legend | filetype=="svg")
 {
 	width=width*(1+(1/GLratio))
 }
@@ -1071,7 +1072,14 @@ if (PlotOpen)
 	{
 		width=height=min(c(width,height))
 	}
+}  
+  
+
+if (legend)
+{
+  width <- width * (GLratio/(1+GLratio))
 }
+
 
 if (is.logical(bg)) if (bg){
 

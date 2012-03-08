@@ -1,4 +1,9 @@
-Changes in Version 1.0.0
+Changes in Version 1.0.2
+  o Fixed a bug in with using a tuning parameter of 0 in centrality()
+  o Fixed a bug with the arrows not being plotted properly when using a layout and nonsquare plotting area
+  o Fixed a bug where qgraph() failed on graphs with 10 or more nodes when using a "pcalg" object as input
+
+Changes in Version 1.0.1
   o Fixed a bug with using the 'directed' argument as a matrix.
 
 Changes in Version 1.0.0

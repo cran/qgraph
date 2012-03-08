@@ -4,6 +4,8 @@ centrality <- function(graph,alpha=1,posfun=abs)
   # Check for correct class:
   if (class(graph) != "qgraph") stop("Must be a 'qgraph' object")
   
+  if (!is.null(graph[['weighted']])) if (!graph[['weighted']]) graph[['qgraphEdgelist']][['weight']] <- ifelse(graph[['qgraphEdgelist']][['weight']]==0,0,1)
+  
   # Extract edgelist:
   E <- graph[['qgraphEdgelist']]
   
@@ -32,7 +34,7 @@ centrality <- function(graph,alpha=1,posfun=abs)
   
   # Compute shortest distance using Dijkstra (code based on pseudo code on Wikipedia)
   # Setup:
-  DistMat <- 1/(posfun(W)^alpha)
+  DistMat <- 1/(ifelse(posfun(W)==0,0,posfun(W)^alpha))
   ShortestPaths <- matrix(Inf,n,n)
   ls <- list()
   for (i in 1:n^2) ls[[i]] <- numeric(0)
@@ -68,12 +70,14 @@ centrality <- function(graph,alpha=1,posfun=abs)
   # Compute Closeness:
   Closeness <- 1/rowSums(ShortestPaths)
   
+
+  
   # Shortest paths function:
   sp <- function(i,j)
   {
     if (length(Previous[[i,j]])==0) return(list())
     if (all(Previous[[i,j]] == i)) return(list(c(i,j)))
-    paths <- sapply(Previous[[i,j]],sp,i=i)
+    paths <- do.call(c,lapply(Previous[[i,j]],sp,i=i))
     paths <- lapply(paths,function(x)c(x,j))
     return(paths)
   }
