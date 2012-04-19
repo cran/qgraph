@@ -16,8 +16,11 @@ centrality <- function(graph,alpha=1,posfun=abs)
   W <- matrix(0,n,n)
   for (i in 1:length(E$from))
   {
-    W[E$from[i],E$to[i]] <- E$weight[i]
-    if (!E$directed[i]) W[E$to[i],E$from[i]] <- E$weight[i]
+    if (E$weight[i]!=0)
+    {
+      W[E$from[i],E$to[i]] <- E$weight[i]
+      if (!E$directed[i] | E$bidir[i]) W[E$to[i],E$from[i]] <- E$weight[i]
+    }
   }
   
   ## Compute adjacency:

@@ -63,6 +63,7 @@ qgraph( input, ... )
 	\item{rotation}{A vector that can be used to rotate the circles created with the circular layout. Must contain the rotation in radian for each group of nodes. Defaults to zero for each group.}
 	\item{layout.par}{A list of arguments passed to \code{\link{qgraph.layout.fruchtermanreingold}} when layout="spring"}
 	\item{layout.control}{A scalar on the size of the circles created with the circular layout.}
+  \item{aspect}{Should the original aspect ratio be maintained if rescale = TRUE? Defaults to FALSE. Set this to TRUE to keep the aspect ratio of the original layout (e.g. result from layout="spring"). Currently this only works correctly if the plotting area is square. This can be forced withh exporting the graph using 'height', 'width' and 'filetype' arguments.}
 }}
 
 \section{Additional arguments for directed graphs}{

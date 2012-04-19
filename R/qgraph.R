@@ -253,6 +253,8 @@ if(is.null(arguments[['GLratio']])) GLratio <- 2.5 else GLratio <- arguments[['G
 if(is.null(arguments$layoutScale)) layoutScale <- 1 else layoutScale <- arguments$layoutScale
 if(is.null(arguments[['layoutOffset']])) layoutOffset <- 0 else layoutOffset <- arguments[['layoutOffset']]
 
+# Aspect ratio:
+if(is.null(arguments[['aspect']])) aspect=FALSE else aspect=arguments[['aspect']]
 
 # Arguments for directed graphs:
 if(is.null(arguments$curve)) curve=NULL else curve=arguments$curve
@@ -693,15 +695,48 @@ if (is.matrix(layout)) if (ncol(layout)>2)
 # Rescale layout:
 l=original.layout=layout
 if (rescale) {
-if (length(unique(l[,1]))>1)
-{
-  l[,1]=(l[,1]-min(l[,1]))/(max(l[,1])-min(l[,1]))*2-1
-} else l[,1] <- 0
-if (length(unique(l[,2]))>1)
-{
-  l[,2]=(l[,2]-min(l[,2]))/(max(l[,2])-min(l[,2]))*2-1 
-} else l[,2] <- 0
-layout=l
+  if (aspect)
+  {
+    # center:
+    l[,1] <- l[,1] - mean(l[,1])
+    l[,2] <- l[,2] - mean(l[,2])
+    lTemp <- l
+    
+    if (length(unique(lTemp[,1]))>1)
+    {
+      l[,1]=(lTemp[,1]-min(lTemp))/(max(lTemp)-min(lTemp))*2-1
+    } else l[,1] <- 0
+    if (length(unique(lTemp[,2]))>1)
+    {
+      l[,2]=(lTemp[,2]-min(lTemp))/(max(lTemp)-min(lTemp))*2-1 
+    } else l[,2] <- 0
+    
+    rm(lTemp)
+
+    
+#     # Equalize white space:
+#     if (diff(range(l[,1])) < 2)
+#     {
+#       l[,1] <- diff(range(l[,1]))/2 + l[,1]
+#     }
+#     if (diff(range(l[,2])) < 2)
+#     {
+#       l[,2] <- (2-diff(range(l[,2])))/2 + l[,2]
+#     }
+    
+    layout=l    
+  } else
+  {
+    if (length(unique(l[,1]))>1)
+    {
+      l[,1]=(l[,1]-min(l[,1]))/(max(l[,1])-min(l[,1]))*2-1
+    } else l[,1] <- 0
+    if (length(unique(l[,2]))>1)
+    {
+      l[,2]=(l[,2]-min(l[,2]))/(max(l[,2])-min(l[,2]))*2-1 
+    } else l[,2] <- 0
+    layout=l
+  }
 }
 
 ## Offset and scale:
@@ -1062,8 +1097,8 @@ if (plot)
 	plot(1, ann = FALSE, axes = FALSE, xlim = c(-1.2, 1.2 + (((legend&is.null(scores))|(filetype=="svg")) * 2.4/GLratio)), ylim = c(-1.2 ,1.2),type = "n", xaxs = "i", yaxs = "i")
 }
 
-if (PlotOpen) 
-{
+# if (PlotOpen) 
+# {
 	width <- par('pin')[1]
 	height <- par('pin')[2]
 	
@@ -1072,7 +1107,7 @@ if (PlotOpen)
 	{
 		width=height=min(c(width,height))
 	}
-}  
+# }  
   
 
 if (legend)
@@ -1457,6 +1492,7 @@ if (filetype%in%c('pdf','png','jpg','jpeg','svg','eps','tiff','tex'))
 
 returnval=arguments
 returnval$layout=layout
+returnval$weighted <- weighted
 returnval$layout.orig=original.layout
 returnval$nNodes <- nNodes
 E$directed <- directed
