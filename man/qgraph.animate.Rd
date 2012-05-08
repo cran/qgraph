@@ -72,6 +72,13 @@ Other methods woth in the same way as above. However, if the 'ind' argument indi
 Sacha Epskamp (qgraph@sachaepskamp.com)
 }
 
+\references{
+Sacha Epskamp, Angelique O. J. Cramer, Lourens J.
+  Waldorp, Verena D. Schmittmann, Denny Borsboom (2012).
+  qgraph: Network Visualizations of Relationships in
+  Psychometric Data. Journal of Statistical Software,
+  48(4), 1-18. URL http://www.jstatsoft.org/v48/i04/.
+}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 

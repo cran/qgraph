@@ -3,7 +3,7 @@
 qgraph =function( input, ... )
 {
 
-if (class(input)=="qgraph") arguments <- list(...,input) else arguments=list(...)
+if ("qgraph"%in%class(input)) arguments <- list(...,input) else arguments=list(...)
 
 if(!is.null(arguments$adj))
 {
@@ -35,7 +35,7 @@ if (length(arguments)>0)
 {
 	for (i in 1:length(arguments))
 	{
-		if (class(arguments[[i]])=="qgraph") 
+		if ("qgraph"%in%class(arguments[[i]])) 
 		{
 			if (!is.null(names(arguments[[i]])))
 			{
@@ -52,7 +52,7 @@ if (length(arguments)>0)
 	}
 }
 
-if (!is.null(arguments$qgraphEdgelist)&class(input)=="qgraph") 
+if (!is.null(arguments$qgraphEdgelist)&"qgraph"%in%class(input)) 
 {
 	input <- cbind(arguments$qgraphEdgelist$from,arguments$qgraphEdgelist$to,arguments$qgraphEdgelist$weight)
 	if (is.null(arguments$directed)) arguments$directed <- arguments$qgraphEdgelist$directed

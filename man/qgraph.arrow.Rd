@@ -48,5 +48,5 @@ Line type
 }
 }
 \author{
-Sacha Epskamp (s.epskamp@uva.nl)
+Sacha Epskamp (qgraph@sachaepskamp.com)
 }

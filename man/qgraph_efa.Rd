@@ -23,10 +23,15 @@ qgraph.efa(dat,factors=1,...,rotation="promax",residuals=TRUE,
 }
 
 \references{
-https://sites.google.com/site/qgraphproject
+Sacha Epskamp, Angelique O. J. Cramer, Lourens J.
+  Waldorp, Verena D. Schmittmann, Denny Borsboom (2012).
+  qgraph: Network Visualizations of Relationships in
+  Psychometric Data. Journal of Statistical Software,
+  48(4), 1-18. URL http://www.jstatsoft.org/v48/i04/.
+
 }
 \author{
-Sacha Epskamp (s.epskamp@uva.nl)
+Sacha Epskamp (qgraph@sachaepskamp.com)
 }
 \seealso{
 \code{\link{qgraph}}

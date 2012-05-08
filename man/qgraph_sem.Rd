@@ -54,7 +54,11 @@ Because the symbol font conveniently uses Arabic numerals, parameter names like 
 created with "*b1" in the model.
 }
 \references{
-https://sites.google.com/site/qgraphproject
+Sacha Epskamp, Angelique O. J. Cramer, Lourens J.
+  Waldorp, Verena D. Schmittmann, Denny Borsboom (2012).
+  qgraph: Network Visualizations of Relationships in
+  Psychometric Data. Journal of Statistical Software,
+  48(4), 1-18. URL http://www.jstatsoft.org/v48/i04/.
 
 Carter T. Butts <buttsc@uci.edu> (2010). sna: Tools for Social Network Analysis. R package version 2.2-0. http://CRAN.R-project.org/package=sna
 
@@ -63,7 +67,7 @@ John Fox with contributions from Adam Kramer <jfox@mcmaster.ca> and Michael Frie
 Fruchterman, T. & Reingold, E. (1991). Graph drawing by force-directed placement. Software - Pract. Exp. 21, 1129?1164.
 }
 \author{
-Sacha Epskamp (s.epskamp@uva.nl)
+Sacha Epskamp (qgraph@sachaepskamp.com)
 }
 \seealso{
 \code{\link{qgraph}}
