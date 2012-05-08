@@ -21,5 +21,5 @@ Arguments send to \code{\link{qgraph}}
 }
 
 \author{
-Sacha Epskamp (s.epskamp@uva.nl)
+Sacha Epskamp (qgraph@sachaepskamp.com)
 }

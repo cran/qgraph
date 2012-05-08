@@ -191,7 +191,12 @@ One of the values returned is 'layout.orig', the original (not rescaled) layout,
 
 
 \references{
-https://sites.google.com/site/qgraphproject
+Sacha Epskamp, Angelique O. J. Cramer, Lourens J.
+  Waldorp, Verena D. Schmittmann, Denny Borsboom (2012).
+  qgraph: Network Visualizations of Relationships in
+  Psychometric Data. Journal of Statistical Software,
+  48(4), 1-18. URL http://www.jstatsoft.org/v48/i04/.
+
 
 Carter T. Butts <buttsc@uci.edu> (2010). sna: Tools for Social Network Analysis. R package version 2.2-0. http://CRAN.R-project.org/package=sna
 
@@ -205,7 +210,7 @@ Fruchterman, T. & Reingold, E. (1991). Graph drawing by force-directed placement
 
 }
 \author{
-Sacha Epskamp<qgraph@sachaepskamp.com>
+Sacha Epskamp (qgraph@sachaepskamp.com)
 }
 
 \seealso{

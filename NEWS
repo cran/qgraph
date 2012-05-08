@@ -1,3 +1,7 @@
+Changes in Version 1.0.4
+  o Added reference to JSS paper.
+  o The name of the author in several function Rd pages has been changed to reflect my new e-mail address.
+
 Changes in Version 1.0.3
   o Added the 'aspect' argument to qgraph. Set this to TRUE to keep the aspect ratio of the original layout (e.g. result from layout="spring").
   o Fixed a bug where an unweighted graph object would be plotted as a weighted graph in consecutive calls.

@@ -25,7 +25,14 @@ This function will create a 4-panel plot containing four plots useful in analyzi
 }
 }
 \author{
-Sacha Epskamp
+Sacha Epskamp (qgraph@sachaepskamp.com)
+}
+\references{
+Sacha Epskamp, Angelique O. J. Cramer, Lourens J.
+  Waldorp, Verena D. Schmittmann, Denny Borsboom (2012).
+  qgraph: Network Visualizations of Relationships in
+  Psychometric Data. Journal of Statistical Software,
+  48(4), 1-18. URL http://www.jstatsoft.org/v48/i04/.
 }
 \seealso{
 \code{\link{qgraph}}
