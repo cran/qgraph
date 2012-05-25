@@ -20,7 +20,7 @@ qgraph.lavaan <- function(
 #reqTest <- require("lavaan")
 #if (!reqTest) stop("lavaan could not be loaded, is this package installed?")
 
-if (fit@Sample@ngroups > 1) stop("qgraph.lavaan currently does not support models based on multiple groups")
+if (fit@SampleStats@ngroups > 1) stop("qgraph.lavaan currently does not support models based on multiple groups")
 
 # Get #vars and #factors:
 #n <- nrow(fit@Model@GLIST$lambda)
@@ -165,7 +165,7 @@ E$bidir[pars$op=="~~"  & pars$lhs != pars$rhs] <- TRUE
 E$curved[pars$op=="~" & ((pars$lhs %in% varNames & pars$rhs %in% varNames) | (pars$lhs %in% factNames & pars$rhs %in% factNames))] <- curve
 E[pars$op=="~",1:2] <- E[pars$op=="~",2:1]
 if (layout=="tree") E$curved[pars$op=="~~"  & pars$lhs != pars$rhs] <- curve
-E$lty[fit@User$free[!meanstructure]==0] <- 2
+E$lty[fit@ParTable$free[!meanstructure]==0] <- 2
 
 E <- rbind(E,transform(subset(E,bidir),from=to,to=from))
 #E <- rbind(E,transform(E[E$bidir,],from=to,to=from))
@@ -485,7 +485,7 @@ if (titles) title("Standardized model (std.nox)",line=-1)
 
 covImp <- round(as.matrix(fit@Fit@Sigma.hat[[1]]),6)
 corImp <- round(cov2cor(covImp),6)
-covObs <- round(as.matrix(fit@Sample@cov[[1]]),6)
+covObs <- round(as.matrix(fit@SampleStats@cov[[1]]),6)
 corObs <- round(cov2cor(covObs),6)
 
 if (is.null(groups))

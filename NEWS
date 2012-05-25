@@ -1,3 +1,6 @@
+Changes in Version 1.0.5
+  o Fixed a compatibility issue with the most recent version of Lavaan (0.4-14)
+
 Changes in Version 1.0.4
   o Added reference to JSS paper.
   o The name of the author in several function Rd pages has been changed to reflect my new e-mail address.
