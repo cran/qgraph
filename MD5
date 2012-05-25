@@ -1,13 +1,13 @@
 ff547ababc85108875b8e8f94239d4dd *COPYING
 bb98f216f1a821b12ca08c2886d6c012 *COPYRIGHTS
-90c3bdc4ed635686d0e4c935e405be82 *DESCRIPTION
+ca7ad7807fde100b3faef66a34ebef09 *DESCRIPTION
 6be52ae5705ebbcf79658c728b58965d *NAMESPACE
-e99cdde29adab48bd7a102cdffd51657 *NEWS
+b684e7dbe46df33313e328032f090b89 *NEWS
 e80eed7900ce35b90145d490bccf22c4 *R/centrality.R
 4a2864e5f90201e808beeaf8b921adbf *R/layout.R
 5f9b25a45ac1f0a5509a4b8b9acc739c *R/printplotsummary.R
 6745c08f5e013deeeeecb7ecdfcf09c1 *R/qgraph.R
-54a8ca926ca6fd876bb747b492f69f20 *R/qgraph.lavaan.R
+c4f71f474cf28a9c832db1a2db28ff55 *R/qgraph.lavaan.R
 3b67c5706ab9a07408b6342c13c25dad *R/qgraph.panel.R
 4993a3663fd300fcd983c020d26fad9e *R/qgraph_Efa.R
 853a4960ae7cbf675715714d40ee983f *R/qgraph_arrow.R
