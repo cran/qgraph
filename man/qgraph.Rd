@@ -14,7 +14,8 @@ qgraph( input, ... )
 }	
 \section{Important additional arguments}{	
 \describe{
-\item{layout}{This argument controls the layout of the graph. "circular" gives a circular layout, "groups" gives a layout in which each group is put in a circle and "spring" gives a force embedded layout. It also can be a matrix with a row for each node and x and y coordinates in the first and second column respectively. Defaults to "circular" in weighted graphs without a groups list, "groups" in weighted graphs with a groups list, and "spring" in unweighted graphs.}
+\item{gui}{Logical, calls \code{\link{qgraph.gui}} if TRUE to open gui window.}
+\item{layout}{This argument controls the layout of the graph. "circle" places all nodes in a single circle, "circular" gives a circular layout in which each group is put in seperate circles and "spring" gives a force embedded layout. It also can be a matrix with a row for each node and x and y coordinates in the first and second column respectively. Defaults to "circular" in weighted graphs without a groups list, "groups" in weighted graphs with a groups list, and "spring" in unweighted graphs.}
 \item{groups}{An object that indicates which nodes belong together. Can be a list in which each element is a vector of integers identifying the numbers of the nodes that belong together, or a factor.}
 \item{minimum}{Edges with absolute weights under this value are omitted. Defaults to 0 for graphs with less than 50 nodes or 0.1 for larger graphs.}
 \item{maximum}{qgraph regards the highest of the maximum or highest absolute edge weight as the highest weight to scale the edge widths too. To compare several graphs, set this argument to a higher value than any edge weight in the graphs (typically 1 for correlations).}
@@ -25,6 +26,7 @@ qgraph( input, ... )
 
 \section{Output arguments}{
 \describe{
+\item{mar}{A vector of the form c(bottom, left, top, right) which gives the margines. Works similar to the argument in par(). Defauts to c(3,3,3,3)}
 	\item{filetype}{A character containing the file type to save the output in. "R" and "x11" outputs in a new R window ("x11" is prefered for Rstudio), "pdf" creates a pdf file. "svg" creates a svg file (requires RSVGTipsDevice). "tex" creates LaTeX code for the graph (requires tikzDevice). 'jpg', 'tiff' and 'png' can also be used. If this is given any other string (e.g. filetype="") no device is opened. Defaults to 'R' if the current device is the NULL-device or no new device if there already is an open device.}
 	\item{filename}{Name of the file without extension}
 	\item{width}{Width of the plot, in inches}
@@ -39,7 +41,7 @@ qgraph( input, ... )
 	\item{legend.cex}{Scalar of the legend. defaults to 1}
 	\item{GLratio}{Relative size of the graph compared to the layout. Defaults to 2.5}
 	\item{vsize}{A value indicating the size of the nodes. Can also be a vector of length 2 (nodes are scaled to degree) or a size for each node. Defaults to: max((-1/72)*(nNodes)+5.35,1)}
-	\item{esize}{Size of the largest edge (or what it would be if there was an edge with weight maximum). Defaults to: max((-1/72)*(nNodes)+5.35,1)}
+	\item{esize}{Size of the largest edge (or what it would be if there was an edge with weight maximum). Defaults to: max((-1/72)*(nNodes)+5.35,1) for weighted graphs and 2 for unweighted graphs. In directed graphs these values are halved.}
 	\item{labels}{If FALSE, no labels are plotted. If TRUE, order in weights matrix is used as labels. This can also be a vector with a label for each node. Defaults for graphs with less than 20 nodes to a 3 character abbreviation of the columnames and rownames if these are identical or else to TRUE. If a label contains an asterisk (e.g. "x1*") then the asterisk will be omitted and the label will be printed in symbol font (use this for Greek letters)}
 	\item{edge.labels}{If FALSE, no edge labels are plotted. If TRUE, numerical edge weights are printed on the edges. This can also be a vector with a label for each edge. Defaults to FALSE. If a label contains an asterisk (e.g. "y1*") then the asterisk will be omitted and the label will be printed in symbol font (use this for Greek letters)}
 	\item{edge.label.cex}{Either a single number or a number per edge used as a scalar of the edge label size. Defaults to 1.}
@@ -71,7 +73,8 @@ qgraph( input, ... )
 	\item{directed}{Logical indicating if edges are directed or not. Can be TRUE or FALSE to indicate if all edges are directed, a logical vector (when using edgelists) or a logical matrix (when using weights matrix)}
 	\item{curve}{A value indicating how strongly edges should be curved. Defaults to 0 (no curve) for each edge except for edges in directional graphs between nodes that have two edges in between them. CURVING LINES DRASTICALLY INCREASES FILE SIZE!}
 	\item{arrows}{A logical indicating if arrows should be drawn, or a number indicating how much arrows should be drawn on each edge. If this is TRUE, a simple arrow is plotted, if this is a number, arrows are put in the middle of the edges.}
-	\item{asize}{Scalar of the length of arrow heads, in inches. Defaults to 0.15.}
+  \item{arrowAngle}{Angle of the arrowhead, in radians. Defaults to pi/8 for unweighted graphs and pi/4 for weighted graphs.}
+	\item{asize}{Size of the arrowhead.}
 	\item{open}{Logical indicating if open (TRUE) or closed (FALSE) arrowheads should be drawn.}
 	\item{bidirectional}{If this is TRUE, Then directional edges between nodes that have two edges between them are not curved. Defaults to FALSE. Can also be a logical vector (when using edgelists) or a logical matrix (when using weights matrix)}
 }}
@@ -210,11 +213,12 @@ Fruchterman, T. & Reingold, E. (1991). Graph drawing by force-directed placement
 
 }
 \author{
-Sacha Epskamp (qgraph@sachaepskamp.com)
+Sacha Epskamp <qgraph@sachaepskamp.com>
 }
 
 \seealso{
 \code{\link{qgraph}}
+\code{\link{qgraph.gui}}
 \code{\link{qgraph.animate}}
 \code{\link{qgraph.efa}}
 \code{\link{qgraph.pca}}
@@ -235,6 +239,7 @@ data(big5groups)
 Q <- qgraph(cor(big5),minimum=0.25,cut=0.4,vsize=2,groups=big5groups,legend=TRUE,borders=FALSE)
 title("Big 5 correlations",line=2.5)
 
+\dontrun{
 # Same graph with spring layout:
 Q <- qgraph(Q,layout="spring")
 title("Big 5 correlations",line=2.5)
@@ -268,14 +273,15 @@ title("Test scores of random subject",line=2.5)
 
 # EFA:
 big5efa <- factanal(big5,factors=5,rotation="promax",scores="regression")
-qgraph(big5efa,groups=big5groups,layout="circle",rotation="promax",minimum=0.2,cut=0.4,vsize=c(1,15),borders=FALSE,asize=0.07,esize=4,vTrans=200,filetype="R",width=7,height=7)
+qgraph(big5efa,groups=big5groups,layout="circle",rotation="promax",minimum=0.2,cut=0.4,vsize=c(1,15),borders=FALSE,vTrans=200,filetype="R",width=7,height=7)
 title("Big 5 EFA",line=2.5)
 
 # PCA:
 library("psych")
 big5pca <- principal(cor(big5),5,rotate="promax")
-qgraph(big5pca,groups=big5groups,layout="circle",rotation="promax",minimum=0.2,cut=0.4,vsize=c(1,15),borders=FALSE,asize=0.07,esize=4,vTrans=200)
+qgraph(big5pca,groups=big5groups,layout="circle",rotation="promax",minimum=0.2,cut=0.4,vsize=c(1,15),borders=FALSE,vTrans=200)
 title("Big 5 PCA",line=2.5)
+}
 
 #### UNWEIGHTED DIRECTED GRAPHS ###
 set.seed(1)
@@ -377,38 +383,6 @@ model.thur <- specifyModel()
     F2 <-> F2,               NA,     1
     F3 <-> F3,               NA,     1
     F4 <-> F4,               NA,     1
-}
-
-\dontshow{
-require('sem')
-
-### This example is taken from the examples of the sem function. 
-### Only names were changed to better suit the path diagram.
-
-# ----------------------- Thurstone data ---------------------------------------
-#  Second-order confirmatory factor analysis, from the SAS manual for PROC CALIS
-
-R.thur <- structure(c(1, 0.828, 0.776, 0.439, 0.432, 0.447, 0.447, 0.541, 
-0.38, 0, 1, 0.779, 0.493, 0.464, 0.489, 0.432, 0.537, 0.358, 
-0, 0, 1, 0.46, 0.425, 0.443, 0.401, 0.534, 0.359, 0, 0, 0, 1, 
-0.674, 0.59, 0.381, 0.35, 0.424, 0, 0, 0, 0, 1, 0.541, 0.402, 
-0.367, 0.446, 0, 0, 0, 0, 0, 1, 0.288, 0.32, 0.325, 0, 0, 0, 
-0, 0, 0, 1, 0.555, 0.598, 0, 0, 0, 0, 0, 0, 0, 1, 0.452, 0, 0, 
-0, 0, 0, 0, 0, 0, 1), .Dim = c(9L, 9L), .Dimnames = list(c("Sen", 
-"Voc", "SC", "FL", "4LW", "Suf", "LS", "Ped", "LG"), c("Sen", 
-"Voc", "SC", "FL", "4LW", "Suf", "LS", "Ped", "LG")))
-            
-model.thur <- structure(c("F1 -> Sen", "F1 -> Voc", "F1 -> SC", "F2 -> FL", 
-"F2 -> 4LW", "F2 -> Suf", "F3 -> LS", "F3 -> Ped", "F3 -> LG", 
-"F4 -> F1", "F4 -> F2", "F4 -> F3", "Sen <-> Sen", "Voc<-> Voc", 
-"SC <-> SC", "FL <-> FL", "4LW <-> 4LW", "Suf<-> Suf", "LS <-> LS", 
-"Ped<-> Ped", "LG <-> LG", "F1 <-> F1", "F2 <-> F2", "F3 <-> F3", 
-"F4 <-> F4", "*l11", "*l21", "*l31", "*l41", "*l52", "*l62", 
-"*l73", "*l83", "*l93", "*g1", "*g2", "*g3", "q*1", "q*2", "q*3", 
-"q*4", "q*5", "q*6", "q*7", "q*8", "q*9", NA, NA, NA, NA, NA, 
-NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 
-NA, NA, NA, NA, "1", "1", "1", "1"), .Dim = c(25L, 3L), class = "semmod")
-}
 
 # Path diagram of the model:
 qgraph(model.thur)
@@ -417,6 +391,7 @@ qgraph(model.thur,layout="tree",manifest=c('Sen','Voc','SC','FL','4LW','Suf','LS
 # Estimate and plot parameters:
 sem.thur <- sem(model.thur, R.thur, 213)
 qgraph(sem.thur,layout="tree",curve=0.4)
+}
 
 \dontrun{
 ### pcalg support ###
