@@ -38,19 +38,23 @@ qgraph( input, ... )
 \section{Graphical arguments}{	
 \describe{
 \item{color}{A vector with a color for each element in the groups list, or a color for each node. Defaults to the background color ("bg" argument, which defaults to "white") without groups list and rainbow(length(groups)) with a groups list.}
-	\item{legend}{Logical value indicating if a legend should be plotted. Defaults to TRUE if a groups object is supplied}
+\item{pastel}{Logical, should default colors (for groups or edge equality constraints) be chosen from pastel colors? If TRUE then \code{\link[colorspace]{rainbow_hcl}} is used.}
+\item{rainbowStart}{A number between 0 and 1 indicating the offset used in rainbow functions for default node coloring.}
+	\item{legend}{Logical value indicating if a legend should be plotted. Defaults to TRUE if a groups object or nodeNames is supplied}
 	\item{legend.cex}{Scalar of the legend. defaults to 1}
+  \item{nodeNames}{Names for each node, can be used to plot a legend next to the plot that links the node labels to node names.}
+  \item{legend.mode}{Character, either \code{"groups"} indicating the legend should be based on the \code{groups} object, or \code{"names"} indicating the legend should be based on the \code{nodeNames} object.}
 	\item{GLratio}{Relative size of the graph compared to the layout. Defaults to 2.5}
 	\item{vsize}{A value indicating the size of the nodes (horizontal if shape is "rectangle". Can also be a vector of length 2 (nodes are scaled to degree) or a size for each node. Defaults to: max((-1/72)*(nNodes)+5.35,1)}
     \item{vsize}{A value indicating the vertical size of the nodes where the shape is "rectangle". Can also be a vector of length 2 (nodes are scaled to degree) or a size for each node. Defaults to the value of 'vsize'. If 'vsize' is not assigned this value is used as a scalar to 'vsize' (e.g., \code{vsize2 = 1/2} would result in rectangled nodes where the height is half the default width)}
 	\item{esize}{Size of the largest edge (or what it would be if there was an edge with weight maximum). Defaults to: max((-1/72)*(nNodes)+5.35,1) for weighted graphs and 2 for unweighted graphs. In directed graphs these values are halved.}
-	\item{labels}{If FALSE, no labels are plotted. If TRUE, order in weights matrix is used as labels. This can also be a vector with a label for each node. Defaults for graphs with less than 20 nodes to a 3 character abbreviation of the columnames and rownames if these are identical or else to TRUE. If a label contains an asterisk (e.g. "x1*") then the asterisk will be omitted and the label will be printed in symbol font (use this for Greek letters)}
+	\item{labels}{If FALSE, no labels are plotted. If TRUE, order in weights matrix is used as labels. This can also be a vector with a label for each node. Defaults for graphs with less than 20 nodes to a 3 character abbreviation of the columnames and rownames if these are identical or else to TRUE. If a label contains an asterisk (e.g. "x1*") then the asterisk will be omitted and the label will be printed in symbol font (use this for Greek letters). Can also be a list with a label as each element, which can be expressions for more advanced mathematical annotation.}
   \item{label.cex}{Scalar on the label size.}
   \item{label.prop}{Controls the proportion of the width of the node that the label rescales to. Defaults to 0.
   9.}
     \item{label.norm}{A single string that is used to normalize label size. If the width of the label is lower than the width of the hypothetical label given by this argument the width of label given by this argument is used instead. Defaults to "OOO" so that every label up to three characters has the same fontsize.}
     \item{label.scale}{Logical indicating if labels should be scaled to fit the node. Defaults to TRUE.}
-	\item{edge.labels}{If FALSE, no edge labels are plotted. If TRUE, numerical edge weights are printed on the edges. This can also be a vector with a label for each edge. Defaults to FALSE. If a label contains an asterisk (e.g. "y1*") then the asterisk will be omitted and the label will be printed in symbol font (use this for Greek letters)}
+	\item{edge.labels}{If FALSE, no edge labels are plotted. If TRUE, numerical edge weights are printed on the edges. This can also be a vector with a label for each edge. Defaults to FALSE. If a label contains an asterisk (e.g. "y1*") then the asterisk will be omitted and the label will be printed in symbol font (use this for Greek letters). Can also be a list with a label as each element, which can be expressions for more advanced mathematical annotation.}
 	\item{edge.label.cex}{Either a single number or a number per edge used as a scalar of the edge label size. Defaults to 1.}
     \item{edge.label.bg}{Either a logical or character vector/matrix. Indicates the background behind edge labels. If TRUE (default) a white background is plotted behind each edge label. If FALSE no background is plotted behind edge labels. Can also be a single color character, a vector or matrix of color vectors for each edge.}
 	\item{bg}{If this is TRUE, a background is plotted in which node colors cast a light of that color on a black background. Can also be a character containing the color of the background Defaults to FALSE}
@@ -70,7 +74,10 @@ qgraph( input, ... )
 	\item{borders}{Logical indicating if borders should be plotted, defaults to TRUE.}
   \item{border.color}{Color vector indicating colors of the borders. Is repeated if length is equal to 1. Defaults to "black"}
     \item{border.width}{Controls the width of the border. Defaults to 2 and is comparable to 'lwd' argument in 'points'.}
-	\item{shape}{A character containing the shape of the nodes. "circle", "square", "triangle" and "diamond" are supported. Can also be a vector with a shape for each node. Defaults to "circle".}
+	\item{shape}{A character containing the shape of the nodes. \code{"circle"}, \code{"square"}, \code{"triangle"} and \code{"diamond"} are supported. In addition, can be a name of an element of \code{polygonList} to plot the corresponding polygon (not reccomended for large graphs), which by default includes shapes \code{"ellipse"} and \code{"heart"} Can also be a vector with a shape for each node. Defaults to "circle".}
+    \item{polygonList}{ A list contaning named lists for each element to include polygons to lookup in the \code{shape} argument. Each element must be named as they are used in \code{shape} and contain a list with elements \code{x} and \code{y} contaning the coordinates of the polygon. By default \code{ellipse} and \code{heart} are added to this list. These polygons are scaled according to \code{vsize} and \code{vsize2}}
+  
+  
 	\item{gray}{Logical, set to TRUE to plot the graph in grayscale colors}
 	\item{tooltips}{A vector with tooltips for each node, only used when filetype='svg' or filetype='tex'}
 	\item{vTrans}{Transparency of the nodes, must be an integer between 0 and 255, 255 indicating no transparency. Defaults to 255}
@@ -79,7 +86,7 @@ qgraph( input, ... )
 	\item{rotation}{A vector that can be used to rotate the circles created with the circular layout. Must contain the rotation in radian for each group of nodes. Defaults to zero for each group.}
 	\item{layout.par}{A list of arguments passed to \code{\link{qgraph.layout.fruchtermanreingold}} when layout="spring" or to an igraph function when such a function is assigned to 'layout'}
 	\item{layout.control}{A scalar on the size of the circles created with the circular layout.}
-  \item{aspect}{Should the original aspect ratio be maintained if rescale = TRUE? Defaults to FALSE. Set this to TRUE to keep the aspect ratio of the original layout (e.g. result from layout="spring"). Currently this only works correctly if the plotting area is square. This can be forced with exporting the graph using 'height', 'width' and 'filetype' arguments.}
+  \item{aspect}{Should the original aspect ratio be maintained if rescale = TRUE? Defaults to FALSE. Set this to TRUE to keep the aspect ratio of the original layout (e.g. result from layout="spring").}
     \item{subplots}{A list with as elements R expressions or NULL for each node. If it is an R expression it is evaluated to create a plot for the node.}
         \item{images}{A character vector of length 1 or the same length as the number of nodes indicating the file location of PNG or JPEG images to use as nodes. Can be NA to not plot an image as node and overwrites 'subplots'
 }}
@@ -92,6 +99,7 @@ qgraph( input, ... )
     \item{curveAll}{Logical, indicating if all edges should be curved with the value of the 'curve' or only edges between nodes that have share multiple edges.}
     \item{curveDefault}{The default curvature. Defaults to 1.}
     \item{curveShape}{The shape of the curve, as used in \code{xspline}. Defaults to \code{-1}.}
+    \item{curveScale}{Logical, should curve scale with distance between nodes. Defaults to TRUE. If FALSE, the curve can be exactly determined. Recommended to set to TRUE for graphs and FALSE for diagrams.}
     \item{curvePivot}{Quantile to pivot curves on. This can be used to, rather than round edges, make straight edges as curves with "knicks" in them. Can be logical or numeric. \code{FALSE} (default) indicates no pivoting in the curved edges, a number indicates the quantile (and one minus this value as quantile) on which to pivot curved edges and \code{TRUE} indicates a value of 0.1.}
         \item{curvePivotShape}{The shape of the curve around the pivots, as used in \code{xspline}. Defaults to \code{0.25}.}
 }
@@ -143,6 +151,16 @@ qgraph( input, ... )
   \item{knot.borders}{Logical indicating if a border should be plotted around the knot. Can be of length one or a vector with the size of each knot. Works similar to 'borders'. Defaults to FALSE}
   \item{knot.border.color}{Color of the knot borders. Can be of length one or a vector with the size of each knot. Works similar to 'border.color'. Defaults to "black"}
     \item{knot.border.width}{Width of the knot borders. Can be of length one or a vector with the size of each knot. Works similar to 'border.width'. Defaults to 1}
+}}
+
+\section{Arguments for bars}{
+\describe{
+  \item{bars}{A list with for each node containing either NULL or a vector with values between 0 and 1 indicating where bars should be placed inside the node.}
+  \item{barSide}{Integer for each node indicating at which side the bars should be drawn. 1, 2, 3 or 4 indicating at bottom, left, top or right respectively.}  
+  \item{barColor}{A vector with for each node indicating the color of bars. Defaults to the border color of the node.}  
+  \item{barLength}{A Vector indicating the relative length of bars of each node compared to the node size. Defaults to 0.5.}  
+      \item{barsAtSide}{Logical, should bars be drawn at the side of a node or at its center? Defaults to FALSE.}  
+  
 }}
 
 \section{Additional arguments}{	
@@ -276,7 +294,8 @@ data(big5)
 data(big5groups)
 
 # Correlations:
-Q <- qgraph(cor(big5),minimum=0.25,cut=0.4,vsize=1.5,groups=big5groups,legend=TRUE,borders=FALSE)
+Q <- qgraph(cor(big5),minimum=0.25,cut=0.4,vsize=1.5,groups=big5groups,
+  legend=TRUE,borders=FALSE)
 title("Big 5 correlations",line=2.5)
 
 \dontrun{
@@ -312,19 +331,22 @@ qgraph(Q,graph="sig",gray=TRUE)
 title("Big 5 correlations (p-values)",line=2.5)
 
 # Correlations graph with scores of random subject:
-qgraph(cor(big5),minimum=0.25,cut=0.4,vsize=1.5,groups=big5groups,legend=TRUE,borders=FALSE,scores=as.integer(big5[sample(1:500,1),]),scores.range=c(1,5))
+qgraph(cor(big5),minimum=0.25,cut=0.4,vsize=1.5,groups=big5groups,legend=TRUE,
+  borders=FALSE,scores=as.integer(big5[sample(1:500,1),]),scores.range=c(1,5))
 title("Test scores of random subject",line=2.5)
 layout(1)
 
 # EFA:
 big5efa <- factanal(big5,factors=5,rotation="promax",scores="regression")
-qgraph(big5efa,groups=big5groups,layout="circle",rotation="promax",minimum=0.2,cut=0.4,vsize=c(1.5,15),borders=FALSE,vTrans=200)
+qgraph(big5efa,groups=big5groups,layout="circle",rotation="promax",minimum=0.2,
+  cut=0.4,vsize=c(1.5,15),borders=FALSE,vTrans=200)
 title("Big 5 EFA",line=2.5)
 
 # PCA:
 library("psych")
 big5pca <- principal(cor(big5),5,rotate="promax")
-qgraph(big5pca,groups=big5groups,layout="circle",rotation="promax",minimum=0.2,cut=0.4,vsize=c(1.5,15),borders=FALSE,vTrans=200)
+qgraph(big5pca,groups=big5groups,layout="circle",rotation="promax",minimum=0.2,
+  cut=0.4,vsize=c(1.5,15),borders=FALSE,vTrans=200)
 title("Big 5 PCA",line=2.5)
 
 #### UNWEIGHTED DIRECTED GRAPHS ###
@@ -370,8 +392,8 @@ qgraph(dat.3,layout=L.3,directed=FALSE,edge.labels=TRUE,esize=14,cut=0.4)
 title("cut=0.4",line=2.5)
 
 # With details:
-qgraph(dat.3,layout=L.3,directed=FALSE,edge.labels=TRUE,esize=14,minimum=0.1,maximum=1,
-       cut=0.4,details=TRUE)
+qgraph(dat.3,layout=L.3,directed=FALSE,edge.labels=TRUE,esize=14,minimum=0.1,
+  maximum=1,cut=0.4,details=TRUE)
 title("details=TRUE",line=2.5)
 
 ### Additional topics ###

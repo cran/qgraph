@@ -1,6 +1,7 @@
 
 qgraph.gui <- function(input,corMat,...)
 {
+  
 	if (!require("rpanel")) stop("Package 'rpanel' is required to use GUI functionality")
 
   ## CHECK FOR CORRELATION MATRIX ###:
