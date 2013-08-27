@@ -9,7 +9,7 @@ plot.qgraph <- function(x, ...)
   x$Edgelist$weight -> E$weight
   x$Edgelist$directed -> directed
   x$Edgelist$bidirectional -> bidirectional
-  
+
   # Nodes:
   x$graphAttributes$Nodes$border.color -> bcolor
   x$graphAttributes$Nodes$borders -> borders
@@ -42,6 +42,7 @@ plot.qgraph <- function(x, ...)
   x$graphAttributes$Edges$label.color -> ELcolor
   x$graphAttributes$Edges$width -> edge.width
   x$graphAttributes$Edges$lty -> lty
+  x$graphAttributes$Edges$edge.label.position -> edge.label.position
   x$graphAttributes$Edges$asize -> asize
   x$graphAttributes$Edges$residEdge -> residEdge
   x$graphAttributes$Edges$CircleEdgeEnd -> CircleEdgeEnd
@@ -115,64 +116,80 @@ plot.qgraph <- function(x, ...)
   x$plotOptions$bgres -> bgres
   x$plotOptions$bgcontrol -> bgcontrol
   x$plotOptions$resolution -> res
-
-  rm(x)
+  x$plotOptions$subpars -> subpars
+  x$plotOptions$subplotbg -> subplotbg
   
+  rm(x)
+
   # Some setup
   vAlpha <- col2rgb(vertex.colors,TRUE)[4,]
   midX=numeric(0)
   midY=numeric(0)
   
-  ### Open device:
-  # Start output:
-  if (filetype=='default') if (is.null(dev.list()[dev.cur()])) dev.new(rescale="fixed",width=width,height=height)
-  if (filetype=='R') dev.new(rescale="fixed",width=width,height=height)
-  if (filetype=='X11' | filetype=='x11') x11(width=width,height=height)
-  if (filetype=='eps') postscript(paste(filename,".eps",sep=""),height=height,width=width, horizontal=FALSE)
-  if (filetype=='pdf') pdf(paste(filename,".pdf",sep=""),height=height,width=width)
-  if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),units='in',res=res,height=height,width=width)
-  if (filetype=='png') png(paste(filename,".png",sep=""),units='in',res=res,height=height,width=width)
-  if (filetype=='jpg' | filetype=='jpeg') jpeg(paste(filename,".jpg",sep=""),units='in',res=res,height=height,width=width)
-  if (filetype=="svg")
+  if (length(E$from)>0) 
   {
-    if (R.Version()$arch=="x64") stop("RSVGTipsDevice is not available for 64bit versions of R.")
-    require("RSVGTipsDevice")
-    devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
-  }
-  if (filetype=="tex")
-  {
-    #   # Special thanks to Charlie Sharpsteen for supplying these tikz codes on stackoverflow.com !!!
-    # 	
-    # 	if (!suppressPackageStartupMessages(require(tikzDevice,quietly=TRUE))) stop("tikzDevice must be installed to use filetype='tex'")
-    # 	opt= c( 
-    # 	getOption('tikzLatexPackages'),  
-    #     "\\def\\tooltiptarget{\\phantom{\\rule{1mm}{1mm}}}",
-    #     "\\newbox\\tempboxa\\setbox\\tempboxa=\\hbox{}\\immediate\\pdfxform\\tempboxa \\edef\\emptyicon{\\the\\pdflastxform}",
-    #     "\\newcommand\\tooltip[1]{\\pdfstartlink user{/Subtype /Text/Contents  (#1)/AP <</N \\emptyicon\\space 0 R >>}\\tooltiptarget\\pdfendlink}"
-    # 	)
-    # 	
-    # 	place_PDF_tooltip <- function(x, y, text)
-    # 	{
-    # 
-    # 		# Calculate coordinates
-    # 		tikzX <- round(grconvertX(x, to = "device"), 2)
-    # 		tikzY <- round(grconvertY(y, to = "device"), 2)
-    # 		# Insert node
-    # 		tikzAnnotate(paste(
-    # 		"\\node at (", tikzX, ",", tikzY, ") ",
-    # 		"{\\tooltip{", text, "}};",
-    # 		sep = ''
-    # 		))
-    # 	  invisible()
-    # 	}
-    # 	
-    # 	print("NOTE: Using 'tex' as filetype will take longer to run than other filetypes")
-    # 	
-    # 	tikzDevice:::tikz(paste(filename,".tex",sep=""), standAlone = standAlone, width=width, height=height, packages=opt)
-    
-    stop("Tikz device no longer supported due to removal from CRAN. Please see www.sachaepskamp.com/qgraph for a fix")
+    plotEdgeLabel <- sapply(1:length(E$from),function(i)(is.character(edge.labels[[i]]) | is.expression(edge.labels[[i]]) |  is.call(edge.labels[[i]])) && !identical(edge.labels[[i]],''))
+  } else {
+    plotEdgeLabel <- logical(0)
   }
   
+  if (!(is.expression(edge.labels) | is.character(edge.labels) | is.list(edge.labels) ))  edge.labels <- as.character(edge.labels)
+  
+  ### Open device:
+  # Start output:
+  if (is.function(filetype))
+  {
+    filetype(width=width, height = height)
+    filetype <- ''
+  } else {
+    if (filetype=='default') if (is.null(dev.list()[dev.cur()])) dev.new(rescale="fixed",width=width,height=height)
+    if (filetype=='R') dev.new(rescale="fixed",width=width,height=height)
+    # if (filetype=='X11' | filetype=='x11') x11(width=width,height=height)
+    if (filetype=='eps') postscript(paste(filename,".eps",sep=""),height=height,width=width, horizontal=FALSE)
+    if (filetype=='pdf') pdf(paste(filename,".pdf",sep=""),height=height,width=width)
+    if (filetype=='tiff') tiff(paste(filename,".tiff",sep=""),units='in',res=res,height=height,width=width)
+    if (filetype=='png') png(paste(filename,".png",sep=""),units='in',res=res,height=height,width=width)
+    if (filetype=='jpg' | filetype=='jpeg') jpeg(paste(filename,".jpg",sep=""),units='in',res=res,height=height,width=width)
+    if (filetype=="svg")
+    {
+      if (R.Version()$arch=="x64") stop("RSVGTipsDevice is not available for 64bit versions of R.")
+      require("RSVGTipsDevice")
+      devSVGTips(paste(filename,".svg",sep=""),width=width,height=height,title=filename)
+    }
+    if (filetype=="tex")
+    {
+      #   # Special thanks to Charlie Sharpsteen for supplying these tikz codes on stackoverflow.com !!!
+      # 	
+      # 	if (!suppressPackageStartupMessages(require(tikzDevice,quietly=TRUE))) stop("tikzDevice must be installed to use filetype='tex'")
+      # 	opt= c( 
+      # 	getOption('tikzLatexPackages'),  
+      #     "\\def\\tooltiptarget{\\phantom{\\rule{1mm}{1mm}}}",
+      #     "\\newbox\\tempboxa\\setbox\\tempboxa=\\hbox{}\\immediate\\pdfxform\\tempboxa \\edef\\emptyicon{\\the\\pdflastxform}",
+      #     "\\newcommand\\tooltip[1]{\\pdfstartlink user{/Subtype /Text/Contents  (#1)/AP <</N \\emptyicon\\space 0 R >>}\\tooltiptarget\\pdfendlink}"
+      # 	)
+      # 	
+      # 	place_PDF_tooltip <- function(x, y, text)
+      # 	{
+      # 
+      # 		# Calculate coordinates
+      # 		tikzX <- round(grconvertX(x, to = "device"), 2)
+      # 		tikzY <- round(grconvertY(y, to = "device"), 2)
+      # 		# Insert node
+      # 		tikzAnnotate(paste(
+      # 		"\\node at (", tikzX, ",", tikzY, ") ",
+      # 		"{\\tooltip{", text, "}};",
+      # 		sep = ''
+      # 		))
+      # 	  invisible()
+      # 	}
+      # 	
+      # 	print("NOTE: Using 'tex' as filetype will take longer to run than other filetypes")
+      # 	
+      # 	tikzDevice:::tikz(paste(filename,".tex",sep=""), standAlone = standAlone, width=width, height=height, packages=opt)
+      
+      stop("Tikz device no longer supported due to removal from CRAN. Please see www.sachaepskamp.com/qgraph for a fix")
+    }
+  }  
   
   
   ### START PLOT:
@@ -194,8 +211,8 @@ plot.qgraph <- function(x, ...)
   if (rescale & aspect) {
     l <- original.layout
       # center:
-      l[,1] <- l[,1] - mean(l[,1])
-      l[,2] <- l[,2] - mean(l[,2])
+      l[,1] <- l[,1] - mean(range(l[,1]))
+      l[,2] <- l[,2] - mean(range(l[,2]))
     
       # Ajust for aspect:
       l[,1] <- l[,1] * min(height/width, 1)
@@ -213,8 +230,8 @@ plot.qgraph <- function(x, ...)
       } else l[,2] <- 0
     
     # center again for good measures! (I really have no idea why but whatever):
-    l[,1] <- l[,1] - mean(l[,1])
-    l[,2] <- l[,2] - mean(l[,2])
+    l[,1] <- l[,1] - mean(range(l[,1]))
+    l[,2] <- l[,2] - mean(range(l[,2]))
     
       rm(lTemp)
       
@@ -302,6 +319,8 @@ plot.qgraph <- function(x, ...)
     
     knot.size <- knot.size * normC
     knot.border.width <- knot.border.width * normC
+    
+    residScale <- residScale * normC
   }
   
   ## Normalize curve (linear to half of diagonal in user coordinates):
@@ -319,7 +338,7 @@ plot.qgraph <- function(x, ...)
   {
     omitEdge <- duplicated(srt)&bidirectional
   } else omitEdge <- NULL 
-  
+
   # If images is not NULL, replace subplots with images calls:
   if (!is.null(images))
   {
@@ -345,7 +364,7 @@ plot.qgraph <- function(x, ...)
       }
     }
   }
-  
+
   # Set non-rectangular/square dge shapes with subplots to square:
   if (!is.null(subplots))
   {
@@ -374,6 +393,7 @@ plot.qgraph <- function(x, ...)
   } else {
     knotLayout <- matrix(,0,0)
   }
+  
   
   # For each (sorted from weak to strong) edge:
   for (i in edgesort)
@@ -411,7 +431,7 @@ plot.qgraph <- function(x, ...)
           y2 <- NewPoints[2]
           
           # Replace source of edge to edge of node if needed:
-          if ((any(E$from==E$to[i] & E$to==E$from[i]) & bidirectional[i]) | vAlpha[E$from[i]] < 255)
+          if (plotEdgeLabel[i] || (any(E$from==E$to[i] & E$to==E$from[i]) & bidirectional[i]) | vAlpha[E$from[i]] < 255)
           {
             # 					xd=x2-x1
             # 					yd=y2-y1
@@ -433,12 +453,12 @@ plot.qgraph <- function(x, ...)
             
           }
         }
-        if (!is.logical(edge.labels))
+        if (plotEdgeLabel[i])
         {
-          midX[i]=mean(c(x1,x2))
-          midY[i]=mean(c(y1,y2))
+          midX[i] <- ((1-edge.label.position[i])*x1 + edge.label.position[i]*x2)
+          midY[i] <- ((1-edge.label.position[i])*y1 + edge.label.position[i]*y2)
         }
-        
+             
         lines(c(x1,x2),c(y1,y2),lwd=edge.width[i],col=edge.color[i],lty=lty[i])
         if (directed[i])
         {
@@ -580,10 +600,10 @@ plot.qgraph <- function(x, ...)
           lines(spl,lwd=edge.width[i]*2,col="white")
         }
         
-        if (!is.logical(edge.labels))
+        if (plotEdgeLabel[i])
         {
-          midX[i]=spl$x[floor(length(spl$x)/2)]
-          midY[i]=spl$y[floor(length(spl$y)/2)]
+          midX[i]=spl$x[floor(edge.label.position[i]*length(spl$x))]
+          midY[i]=spl$y[floor(edge.label.position[i]*length(spl$y))]
         }
         
         lines(spl,lwd=edge.width[i],col=edge.color[i],lty=lty[i])        
@@ -620,7 +640,6 @@ plot.qgraph <- function(x, ...)
       }
     } 
   }
-  
   
   
   # Plot knots:
@@ -665,17 +684,22 @@ plot.qgraph <- function(x, ...)
     edgesort2 <- edgesort2[!(duplicated(srt[edgesort2,,drop=FALSE])&bidirectional[edgesort2]) & (!duplicated(knots[edgesort2])|knots[edgesort2]==0)]
     
     if (length(edge.label.cex)==1) edge.label.cex <- rep(edge.label.cex,length(E$from))
-    
+
     if (plotELBG)
     {
       for (i in edgesort2)
       {
-        labwd <- strwidth(edge.labels[[i]],cex=edge.label.cex[i])
-        labht <- strheight(edge.labels[[i]],cex=edge.label.cex[i])
-        polygon(c(midX[i]-labwd/2,midX[i]+labwd/2,midX[i]+labwd/2,midX[i]-labwd/2),
-                c(midY[i]-labht/2,midY[i]-labht/2,midY[i]+labht/2,midY[i]+labht/2),
-                border=NA,
-                col=edge.label.bg[i])
+#        if (((is.character(edge.labels[[i]]) | is.expression(edge.labels[[i]]) |  is.call(edge.labels[[i]])) && !identical(edge.labels[[i]],'')) || length(edge.labels) == 0)
+        #if ((is.character(edge.labels[[i]]) | is.expression(edge.labels[[i]]) |  is.call(edge.labels[[i]])) && !identical(edge.labels[[i]],''))
+        if (plotEdgeLabel[i])
+        {
+          labwd <- strwidth(edge.labels[[i]],cex=edge.label.cex[i])
+          labht <- strheight(edge.labels[[i]],cex=edge.label.cex[i])
+          polygon(c(midX[i]-labwd/2,midX[i]+labwd/2,midX[i]+labwd/2,midX[i]-labwd/2),
+                  c(midY[i]-labht/2,midY[i]-labht/2,midY[i]+labht/2,midY[i]+labht/2),
+                  border=NA,
+                  col=edge.label.bg[i]) 
+        }
       }
     }
     
@@ -712,6 +736,7 @@ plot.qgraph <- function(x, ...)
       #           bordVec <- bordVec[!bordVec%in%whichsub]
       #           points(layout[bordVec,],cex=vsize[bordVec],col=ifelse(duplicated(bordVec),bcolor[bordVec],vertex.colors[bordVec]),lwd=border.width,pch=ifelse(duplicated(bordVec),pch2[bordVec],pch1[bordVec]))            
       
+
       for (i in order(vsize*vsize2,decreasing=TRUE))
       {
         x <- layout[i,1]
@@ -719,18 +744,18 @@ plot.qgraph <- function(x, ...)
         
         if (isTRUE(is.expression(subplots[[i]])))
         {
-          xOff <- Cent2Edge(x,y,pi/2,vsize[i],vsize2[i],shape[i], polygonList)[1] - x
-          yOff <- Cent2Edge(x,y,0,vsize[i],vsize2[i],shape[i], polygonList)[2] - y
+          xOff <- Cent2Edge(x,y,pi/2,vsize[i],vsize2[i],shape[i], offset=0, polygonList=polygonList)[1] - x
+          yOff <- Cent2Edge(x,y,0,vsize[i],vsize2[i],shape[i], offset=0, polygonList=polygonList)[2] - y
           
           usr <- par("usr")
           # Plot background:
-          rect(max(usr[1],x-xOff),max(usr[3],y-yOff),min(usr[2],x+xOff),min(usr[4],y+yOff),col=background,border=NA)
+          rect(max(usr[1],x-xOff),max(usr[3],y-yOff),min(usr[2],x+xOff),min(usr[4],y+yOff),col=subplotbg,border=NA)
           # Plot subplot:
-          subplot(eval(subplots[[i]]),c(max(usr[1],x-xOff),min(usr[2],x+xOff)), c(max(usr[3],y-yOff),min(usr[4],y+yOff)))  
+          subplot(eval(subplots[[i]],envir=globalenv()),c(max(usr[1],x-xOff),min(usr[2],x+xOff)), c(max(usr[3],y-yOff),min(usr[4],y+yOff)), pars = subpars)  
           # Plot border:
-          if (borders[i]) rect(x-xOff,y-yOff,x+xOff,y+yOff,border=bcolor[i],lwd=border.width)
+          if (borders[i]) rect(x-xOff,y-yOff,x+xOff,y+yOff,border=bcolor[i],lwd=border.width[i])
         } else {
-          drawNode(x, y, shape[i], vsize[i], vsize2[i], borders[i], vertex.colors[i], bcolor[i], border.width, polygonList, bars[[i]], barSide[i], barColor[i], barLength[i], barsAtSide)
+          drawNode(x, y, shape[i], vsize[i], vsize2[i], borders[i], vertex.colors[i], bcolor[i], border.width[i], polygonList, bars[[i]], barSide[i], barColor[i], barLength[i], barsAtSide)
         }
       }      
     } else {
@@ -766,7 +791,7 @@ plot.qgraph <- function(x, ...)
       
       
       bordVec <- unlist(lapply(order(vsize,decreasing=FALSE),function(x)rep(x,1+borders[x])))
-      points(layout[bordVec,],cex=vsize[bordVec],col=ifelse(duplicated(bordVec),bcolor[bordVec],vertex.colors[bordVec]),lwd=border.width,pch=ifelse(duplicated(bordVec),pch2[bordVec],pch1[bordVec]))  
+      points(layout[bordVec,],cex=vsize[bordVec],col=ifelse(duplicated(bordVec),bcolor[bordVec],vertex.colors[bordVec]),lwd=border.width[bordVec],pch=ifelse(duplicated(bordVec),pch2[bordVec],pch1[bordVec]))  
     }
     
     
@@ -794,16 +819,8 @@ plot.qgraph <- function(x, ...)
     }
   }
   
-  # Make labels:
-  if (is.logical(labels))
-  {
-    if (labels)
-    {
-      labels=1:nNodes
-    }
-  }
-  
-  if (!is.logical(labels))
+
+  if (any(labels != ''))
   {
     #         labels=as.character(labels)
     # Vertex label symbols:
@@ -1020,4 +1037,5 @@ plot.qgraph <- function(x, ...)
     dev.off()
   }
   par(mar=marOrig, bg=bgOrig)
+  
 }

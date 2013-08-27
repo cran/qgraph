@@ -27,7 +27,7 @@ qgraph( input, ... )
 \section{Output arguments}{
 \describe{
 \item{mar}{A vector of the form c(bottom, left, top, right) which gives the margins. Works similar to the argument in par(). Defaults to c(3,3,3,3)}
-	\item{filetype}{A character containing the file type to save the output in. "R" and "x11" outputs in a new R window ("x11" is preferred for Rstudio), "pdf" creates a pdf file. "svg" creates a svg file (requires RSVGTipsDevice). "tex" creates LaTeX code for the graph (requires tikzDevice). 'jpg', 'tiff' and 'png' can also be used. If this is given any other string (e.g. filetype="") no device is opened. Defaults to 'R' if the current device is the NULL-device or no new device if there already is an open device.}
+	\item{filetype}{A character containing the file type to save the output in. "R" outputs in a new R window, "pdf" creates a pdf file. "svg" creates a svg file (requires RSVGTipsDevice). "tex" creates LaTeX code for the graph (requires tikzDevice). 'jpg', 'tiff' and 'png' can also be used. If this is given any other string (e.g. filetype="") no device is opened. Defaults to 'R' if the current device is the NULL-device or no new device if there already is an open device. A function such as \code{x11} can also be used}
 	\item{filename}{Name of the file without extension}
 	\item{width}{Width of the plot, in inches}
 	\item{height}{Height of the plot, in inches}
@@ -57,6 +57,7 @@ qgraph( input, ... )
 	\item{edge.labels}{If FALSE, no edge labels are plotted. If TRUE, numerical edge weights are printed on the edges. This can also be a vector with a label for each edge. Defaults to FALSE. If a label contains an asterisk (e.g. "y1*") then the asterisk will be omitted and the label will be printed in symbol font (use this for Greek letters). Can also be a list with a label as each element, which can be expressions for more advanced mathematical annotation.}
 	\item{edge.label.cex}{Either a single number or a number per edge used as a scalar of the edge label size. Defaults to 1.}
     \item{edge.label.bg}{Either a logical or character vector/matrix. Indicates the background behind edge labels. If TRUE (default) a white background is plotted behind each edge label. If FALSE no background is plotted behind edge labels. Can also be a single color character, a vector or matrix of color vectors for each edge.}
+    \item{    edge.label.position}{Vetor of numbers between 0 and 1 controlling the relative position of each edge label. Defaults to 0.5 for placing edge labels at the middle of the edge.}
 	\item{bg}{If this is TRUE, a background is plotted in which node colors cast a light of that color on a black background. Can also be a character containing the color of the background Defaults to FALSE}
 	\item{bgcontrol}{The higher this is, the less light each node gives if bg=TRUE. Defaults to 6.}
 	\item{bgres}{square root of the number of pixels used in bg=TRUE, defaults to 100.}
@@ -271,7 +272,7 @@ Fruchterman, T. & Reingold, E. (1991). Graph drawing by force-directed placement
 
 }
 \author{
-Sacha Epskamp <qgraph@sachaepskamp.com>
+Sacha Epskamp <mail@sachaepskamp.com>
 }
 
 \seealso{
