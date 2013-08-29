@@ -71,20 +71,32 @@ qgraph <- function( input, ... )
     {
       if (is.null(qgraphObject$Arguments$directed)) qgraphObject$Arguments$directed <- input$Edgelist$directed
       if (is.null(qgraphObject$Arguments$bidirectional)) qgraphObject$Arguments$bidirectional <- input$Edgelist$bidirectional
-      input <- cbind(input$Edgelist$from,input$Edgelist$to,input$Edgelist$weight)
+      
+      if(input[['graphAttributes']][['Graph']][['weighted']])
+      {
+        input <- cbind(input$Edgelist$from,input$Edgelist$to,input$Edgelist$weight)
+      } else
+      {
+        input <- cbind(input$Edgelist$from,input$Edgelist$to)
+      }
+      qgraphObject$Arguments$edgelist <- TRUE
     }
     
     ### PCALG AND GRAPHNEL ###
-    if (class(input) %in% c("graphNEL","pcAlgo"))
+    if (any(c("graphNEL","pcAlgo")  %in% class(input)  ))
     {
       if (class(input) == "pcAlgo") graphNEL <- input@graph else graphNEL <- input
       qgraphObject$Arguments$directed <- graphNEL@graphData$edgemode == "directed"
       qgraphObject$Arguments$bidirectional <- TRUE
-      qgraphObject$Arguments$labels <- graphNEL@nodes
+      TempLabs  <- graphNEL@nodes
+      if (is.null(qgraphObject$Arguments$labels)) qgraphObject$Arguments$labels  <- graphNEL@nodes
       weights <- sapply(graphNEL@edgeData@data,'[[','weight')
       
       EL <- laply(strsplit(names(weights),split="\\|"),'[',c(1,2))
-      EL <- apply(EL,2,as.numeric)
+#       EL <- apply(EL,2,as.numeric)
+      EL[,1] <- match(EL[,1],TempLabs)
+      EL[,2] <- match(EL[,2],TempLabs)
+      mode(EL) <- "numeric"
       # Create mixed graph if pcAlgo:
       if ("pcAlgo" %in% class(input))
       {
@@ -96,7 +108,40 @@ qgraph <- function( input, ... )
       rm(EL)
       if (any(weights!=1)) input <- cbind(input,weights)
     }
+    ### bnlearn ###
+    if (is(input,"bn"))
+    {
+      bnobject <- input
+      input <- as.matrix(bnobject$arcs)
+      TempLabs  <- names(bnobject$nodes)
+      if (is.null(qgraphObject$Arguments$labels)) qgraphObject$Arguments$labels  <- TempLabs
+      
+      input[] <- as.numeric(match(c(input), TempLabs))
+      mode(input) <- "numeric"
+      
+      srtInput <- aaply(input,1,sort)
+      input <- input[!duplicated(srtInput),]
+      qgraphObject$Arguments$directed <- !(duplicated(srtInput)|duplicated(srtInput,fromLast=TRUE))
+      qgraphObject$Arguments$directed <- qgraphObject$Arguments$directed[!duplicated(srtInput)]
+    }
+  if (is(input,"bn.strength"))
+  {
+    bnobject <- input
+    input <- as.matrix(bnobject[c("from","to","strength")])
+    TempLabs  <- unique(c(bnobject$from,bnobject$to))
+    if (is.null(qgraphObject$Arguments$labels)) qgraphObject$Arguments$labels  <- TempLabs
     
+    input[,1:2] <- as.numeric(match(c(input[,1:2]), TempLabs))
+    input <- as.matrix(input)
+    mode(input) <- "numeric"
+    
+#     srtInput <- aaply(input,1,sort)
+#     input <- input[!duplicated(srtInput),]
+#     qgraphObject$Arguments$directed <- !(duplicated(srtInput)|duplicated(srtInput,fromLast=TRUE))
+#     qgraphObject$Arguments$directed <- qgraphObject$Arguments$directed[!duplicated(srtInput)]
+    qgraphObject$Arguments$directed <- TRUE
+  }
+  
     # Coerce input to matrix:
     input <- as.matrix(input)
     
@@ -145,6 +190,10 @@ qgraph <- function( input, ... )
     if(is.null(qgraphObject$Arguments[['nodeNames']])) nodeNames <- NULL else nodeNames <- qgraphObject$Arguments[['nodeNames']]
     
     if(is.null(qgraphObject$Arguments[['subplots']])) subplots <- NULL else subplots <- qgraphObject$Arguments[['subplots']]
+  if(is.null(qgraphObject$Arguments[['subpars']])) subpars <- NULL else subpars <- qgraphObject$Arguments[['subpars']]
+  
+  if(is.null(qgraphObject$Arguments[['subplotbg']])) subplotbg <- NULL else subplotbg <- qgraphObject$Arguments[['subplotbg']]
+  
     if(is.null(qgraphObject$Arguments[['images']])) images <- NULL else images <- qgraphObject$Arguments[['images']]
     
     # Knots:
@@ -246,6 +295,7 @@ qgraph <- function( input, ... )
     
     if(is.null(qgraphObject$Arguments[['edge.color']])) edge.color <- NULL else edge.color=qgraphObject$Arguments[['edge.color']]
     if(is.null(qgraphObject$Arguments[['edge.label.cex']])) edge.label.cex=1 else edge.label.cex=qgraphObject$Arguments[['edge.label.cex']]
+    if(is.null(qgraphObject$Arguments[['edge.label.position']])) edge.label.position <- 0.5 else edge.label.position=qgraphObject$Arguments[['edge.label.position']]
     
     
     if(is.null(qgraphObject$Arguments$directed))
@@ -376,7 +426,7 @@ qgraph <- function( input, ... )
     if(is.null(qgraphObject$Arguments$label.scale)) label.scale=TRUE else label.scale=qgraphObject$Arguments$label.scale
     if(is.null(qgraphObject$Arguments$scores)) scores=NULL else scores=qgraphObject$Arguments$scores
     if(is.null(qgraphObject$Arguments$scores.range)) scores.range=NULL else scores.range=qgraphObject$Arguments$scores.range
-    if(is.null(qgraphObject$Arguments$lty)) lty=NULL else lty=qgraphObject$Arguments$lty
+    if(is.null(qgraphObject$Arguments$lty)) lty=1 else lty=qgraphObject$Arguments$lty
     if(is.null(qgraphObject$Arguments$vTrans)) vTrans=255 else vTrans=qgraphObject$Arguments$vTrans
     if(is.null(qgraphObject$Arguments[['overlay']])) overlay <- FALSE else overlay <- qgraphObject$Arguments[['overlay']]
     if(is.null(qgraphObject$Arguments[['overlaySize']])) overlaySize <- 0.5 else overlaySize <- qgraphObject$Arguments[['overlaySize']]
@@ -432,7 +482,7 @@ qgraph <- function( input, ... )
 #       if (is.null(groups)) legend=FALSE else legend=TRUE
 #     }
         #if ((legend & filetype!='pdf' & filetype!='eps') | filetype=="svg")
-        if ((legend&is.null(scores))|(filetype=="svg"))
+        if ((legend&is.null(scores))|(identical(filetype,"svg")))
         {
           width=width*(1+(1/GLratio))
         }
@@ -493,11 +543,14 @@ qgraph <- function( input, ... )
     
     # Specify background:
     background <- par("bg")
+    if (background == "transparent") background <- "white"
     if (isColor(bg)) background <- bg
     # Remove alpha:
-    background <- col2rgb(background)
-    background <- rgb(background[1],background[2],background[3],maxColorValue=255)
-    
+    background <- col2rgb(background, alpha = TRUE)
+    background <- rgb(background[1],background[2],background[3],background[4],maxColorValue=255)
+  
+  if (is.null(subplotbg)) subplotbg <- background
+  
     if (isTRUE(edge.label.bg)) edge.label.bg <- background
     if(is.null(qgraphObject$Arguments[['label.color']])) {
       if(is.null(qgraphObject$Arguments$lcolor)) lcolor <- ifelse(mean(col2rgb(background)/255) > 0.5,"black","white") else lcolor <- qgraphObject$Arguments$lcolor
@@ -518,7 +571,7 @@ qgraph <- function( input, ... )
       }
       if (!edgelist)
       {
-        if (length(unique(c(input)))>2) weighted=TRUE else weighted=FALSE
+        if (all(unique(c(input)) %in% c(0,1))) weighted <- FALSE else weighted <- TRUE
       }
     }		
     if (!weighted) cut=0
@@ -531,7 +584,7 @@ qgraph <- function( input, ... )
     {
       if (!is.logical(directed)) if (is.null(directed))
       {
-        if (!all(input==t(input))) directed=TRUE else directed=FALSE
+        if (!isSymmetric(input)) directed=TRUE else directed=FALSE
       }
     }
     
@@ -677,7 +730,7 @@ qgraph <- function( input, ... )
             incl <- matrix(TRUE,nNodes,nNodes)
           } else
           {
-            if (all(input==t(input))) 
+            if (isSymmetric(input))
             {
               
               incl <- upper.tri(input,diag=TRUE)
@@ -808,6 +861,12 @@ qgraph <- function( input, ... )
         lty <- lty[c(incl)]
         lty <- lty[E$weight!=0]
       }
+      
+      if (is.matrix(edge.label.position))
+      {
+        edge.label.position <- edge.label.position[c(incl)]
+        edge.label.position <- edge.label.position[E$weight!=0]
+      }
     }	
     keep <- E$weight!=0
     
@@ -819,7 +878,7 @@ qgraph <- function( input, ... )
     }
     directed <- directed[keep]
     
-    if (!is.null(edge.color)) 
+    if (!is.null(edge.color) && length(edge.color) != sum(keep)) 
     {
       edge.color <- rep(edge.color,length=length(E$from))
       if (length(edge.color) != length(keep)) stop("'edge.color' is wrong length")
@@ -839,6 +898,15 @@ qgraph <- function( input, ... )
     if (length(edge.label.bg) != length(keep)) stop("'edge.label.bg' is wrong length")
     if (length(edge.label.bg)==length(keep)) edge.label.bg <- edge.label.bg[keep]
     
+  if (length(lty) == 1) lty <- rep(lty,length(E$from))
+  if (length(lty) != length(keep) & length(lty) != sum(keep)) stop("'lty' is wrong length")
+  if (length(lty)==length(keep)) lty <- lty[keep]
+  
+  if (length(edge.label.position) == 1) edge.label.position <- rep(edge.label.position,length(E$from))
+  if (length(edge.label.position) != length(keep) & length(edge.label.position) != sum(keep)) stop("'edge.label.position' is wrong length")
+  if (length(edge.label.position)==length(keep)) edge.label.position <- edge.label.position[keep]  
+  
+  
     if (!is.null(ELcolor))
     {
       ELcolor <- rep(ELcolor,length = length(E$from))
@@ -881,6 +949,12 @@ qgraph <- function( input, ... )
         edge.labels <- edge.labels[keep]
       }
     }
+  
+  if (length(curve)==1) 
+  {
+    curve <- rep(curve,length(E$from))
+  }
+  if (length(curve)==length(keep)) curve <- curve[keep]    
     
     E$from=E$from[keep]
     E$to=E$to[keep]
@@ -903,19 +977,18 @@ qgraph <- function( input, ... )
     
     
     # lty and curve settings:
-    if (is.null(lty))
-    {
-      lty=rep(1,length(E$from))
-    } else 
-    {
+
       if (length(lty)==1) lty=rep(lty,length(E$from))
-    }
+      
+  if (length(edge.label.position)==1) edge.label.position=rep(edge.label.position,length(E$from))
+  
     
     # Make bidirectional vector:
     if (length(bidirectional)==1) bidirectional=rep(bidirectional,length(E$from))
     if (length(bidirectional)!=length(E$from)) stop("Bidirectional vector must be of legth 1 or equal to the number of edges")
     
     srt <- cbind(pmin(E$from,E$to), pmax(E$from,E$to) , knots, abs(E$weight) > minimum)
+
     if (!curveAll)
     {
       dub <- duplicated(srt)|duplicated(srt,fromLast=TRUE)
@@ -1380,7 +1453,10 @@ qgraph <- function( input, ... )
       for (i in 1:length(groups)) vertex.colors[groups[[i]]]=color[i] 
     } else vertex.colors <- rep(color, length=nNodes)
     if (length(color)==nNodes) vertex.colors <- color
-    vertex.colors[vertex.colors=="background"] <- background
+    if (all(col2rgb(background,TRUE) == col2rgb("transparent",TRUE)))
+    {
+      vertex.colors[vertex.colors=="background"] <- "white"
+    } else  vertex.colors[vertex.colors=="background"] <- background
     
     # Dummy groups list:
     if (is.null(groups)) 
@@ -1524,14 +1600,7 @@ qgraph <- function( input, ... )
     
     # Edge labels:
     # Make labels:
-    if (is.logical(edge.labels))
-    {
-      if (edge.labels)
-      {
-        edge.labels=round(E$weight,2)
-      }
-    }
-    
+
     edge.font=rep(1,length(E$from))
   
     if (!is.logical(edge.labels))
@@ -1556,8 +1625,16 @@ qgraph <- function( input, ... )
         
         edge.labels[edge.labels=="NA"]=""
       }  
+    } else
+    {
+      if (edge.labels)
+      {
+        edge.labels= as.character(round(E$weight,2))
+      } else edge.labels <- rep('',length(E$from))
     }
     
+    if (is.numeric(edge.labels)) edge.labels <- as.character(edge.labels)
+  
   # Bars:
   length(bars) <- nNodes
   barSide <- rep(barSide,nNodes)
@@ -1592,6 +1669,21 @@ qgraph <- function( input, ... )
   
   # Node names:
   if (is.null(nodeNames)) nodeNames <- labels
+  
+  
+  # Make labels:
+  if (is.logical(labels))
+  {
+    if (labels)
+    {
+      labels=1:nNodes
+    } else 
+    {
+      labels <- rep('',nNodes)
+    }
+  }
+  
+  border.width <- rep(border.width, nNodes)
   
     ########### SPLIT HERE ###########
   
@@ -1635,6 +1727,7 @@ qgraph <- function( input, ... )
   qgraphObject$graphAttributes$Edges$label.color <- ELcolor
   qgraphObject$graphAttributes$Edges$width <- edge.width
   qgraphObject$graphAttributes$Edges$lty <- lty
+  qgraphObject$graphAttributes$Edges$edge.label.position <- edge.label.position
   qgraphObject$graphAttributes$Edges$residEdge <- residEdge
   qgraphObject$graphAttributes$Edges$CircleEdgeEnd <- CircleEdgeEnd
   qgraphObject$graphAttributes$Edges$asize <- asize
@@ -1707,6 +1800,8 @@ qgraph <- function( input, ... )
   qgraphObject$plotOptions$bgres <- bgres
   qgraphObject$plotOptions$bgcontrol <- bgcontrol
   qgraphObject$plotOptions$resolution <- res
+  qgraphObject$plotOptions$subpars <- subpars
+  qgraphObject$plotOptions$subplotbg <- subplotbg
   
     if (!DoNotPlot)
     {
