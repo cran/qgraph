@@ -1,6 +1,6 @@
 
 
-qgraph.animate <- function(input,ind=NULL,...,constraint=10,growth="order",titles=NULL,sleep=0)
+qgraph.animate <- function(input,ind=NULL,...,constraint=10,growth="order",titles=NULL,sleep=0,smooth = TRUE, plotGraphs = TRUE, progress = TRUE)
 {
   
   
@@ -26,6 +26,7 @@ qgraph.animate <- function(input,ind=NULL,...,constraint=10,growth="order",title
   # 		}
   # 	}
   # }
+
   arguments <- list(...)
   
   # Import arguments:
@@ -142,9 +143,20 @@ qgraph.animate <- function(input,ind=NULL,...,constraint=10,growth="order",title
   if (ncol(ind) != n) stop("Number of columns in ind must correspond to total number of nodes")
   if (inputIsList) if (nrow(ind)!=length(inputList)) stop("Number of frames according to length of input different than according to length of ind")
   
+  # Graphs list:
+  Graphs <- list()
   
   # Start the loop:
   sub <- NULL
+  
+  
+  ### PRogress bar:
+  if (progress)
+  {
+    message("Computing Graphs")
+    pb <- txtProgressBar(min = 0, max = nrow(ind), title = "Computing Graphs:", style = 3)
+  }
+  
   
   for (i in seq(nrow(ind)))
   {
@@ -166,12 +178,125 @@ qgraph.animate <- function(input,ind=NULL,...,constraint=10,growth="order",title
     class(arg2) <- "qgraph"
     
     # Run qgraph:
-    if (length(labels) ==n) init <- qgraph(inputSub,layout="spring",layout.par=layout.par,arg2,labels=labels[sub])$layout.orig
-    else init <- qgraph(inputSub,layout="spring",layout.par=layout.par,arg2,labels=labels)$layout.orig
+    if (length(labels) ==n)
+    {
+      Graphs[[i]] <- qgraph(inputSub,layout="spring",layout.par=layout.par,arg2,labels=labels[sub],DoNotPlot = TRUE)
+      init <- Graphs[[i]]$layout.orig
+    } else 
+    {
+      Graphs[[i]] <- qgraph(inputSub,layout="spring",layout.par=layout.par,arg2,labels=labels,DoNotPlot = TRUE)
+      init <- Graphs[[i]]$layout.orig
+    }
     
     if (!is.null(titles)) title(titles[i],line=-1)
-    Sys.sleep(sleep)
+    
+    ### PRogress bar:
+    if (progress)
+    {
+      setTxtProgressBar(pb, i)
+    }
+    
   }
+  ### PRogress bar:
+  if (progress)
+  {
+    close(pb)
+  }
+  
+
+  if (smooth)
+  {
+    ### PRogress bar:
+    if (progress)
+    {
+      message("Smoothing Graphs")
+      pb <- txtProgressBar(min = 0, max = n, title = "Smoothing Graphs:", style = 3)
+    }
+    
+    # Extract Layouts
+    Layouts <- lapply(Graphs,'[[','layout')
+           
+    # For every node, smooth:
+    for (node in 1:n)
+    {      
+     # Graphs node is present in:
+      GraphsWithNode <- which(ind[,node])
+      
+      # Node ID in each graph
+      NodeIDs <- sapply(GraphsWithNode,function(g)sum(ind[g,1:node]))
+
+      # Coordinates:
+      Coord <- do.call(rbind,mapply(l = Layouts[GraphsWithNode], i = NodeIDs, FUN = function(l,i) l[i,], SIMPLIFY = FALSE))
+      
+      if (nrow(Coord) > 3)
+      {
+        CoordSmooth <- matrix(,nrow(Coord),ncol(Coord))    
+        CoordSmooth[,1] <- predict(loess(I(Coord[,1]) ~ I(1:nrow(Coord))))
+        CoordSmooth[,2] <- predict(loess(I(Coord[,2]) ~ I(1:nrow(Coord))))        
+      } else 
+      {
+        CoordSmooth <- Coord 
+      }
+
+#       
+#      plot(Coord[,2])
+#      lines(CoordSmooth[,2])
+    
+      # Write back coordinates:
+      for (g in seq_along(GraphsWithNode))
+      {
+        Graphs[[GraphsWithNode[g]]]$layout[NodeIDs[g],1] <- CoordSmooth[g,1]
+        Graphs[[GraphsWithNode[g]]]$layout[NodeIDs[g],2] <- CoordSmooth[g,2]
+      }
+      
+      ### PRogress bar:
+      if (progress)
+      {
+        setTxtProgressBar(pb, node)
+      }
+    }
+    ### PRogress bar:
+    if (progress)
+    {
+      close(pb)
+    }
+    
+  }
+  
+  # Plot graphs:
+    ### PRogress bar:
+    if (progress)
+    {
+      if (plotGraphs)
+      {
+        message("Plotting Graphs") 
+      } else message("Recomputing Graphs")
+      
+      pb <- txtProgressBar(min = 0, max = length(Graphs), title = "Plotting Graphs:", style = 3)
+    }
+    
+    
+    for (graph in seq_along(Graphs))
+    {
+      Graphs[[graph]] <- qgraph(Graphs[[graph]], DoNotPlot = !plotGraphs, layout = Graphs[[graph]]$layout )
+#       plot(Graphs[[graph]])
+      Sys.sleep(sleep)
+      
+      ### PRogress bar:
+      if ( progress)
+      {
+        setTxtProgressBar(pb, graph)
+      }
+    }
+    
+    ### PRogress bar:
+    if ( progress)
+    {
+      close(pb)
+    }
+  
+  # Return graphs:
+  invisible(Graphs)
 }
 
 
