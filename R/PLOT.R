@@ -11,7 +11,7 @@ plot.qgraph <- function(x, ...)
   x$Edgelist$weight -> E$weight
   x$Edgelist$directed -> directed
   x$Edgelist$bidirectional -> bidirectional
-
+  
   # Nodes:
   x$graphAttributes$Nodes$border.color -> bcolor
   x$graphAttributes$Nodes$borders -> borders
@@ -75,39 +75,67 @@ plot.qgraph <- function(x, ...)
   x$graphAttributes$Graph$polygonList -> polygonList
   x$graphAttributes$Graph$mode -> mode
   x$graphAttributes$Graph$color -> color
-
+  
   # Layout:
   x$layout -> layout
   x$layout.orig -> original.layout
   
   # Plot options:
-  x$plotOptions$filetype -> filetype
-  x$plotOptions$filename -> filename
+#   x$plotOptions$filetype -> filetype
+#   if (missing(filetype)) x$plotOptions$filetype -> filetype
+#   if (missing(filename)) x$plotOptions$filename -> filename
+#   if (missing(normalize)) x$plotOptions$normalize -> normalize
+#   if (missing(plot)) x$plotOptions$plot -> plot
+#   if (missing(mar)) x$plotOptions$mar -> mar
+#   if (missing(GLratio)) x$plotOptions$GLratio -> GLratio
+#   if (missing(legend)) x$plotOptions$legend -> legend
+#   if (missing(legend.cex)) x$plotOptions$legend.cex -> legend.cex
+#   if (missing(pty)) x$plotOptions$pty -> pty
+#   if (missing(XKCD)) x$plotOptions$XKCD -> XKCD
+#   if (missing(arrows)) x$plotOptions$arrows -> arrows
+#   if (missing(arrowAngle)) x$plotOptions$arrowAngle -> arrowAngle
+#   if (missing(open)) x$plotOptions$open -> open
+#   if (missing(curvePivot)) x$plotOptions$curvePivot -> curvePivot
+#   if (missing(curveShape)) x$plotOptions$curveShape -> curveShape
+#   if (missing(curveScale)) x$plotOptions$curveScale -> curveScale
+#   if (missing(curvePivotShape)) x$plotOptions$curvePivotShape -> curvePivotShape
+#   if (missing(label.scale)) x$plotOptions$label.scale -> label.scale
+#   if (missing(label.norm)) x$plotOptions$label.norm -> label.norm
+#   if (missing(label.prop)) x$plotOptions$label.prop -> label.prop
+#   if (missing(overlay)) x$plotOptions$overlay -> overlay
+#   if (missing(details)) x$plotOptions$details -> details
+#   if (missing(legend.mode)) x$plotOptions$legend.mode -> legend.mode
+
+x$plotOptions$filetype -> filetype
+x$plotOptions$filename -> filename
+x$plotOptions$normalize -> normalize
+x$plotOptions$plot -> plot
+x$plotOptions$mar -> mar
+x$plotOptions$GLratio -> GLratio
+x$plotOptions$legend -> legend
+x$plotOptions$legend.cex -> legend.cex
+x$plotOptions$pty -> pty
+x$plotOptions$XKCD -> XKCD
+x$plotOptions$arrows -> arrows
+x$plotOptions$arrowAngle -> arrowAngle
+x$plotOptions$open -> open
+x$plotOptions$curvePivot -> curvePivot
+x$plotOptions$curveShape -> curveShape
+x$plotOptions$curveScale -> curveScale
+x$plotOptions$curvePivotShape -> curvePivotShape
+x$plotOptions$label.scale -> label.scale
+x$plotOptions$label.norm -> label.norm
+x$plotOptions$label.prop -> label.prop
+x$plotOptions$overlay -> overlay
+x$plotOptions$details -> details
+x$plotOptions$legend.mode -> legend.mode
+
   x$plotOptions$background -> background
   x$plotOptions$bg -> bg
-  x$plotOptions$normalize -> normalize
-  x$plotOptions$plot -> plot
-  x$plotOptions$mar -> mar
-  x$plotOptions$GLratio -> GLratio
-  x$plotOptions$legend -> legend
-  x$plotOptions$legend.cex -> legend.cex
-  x$plotOptions$pty -> pty
-  x$plotOptions$XKCD -> XKCD
   x$plotOptions$residuals -> residuals
   x$plotOptions$residScale -> residScale
-  x$plotOptions$arrows -> arrows
-  x$plotOptions$arrowAngle -> arrowAngle
-  x$plotOptions$open -> open
-  x$plotOptions$curvePivot -> curvePivot
-  x$plotOptions$curveShape -> curveShape
-  x$plotOptions$curveScale -> curveScale
-  x$plotOptions$curvePivotShape -> curvePivotShape
-  x$plotOptions$label.scale -> label.scale
-  x$plotOptions$label.norm -> label.norm
-  x$plotOptions$label.prop -> label.prop
-  x$plotOptions$overlay -> overlay
-  x$plotOptions$details -> details
-  x$plotOptions$legend.mode -> legend.mode
+
+
   x$plotOptions$srt -> srt
   x$plotOptions$gray -> gray
   x$plotOptions$overlaySize -> overlaySize
@@ -126,9 +154,11 @@ plot.qgraph <- function(x, ...)
   x$plotOptions$title -> title
   x$plotOptions$preExpression -> preExpression
   x$plotOptions$postExpression -> postExpression
+  x$plotOptions$usePCH -> usePCH
+  x$plotOptions$node.resolution -> node.resolution
   
   rm(x)
-
+  
   # Some setup
   vAlpha <- col2rgb(vertex.colors,TRUE)[4,]
   midX=numeric(0)
@@ -224,44 +254,44 @@ plot.qgraph <- function(x, ...)
   
   if (rescale & aspect) {
     l <- original.layout
-      # center:
-      l[,1] <- l[,1] - mean(range(l[,1]))
-      l[,2] <- l[,2] - mean(range(l[,2]))
+    # center:
+    l[,1] <- l[,1] - mean(range(l[,1]))
+    l[,2] <- l[,2] - mean(range(l[,2]))
     
-      # Ajust for aspect:
-      l[,1] <- l[,1] * min(height/width, 1)
-      l[,2] <- l[,2] * min(width/height, 1)
+    # Ajust for aspect:
+    l[,1] <- l[,1] * min(height/width, 1)
+    l[,2] <- l[,2] * min(width/height, 1)
     
-      lTemp <- l
-      
-      if (length(unique(lTemp[,1]))>1)
-      {
-        l[,1]=(lTemp[,1]-min(lTemp))/(max(lTemp)-min(lTemp))*2-1
-      } else l[,1] <- 0
-      if (length(unique(lTemp[,2]))>1)
-      {
-        l[,2]=(lTemp[,2]-min(lTemp))/(max(lTemp)-min(lTemp))*2-1 
-      } else l[,2] <- 0
+    lTemp <- l
+    
+    if (length(unique(lTemp[,1]))>1)
+    {
+      l[,1]=(lTemp[,1]-min(lTemp))/(max(lTemp)-min(lTemp))*2-1
+    } else l[,1] <- 0
+    if (length(unique(lTemp[,2]))>1)
+    {
+      l[,2]=(lTemp[,2]-min(lTemp))/(max(lTemp)-min(lTemp))*2-1 
+    } else l[,2] <- 0
     
     # center again for good measures! (I really have no idea why but whatever):
     l[,1] <- l[,1] - mean(range(l[,1]))
     l[,2] <- l[,2] - mean(range(l[,2]))
     
-      rm(lTemp)
-      
-      
-      #     # Equalize white space:
-      #     if (diff(range(l[,1])) < 2)
-      #     {
-      #       l[,1] <- diff(range(l[,1]))/2 + l[,1]
-      #     }
-      #     if (diff(range(l[,2])) < 2)
-      #     {
-      #       l[,2] <- (2-diff(range(l[,2])))/2 + l[,2]
-      #     }
-      
-      layout <- l    
-    }
+    rm(lTemp)
+    
+    
+    #     # Equalize white space:
+    #     if (diff(range(l[,1])) < 2)
+    #     {
+    #       l[,1] <- diff(range(l[,1]))/2 + l[,1]
+    #     }
+    #     if (diff(range(l[,2])) < 2)
+    #     {
+    #       l[,2] <- (2-diff(range(l[,2])))/2 + l[,2]
+    #     }
+    
+    layout <- l    
+  }
   
   # Rescale dims:
   if (pty=='s')
@@ -301,10 +331,10 @@ plot.qgraph <- function(x, ...)
     colarray=((2.2-colarray)/2.2)^bgcontrol
     
     colarray2=array(dim=c(3,bgres,bgres))
-#   }
-#   
-#   if (is.logical(bg)) if (bg){
-#     
+    #   }
+    #   
+    #   if (is.logical(bg)) if (bg){
+    #     
     
     for (i in 1:bgres) {
       for (j in 1:bgres) {
@@ -351,7 +381,7 @@ plot.qgraph <- function(x, ...)
   {
     omitEdge <- duplicated(srt)&bidirectional
   } else omitEdge <- NULL 
-
+  
   # If images is not NULL, replace subplots with images calls:
   if (!is.null(images))
   {
@@ -377,7 +407,7 @@ plot.qgraph <- function(x, ...)
       }
     }
   }
-
+  
   # Set non-rectangular/square dge shapes with subplots to square:
   if (!is.null(subplots))
   {
@@ -459,14 +489,14 @@ plot.qgraph <- function(x, ...)
             
           }
         }
- 
+        
         
         if (plotEdgeLabel[i])
         {
           midX[i] <- ((1-edge.label.position[i])*x1 + edge.label.position[i]*x2)
           midY[i] <- ((1-edge.label.position[i])*y1 + edge.label.position[i]*y2)
         }
-             
+        
         
         
         ## Plot edges and arrows:
@@ -479,35 +509,35 @@ plot.qgraph <- function(x, ...)
                  arrows=arrows,
                  arrowAngle=arrowAngle,
                  open=open)
-#         
-#         lines(c(x1,x2),c(y1,y2),lwd=edge.width[i],col=edge.color[i],lty=lty[i])
-#         if (directed[i])
-#         {
-#           if (!is.logical(arrows))
-#           {
-#             Ax=seq(x1,x2,length=arrows+2)
-#             Ay=seq(y1,y2,length=arrows+2)
-#             for (a in 1:arrows+1)
-#             {
-#               #                   qgraph.arrow(Ax[a],Ay[a],x1,y1,length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
-#               #                                col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
-#               DrawArrow(Ax[a],Ay[a],atan2usr2in(Ax[a]-x1,Ay[a]-y1),angle=arrowAngle,cex=asize[i],open=open,lwd=max(edge.width[i]/2,1),lty=lty[i],edge.color[i])
-#             }
-#           }
-#           else if (arrows)
-#           {
-#             #                 qgraph.arrow(x2,y2,x1,y1,length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
-#             #                              col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
-#             DrawArrow(x2,y2,atan2usr2in(x2-x1,y2-y1),angle=arrowAngle,cex=asize[i],open=open,lwd=max(edge.width[i]/2,1),lty=lty[i],edge.color[i])
-#             
-#             if (any(E$from==E$to[i] & E$to==E$from[i]) & bidirectional[i])
-#             {
-#               #                   qgraph.arrow(x1,y1,x2,y2,length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
-#               #                                col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
-#               DrawArrow(x1,y1,atan2usr2in(x1-x2,y1-y2),angle=arrowAngle,cex=asize[i],open=open,lwd=max(edge.width[i]/2,1),lty=lty[i],edge.color[i])
-#             }
-#           }
-#         }
+        #         
+        #         lines(c(x1,x2),c(y1,y2),lwd=edge.width[i],col=edge.color[i],lty=lty[i])
+        #         if (directed[i])
+        #         {
+        #           if (!is.logical(arrows))
+        #           {
+        #             Ax=seq(x1,x2,length=arrows+2)
+        #             Ay=seq(y1,y2,length=arrows+2)
+        #             for (a in 1:arrows+1)
+        #             {
+        #               #                   qgraph.arrow(Ax[a],Ay[a],x1,y1,length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+        #               #                                col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
+        #               DrawArrow(Ax[a],Ay[a],atan2usr2in(Ax[a]-x1,Ay[a]-y1),angle=arrowAngle,cex=asize[i],open=open,lwd=max(edge.width[i]/2,1),lty=lty[i],edge.color[i])
+        #             }
+        #           }
+        #           else if (arrows)
+        #           {
+        #             #                 qgraph.arrow(x2,y2,x1,y1,length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+        #             #                              col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
+        #             DrawArrow(x2,y2,atan2usr2in(x2-x1,y2-y1),angle=arrowAngle,cex=asize[i],open=open,lwd=max(edge.width[i]/2,1),lty=lty[i],edge.color[i])
+        #             
+        #             if (any(E$from==E$to[i] & E$to==E$from[i]) & bidirectional[i])
+        #             {
+        #               #                   qgraph.arrow(x1,y1,x2,y2,length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+        #               #                                col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
+        #               DrawArrow(x1,y1,atan2usr2in(x1-x2,y1-y2),angle=arrowAngle,cex=asize[i],open=open,lwd=max(edge.width[i]/2,1),lty=lty[i],edge.color[i])
+        #             }
+        #           }
+        #         }
       } else {
         if (E$from[i]==E$to[i])
         {
@@ -516,7 +546,7 @@ plot.qgraph <- function(x, ...)
           #               loopY=loop*3*(0.5*vsize[E$to[i]]*0.130*(7/height)*par("cin")[2])
           #               spy=c(y1,y1+loopY,y1)
           #               spl <- spl2 <- xspline(c(x1,spx,x2),c(y1,spy,y2),1,draw=FALSE)
-
+          
           spl <- SelfLoop(x1,y1,loopRotation[E$from[i]],vsize[E$from[i]],vsize2[E$from[i]],shape[E$from[i]],residuals,residScale,polygonList,offset=ifelse(XKCD,2,0))
           
         } else 
@@ -550,7 +580,6 @@ plot.qgraph <- function(x, ...)
               spx <- curvemid[1]
               spy <- curvemid[2]
             }
-            
             spl=xspline(c(x1,spx,x2),c(y1,spy,y2),splShape,draw=FALSE) 
           }
           
@@ -559,7 +588,7 @@ plot.qgraph <- function(x, ...)
         {
           recurve <- FALSE
           
-
+          
           # Replace source to fixed points if specified in edgeConnectPoints:
           if (!is.null(edgeConnectPoints) && !is.na(edgeConnectPoints[i,1]))
           {
@@ -577,8 +606,8 @@ plot.qgraph <- function(x, ...)
             
             recurve <- TRUE
           } 
-            
-            
+          
+          
           
           # Replace destination of edge to edge of node if needed:
           #           if (is.logical(arrows)| vAlpha[E$to[i]] < 255)
@@ -608,21 +637,21 @@ plot.qgraph <- function(x, ...)
           
           if (recurve)
           {
-#             # Update curve if needed:
-#             if (isTRUE(curveScale))
-#             {
-#               usr <- par("usr")
-#               AverageLength <- sqrt(((usr[2]-usr[1]) * (usr[4]-usr[3])) / nNodes)
-#               EdgeLenght <- sqrt((x2 - x1)^2 + (y2 - y1)^2)
-#               curve[i] <- curve[i] * EdgeLenght /AverageLength
-#             }
+            #             # Update curve if needed:
+            #             if (isTRUE(curveScale))
+            #             {
+            #               usr <- par("usr")
+            #               AverageLength <- sqrt(((usr[2]-usr[1]) * (usr[4]-usr[3])) / nNodes)
+            #               EdgeLenght <- sqrt((x2 - x1)^2 + (y2 - y1)^2)
+            #               curve[i] <- curve[i] * EdgeLenght /AverageLength
+            #             }
             
             if (knots[i]!=0)
             {
               spl <- xspline(c(x1,knotLayout[knots[i],1],x2),c(y1,knotLayout[knots[i],2],y2),0,draw=FALSE)
             } else {               
               
-            if (residEdge[i])  curvemid <- PerpMid(c(x1,y1),c(x2,y2),cex=curve[i]) 
+              if (residEdge[i])  curvemid <- PerpMid(c(x1,y1),c(x2,y2),cex=curve[i]) 
               
               # Add pivots:
               if (is.numeric(curvePivot))
@@ -641,8 +670,18 @@ plot.qgraph <- function(x, ...)
                 spx <- curvemid[1]
                 spy <- curvemid[2]
               }
-            
-              spl=xspline(c(x1,spx,x2),c(y1,spy,y2),splShape,draw=FALSE) 
+              
+              # Check if midpoint is not curved but indented:r
+              tans <- atan2(x2-x1,y2-y1) - (atan2(spx-x1,spy-y1) + c(-2*pi,0,2*pi))
+              tans <- tans[which.min(abs(tans))]
+#               if (sign(atan2(x2-x1,y2-y1) - atan2(spx-x1,spy-y1)) != sign(curve[i]))
+              if (sign(tans) != sign(curve[i]))
+              {
+                spl <- list(x = seq(x1, x2, length=length(spx)+2), y = seq(y1, y2, length=length(spx)+2))
+              } else 
+              {
+                spl=xspline(c(x1,spx,x2),c(y1,spy,y2),splShape,draw=FALSE)  
+              }
             }
           }
         }
@@ -685,37 +724,37 @@ plot.qgraph <- function(x, ...)
                  arrows=arrows,
                  arrowAngle=arrowAngle,
                  open=open)
-#         lines(spl,lwd=edge.width[i],col=edge.color[i],lty=lty[i])        
-#         
-#         if (directed[i])
-#         {
-#           if (!is.logical(arrows))
-#           {
-#             Ax=seq(1,length(spl$x),length=arrows+2)
-#             Ay=seq(1,length(spl$y),length=arrows+2)
-#             for (a in 2:(arrows+1))
-#             {
-#               #                   qgraph.arrow(spl$x[Ax[a]+1],spl$y[Ay[a]+1],spl$x[Ax[a]],spl$y[Ay[a]],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
-#               #                                col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
-#               
-#               DrawArrow(spl$x[Ax[a]+1],spl$y[Ay[a]+1],atan2usr2in(spl$x[Ax[a]+1]-spl$x[Ax[a]],spl$y[Ay[a]+1]-spl$y[Ay[a]]),angle=arrowAngle,cex=asize[i],open=open,lwd=max(edge.width[i]/2,1),lty=lty[i],edge.color[i])
-#             }
-#           }
-#           else if (arrows)
-#           {
-#             #                 qgraph.arrow(spl$x[length(spl$x)],spl$y[length(spl$y)],spl$x[length(spl$x)-1],spl$y[length(spl$y)-1],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
-#             #                              col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
-#             DrawArrow(spl$x[length(spl$x)],spl$y[length(spl$y)],atan2usr2in(spl$x[length(spl$x)]-spl$x[length(spl$x)-1],spl$y[length(spl$y)]-spl$y[length(spl$y)-1]),angle=arrowAngle,cex=asize[i],open=open,lwd=max(edge.width[i]/2,1),lty=lty[i],edge.color[i])
-#             
-#             if (any(E$from==E$to[i] & E$to==E$from[i]) & bidirectional[i])
-#             {
-#               #                   qgraph.arrow(spl$x[1],spl$y[1],spl$x[2],spl$y[2],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
-#               #                                col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
-#               DrawArrow(spl$x[1],spl$y[1],atan2usr2in(spl$x[1]-spl$x[2],spl$y[1]-spl$y[2]),angle=arrowAngle,cex=asize[i],open=open,lwd=max(edge.width[i]/2,1),lty=lty[i],edge.color[i])
-#             }
-#           }
-#           
-#         }
+        #         lines(spl,lwd=edge.width[i],col=edge.color[i],lty=lty[i])        
+        #         
+        #         if (directed[i])
+        #         {
+        #           if (!is.logical(arrows))
+        #           {
+        #             Ax=seq(1,length(spl$x),length=arrows+2)
+        #             Ay=seq(1,length(spl$y),length=arrows+2)
+        #             for (a in 2:(arrows+1))
+        #             {
+        #               #                   qgraph.arrow(spl$x[Ax[a]+1],spl$y[Ay[a]+1],spl$x[Ax[a]],spl$y[Ay[a]],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+        #               #                                col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
+        #               
+        #               DrawArrow(spl$x[Ax[a]+1],spl$y[Ay[a]+1],atan2usr2in(spl$x[Ax[a]+1]-spl$x[Ax[a]],spl$y[Ay[a]+1]-spl$y[Ay[a]]),angle=arrowAngle,cex=asize[i],open=open,lwd=max(edge.width[i]/2,1),lty=lty[i],edge.color[i])
+        #             }
+        #           }
+        #           else if (arrows)
+        #           {
+        #             #                 qgraph.arrow(spl$x[length(spl$x)],spl$y[length(spl$y)],spl$x[length(spl$x)-1],spl$y[length(spl$y)-1],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+        #             #                              col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
+        #             DrawArrow(spl$x[length(spl$x)],spl$y[length(spl$y)],atan2usr2in(spl$x[length(spl$x)]-spl$x[length(spl$x)-1],spl$y[length(spl$y)]-spl$y[length(spl$y)-1]),angle=arrowAngle,cex=asize[i],open=open,lwd=max(edge.width[i]/2,1),lty=lty[i],edge.color[i])
+        #             
+        #             if (any(E$from==E$to[i] & E$to==E$from[i]) & bidirectional[i])
+        #             {
+        #               #                   qgraph.arrow(spl$x[1],spl$y[1],spl$x[2],spl$y[2],length=asize[i],angle=30*pi/180,lwd=max(edge.width[i]/2,1),
+        #               #                                col=edge.color[i],open=open,Xasp=width/height,lty=lty[i])
+        #               DrawArrow(spl$x[1],spl$y[1],atan2usr2in(spl$x[1]-spl$x[2],spl$y[1]-spl$y[2]),angle=arrowAngle,cex=asize[i],open=open,lwd=max(edge.width[i]/2,1),lty=lty[i],edge.color[i])
+        #             }
+        #           }
+        #           
+        #         }
       }
     } 
   }
@@ -763,12 +802,12 @@ plot.qgraph <- function(x, ...)
     edgesort2 <- edgesort2[!(duplicated(srt[edgesort2,,drop=FALSE])&bidirectional[edgesort2]) & (!duplicated(knots[edgesort2])|knots[edgesort2]==0)]
     
     if (length(edge.label.cex)==1) edge.label.cex <- rep(edge.label.cex,length(E$from))
-
+    
     if (plotELBG)
     {
       for (i in edgesort2)
       {
-#        if (((is.character(edge.labels[[i]]) | is.expression(edge.labels[[i]]) |  is.call(edge.labels[[i]])) && !identical(edge.labels[[i]],'')) || length(edge.labels) == 0)
+        #        if (((is.character(edge.labels[[i]]) | is.expression(edge.labels[[i]]) |  is.call(edge.labels[[i]])) && !identical(edge.labels[[i]],'')) || length(edge.labels) == 0)
         #if ((is.character(edge.labels[[i]]) | is.expression(edge.labels[[i]]) |  is.call(edge.labels[[i]])) && !identical(edge.labels[[i]],''))
         if (plotEdgeLabel[i])
         {
@@ -801,11 +840,13 @@ plot.qgraph <- function(x, ...)
   # scale border width:
   #       border.width <- border.width * normC
   
+  # If usePCH = NULL, detect if device or resizable R plot:
+  if (is.null(usePCH)) usePCH <- grepl("(RStudioGD)|(x11)|(X11)|(quartz)|(windows)",dev.cur(), ignore.case = TRUE)
   
   if (!XKCD)
   {
     # Check if nodes need to be plotted in for loop:
-    if (!is.null(subplots) || any(shape=="rectangle") || !all(shape %in% c("circle","square","triangle","diamond")) || any(sapply(bars,length) > 0))
+    if (!usePCH || !is.null(subplots) || any(shape=="rectangle") || !all(shape %in% c("circle","square","triangle","diamond")) || any(sapply(bars,length) > 0))
     {
       # Get which nodes become a subplot:
       #           whichsub <- which(sapply(subplots,function(x)is.expression(x)|is.function(x)))
@@ -815,7 +856,7 @@ plot.qgraph <- function(x, ...)
       #           bordVec <- bordVec[!bordVec%in%whichsub]
       #           points(layout[bordVec,],cex=vsize[bordVec],col=ifelse(duplicated(bordVec),bcolor[bordVec],vertex.colors[bordVec]),lwd=border.width,pch=ifelse(duplicated(bordVec),pch2[bordVec],pch1[bordVec]))            
       
-
+      
       for (i in order(vsize*vsize2,decreasing=TRUE))
       {
         x <- layout[i,1]
@@ -834,7 +875,8 @@ plot.qgraph <- function(x, ...)
           # Plot border:
           if (borders[i]) rect(x-xOff,y-yOff,x+xOff,y+yOff,border=bcolor[i],lwd=border.width[i])
         } else {
-          drawNode(x, y, shape[i], vsize[i], vsize2[i], borders[i], vertex.colors[i], bcolor[i], border.width[i], polygonList, bars[[i]], barSide[i], barColor[i], barLength[i], barsAtSide)
+          drawNode(x, y, shape[i], vsize[i], vsize2[i], borders[i], vertex.colors[i], bcolor[i], border.width[i], polygonList, bars[[i]], barSide[i], barColor[i], barLength[i], barsAtSide,
+                   usePCH = usePCH, resolution = node.resolution)
         }
       }      
     } else {
@@ -882,7 +924,7 @@ plot.qgraph <- function(x, ...)
     #         if (any(borders) & nNodes == 1) points(layout,cex=vsize[borders],lwd=border.width,pch=pch2[borders],col=bcolor[borders])
     
   } else {
-
+    
     circ <- seq(0,2*pi,length=100)
     for (i in 1:nNodes)
     {
@@ -899,24 +941,24 @@ plot.qgraph <- function(x, ...)
     }
   }
   
-
+  
   if (any(labels != ''))
   {
     #         labels=as.character(labels)
     # Vertex label symbols:
     # Set symbol font:
-#     if (is.character(labels))
-#     {
-#       strsplV=strsplit(labels,"")
-#       greekV=logical(0)
-#       for (i in 1:length(strsplV)) 
-#       {
-#         greekV[i]=any(strsplV[[i]]=="*")
-#         labels[i]=paste(strsplV[[i]][which(strsplV[[i]]!="*")],collapse="") 
-#       }
-#       V.font=rep(1,length(E$from))
-#       V.font[greekV]=5
-#     } else V.font <- 1
+    #     if (is.character(labels))
+    #     {
+    #       strsplV=strsplit(labels,"")
+    #       greekV=logical(0)
+    #       for (i in 1:length(strsplV)) 
+    #       {
+    #         greekV[i]=any(strsplV[[i]]=="*")
+    #         labels[i]=paste(strsplV[[i]][which(strsplV[[i]]!="*")],collapse="") 
+    #       }
+    #       V.font=rep(1,length(E$from))
+    #       V.font[greekV]=5
+    #     } else V.font <- 1
     
     if (is.null(label.cex)) label.cex <- pmax(1,vsize)
     # Rescale labels:
@@ -987,11 +1029,11 @@ plot.qgraph <- function(x, ...)
         
         # Size of bal:
         sizeBal <- mean(vsize[E$to[i]],vsize2[E$to[i]]) / 4
-
+        
         # Center of bal:
         r <- atan2usr2in(x-edge[1], y-edge[2] )
         ball <- Cent2Edge(edge[1],edge[2],r,sizeBal,sizeBal,'circle',offset=0, polygonList)
-
+        
         # Draw ball:
         points(ball[1], ball[2], pch = 16, col = edge.color[i], cex = sizeBal)
       }
@@ -1011,8 +1053,14 @@ plot.qgraph <- function(x, ...)
     colHEX <- rgb(t(col2rgb(color)/255))
     
     fillCols <- paste(sapply(strsplit(colHEX,split=""),function(x)paste(x[1:7],collapse="")),num2hex(25),sep="")
-    
-    for (i in 1:length(groups)) polygon(ellipse(cov(layout[groups[[i]],]),centre=colMeans(layout[groups[[i]],]),level=overlaySize),border=color[i],col=fillCols[i])
+
+    for (i in 1:length(groups)) 
+    {
+      if (length(groups[[i]]) > 1)
+      {
+        polygon(ellipse(cov(layout[groups[[i]],,drop=FALSE]),centre=colMeans(layout[groups[[i]],,drop=FALSE]),level=overlaySize),border=color[i],col=fillCols[i]) 
+      }
+    }
   }
   
   if (is.null(names(groups))) names(groups) <- LETTERS[1:length(groups)]

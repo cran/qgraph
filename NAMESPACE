@@ -1,5 +1,8 @@
 useDynLib(qgraph)
-
+export(clusteringTable)
+export(clusteringPlot)
+export(centralityTable)
+export(centralityPlot)
 export(qgraph)
 export(qgraph.layout.fruchtermanreingold)
 export(qgraph.loadings)
@@ -22,7 +25,7 @@ importFrom(psych,"principal")
 importFrom(lavaan,"lavaan","cfa","standardizedSolution", "standardizedsolution", "parameterEstimates", "parameterestimates","inspect")
 importClassesFrom(lavaan,"lavaan")
 importFrom(stats,"factanal")
-importFrom(BDgraph,"phat")
+# importFrom(BDgraph,"phat")
 importFrom(ellipse,"ellipse")
 importFrom(corpcor,"pseudoinverse")
 importFrom(corpcor,"cor2pcor")
@@ -35,13 +38,18 @@ import(igraph)
 S3method(as.igraph, qgraph)
 importFrom(colorspace,rainbow_hcl)
 importFrom(Matrix,sparseMatrix)
+export(averageLayout)
 
 export(getWmat)
 S3method(getWmat, matrix)
 S3method(getWmat, data.frame)
 S3method(getWmat, igraph)
 S3method(getWmat, qgraph)
+S3method(getWmat, list)
 
+importFrom(reshape2, "melt")
+import(ggplot2)
+# importFrom(glasso, glasso)
 importFrom(sna, component.largest)
 
 # export(smoothAnimationList)
@@ -55,4 +63,20 @@ export(clustWS)
 export(clustcoef_auto)
 export(centrality_auto)
 export(mat2vec)
+
+# LASSO STUFF:
+export(wi2net)
+export(EBICglasso)
+importFrom(Matrix, forceSymmetric)
+import(glasso)
+
+## corauto stuff:
+importFrom(huge, huge.select)
+importFrom(huge, huge.npn)
+#importFrom(psych, tetrachoric)
+#importFrom(psych, polychoric)
+export(cor_auto)
+importFrom(lavaan, lavCor)
+
+export(VARglm)
 
