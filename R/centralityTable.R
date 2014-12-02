@@ -1,8 +1,8 @@
-centralityTable <- function(..., labels, relative = TRUE)
+centralityTable <- function(..., labels, standardized=TRUE, relative = FALSE)
 {
   
   Wmats <- getWmat(list(...))
-  
+
 
   # Fix names:
   names(Wmats) <- fixnames(Wmats,"graph ")
@@ -62,12 +62,32 @@ centralityTable <- function(..., labels, relative = TRUE)
   # Add method and labels to tables:
   for (i in seq_along(CentAuto))
   {
-    # Relativate:
-    if (relative)
+    # Relativate or standardize:
+    if (relative | standardized )
     {
+      if (relative & standardized)
+      {
+        warning("Using 'relative' and 'standardized' together is not recommended")
+      }
       for (j in which(sapply(CentAuto[[i]][['node.centrality']],mode)=="numeric"))
       {
-        CentAuto[[i]][['node.centrality']][,j] <- CentAuto[[i]][['node.centrality']][,j] / max(abs(CentAuto[[i]][['node.centrality']][,j]), na.rm = TRUE)
+        if (standardized) {
+          # Standardize:
+          CentAuto[[i]][['node.centrality']][,j]  <- scale(CentAuto[[i]][['node.centrality']][,j] ,TRUE, TRUE)
+        }
+        
+        if (relative)
+        {
+          mx <- max(abs(CentAuto[[i]][['node.centrality']][,j]), na.rm = TRUE)
+          if (mx != 0)
+          {
+            CentAuto[[i]][['node.centrality']][,j] <- CentAuto[[i]][['node.centrality']][,j] /  mx
+          }  
+        }
+        
+        # Remove attributes:
+        attributes(CentAuto[[i]][['node.centrality']][,j]) <- NULL
+        
       } 
     }
   
@@ -79,6 +99,10 @@ centralityTable <- function(..., labels, relative = TRUE)
   
   # LONG FORMAT:
   LongCent <- melt(WideCent, variable.name = "measure", id.var = c("graph","type", "node"))
+  
+  if (any(is.nan(LongCent$value))){
+    warning("NaN detected in centrality measures. Try relative = FALSE")
+  }
   
   return(LongCent)  
 }

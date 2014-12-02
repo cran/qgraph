@@ -11,10 +11,13 @@ Centrality and Clustering plots and tables
 These functions can be used to facilitate interpreting centrality and clustering coefficients. The plot functions use ggplot2 (Wickham, 2009). The table functions create a long format table which can easilly be plotted in ggplot2.
 }
 \usage{
-centralityPlot(..., labels, relative = TRUE, include)
-clusteringPlot(..., labels, relative = TRUE,  include, signed = FALSE)
-centralityTable(..., labels, relative = TRUE)
-clusteringTable(..., labels, relative = TRUE, signed = FALSE)
+centralityPlot(..., labels, standardized = TRUE, relative = FALSE, include, 
+                theme_bw = TRUE, print = TRUE)
+clusteringPlot(..., labels,  standardized = TRUE, relative = FALSE,  include, 
+                signed = FALSE, theme_bw = TRUE, print = TRUE)
+centralityTable(..., labels, standardized = TRUE,  relative = FALSE)
+clusteringTable(..., labels,  standardized = TRUE, relative = FALSE, 
+                signed = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,14 +27,23 @@ Objects usuable in the \code{\link{getWmat}} generic, such as qgraph objects and
   \item{labels}{
 A vector overwriting the labels used
 }
+  \item{standardized}{
+Logical, should all measures be standardized?
+}
   \item{relative}{
-Logical, should all measures be divided by the largest measure?
+Logical, should all measures be scaled relative to the largest value?
 }
   \item{include}{
 A vector of measures to include. if missing all measures available will be included.
 }
 \item{signed}{
 Logical indicating if signed clustering coefficients should be plotted.
+}
+\item{theme_bw}{
+Adds the ggplot2 black and white theme to the plot
+}
+\item{print}{
+  If \code{TRUE}, the plot is sent to the print command and returned invisible, if \code{FALSE} the plot is returned normally. Needed to include plots in e.g., pdf files.
 }
 }
 

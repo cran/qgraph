@@ -1,4 +1,4 @@
-clusteringPlot <- function(..., labels, relative = TRUE, include , signed = FALSE)
+clusteringPlot <- function(..., labels,standardized=TRUE,  relative = FALSE, include , signed = FALSE, theme_bw = TRUE, print = TRUE)
 {
   # Some dummies to get rid of NOTES:
   measure <- NULL
@@ -7,7 +7,7 @@ clusteringPlot <- function(..., labels, relative = TRUE, include , signed = FALS
   type <- NULL
   
   
-  Long <- clusteringTable(..., labels=labels, relative=relative, signed=signed)
+  Long <- clusteringTable(..., labels=labels, standardized=standardized, relative=relative, signed=signed)
   
   # If not missing, include only include vars:
   if (!missing(include))
@@ -16,7 +16,11 @@ clusteringPlot <- function(..., labels, relative = TRUE, include , signed = FALS
   }
   
   # Ordereing by node name to make nice paths:
-  Long <- Long[order(Long$node),] 
+  Long <- Long[gtools::mixedorder(Long$node),] 
+  Long$node <- factor(as.character(Long$node), levels = unique(gtools::mixedsort(as.character(Long$node))))
+  
+  
+  
   # PLOT:
   if (length(unique(Long$type)) > 1)
   {
@@ -35,7 +39,18 @@ clusteringPlot <- function(..., labels, relative = TRUE, include , signed = FALS
     g <- g + facet_grid( ~ measure, scales = "free") 
   }
   
-  return(g)  
+  
+  if (theme_bw){
+    g <- g + theme_bw()
+  }
+  
+  
+  if (print){
+    print(g)
+    invisible(g)
+  } else {
+    return(g)
+  }
 }
 
 
