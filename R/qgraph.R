@@ -329,7 +329,15 @@ if (length(alpha) > 4) stop("`alpha' can not have length > 4")
   # Settings for the edgelist
   if(is.null(qgraphObject$Arguments$edgelist)) 
   {
-    if (nrow(input)!=ncol(input)) edgelist=TRUE else edgelist=FALSE 
+    if (nrow(input)!=ncol(input)) {
+      # Check if it is an edgelist or break:
+      if (ncol(input) %in% c(2,3) && ((is.character(input[,1]) || is.factor(input[,1])) || all(input[,1] %% 1 == 0)) &&
+            ((is.character(input[,2]) || is.factor(input[,2])) || all(input[,2] %% 1 == 0))){
+        edgelist <- TRUE
+      } else {
+        stop("Input is not a weights matrix or an edgelist.")
+      }
+    } else edgelist <- FALSE
   } else edgelist=qgraphObject$Arguments$edgelist
   
   if(is.null(qgraphObject$Arguments[['edgeConnectPoints']])) edgeConnectPoints <- NULL else edgeConnectPoints <- qgraphObject$Arguments[['edgeConnectPoints']]
@@ -342,7 +350,11 @@ if (length(alpha) > 4) stop("`alpha' can not have length > 4")
     {
       #       if (nrow(input) <= 20 & all(colnames(input)==rownames(input)))
       #       {
-      labels <- abbreviate(colnames(input),3)
+      labels <- iconv(abbreviate(colnames(input),3))
+      if (any(is.na(labels))){
+        warning("Some labels where not abbreviatable.")
+        labels <- ifelse(is.na(labels), colnames(input), labels)
+      }
       #       }
     }
   } else labels <- qgraphObject$Arguments$labels
@@ -655,7 +667,7 @@ if(is.null(qgraphObject$Arguments[['noPar']])) noPar <- FALSE else noPar <- qgra
   {
     if (isTRUE(bg)) transparency <- TRUE else transparency <- FALSE
   }
-  if(is.null(qgraphObject$Arguments[['fade']])) fade <- TRUE else fade <- FALSE
+  if(is.null(qgraphObject$Arguments[['fade']])) fade <- TRUE else fade <- qgraphObject$Arguments[['fade']]
   if(is.null(qgraphObject$Arguments[['loop']])) loop=1 else loop=qgraphObject$Arguments[['loop']]
   if(is.null(qgraphObject$Arguments[['loopRotation']]))
   {
