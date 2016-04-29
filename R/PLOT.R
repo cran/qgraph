@@ -34,6 +34,8 @@ plot.qgraph <- function(x, ...)
   x$graphAttributes$Nodes$barSide -> barSide
   x$graphAttributes$Nodes$barColor -> barColor
   x$graphAttributes$Nodes$barLength -> barLength
+  x$graphAttributes$Nodes$means -> means
+  x$graphAttributes$Nodes$SDs -> SDs
   
   # for BW only
   bw <- FALSE
@@ -173,6 +175,7 @@ x$plotOptions$legend.mode -> legend.mode
   x$plotOptions$node.resolution -> node.resolution
 
   x$plotOptions$noPar -> noPar
+  x$plotOptions$meanRange -> meanRange
   
   rm(x)
   
@@ -865,7 +868,8 @@ x$plotOptions$legend.mode -> legend.mode
   if (!XKCD)
   {
     # Check if nodes need to be plotted in for loop:
-    if (!usePCH || !is.null(subplots) || any(shape=="rectangle") || !all(shape %in% c("circle","square","triangle","diamond")) || any(sapply(bars,length) > 0))
+    if (!usePCH || !is.null(subplots) || any(shape=="rectangle") || !all(shape %in% c("circle","square","triangle","diamond")) || any(sapply(bars,length) > 0) & 
+        !all(is.na(means)) & !all(is.na(SDs)))
     {
       # Get which nodes become a subplot:
       #           whichsub <- which(sapply(subplots,function(x)is.expression(x)|is.function(x)))
@@ -894,8 +898,10 @@ x$plotOptions$legend.mode -> legend.mode
           # Plot border:
           if (borders[i]) rect(x-xOff,y-yOff,x+xOff,y+yOff,border=bcolor[i],lwd=border.width[i])
         } else {
+
           drawNode(x, y, shape[i], vsize[i], vsize2[i], borders[i], vertex.colors[i], bcolor[i], border.width[i], polygonList, bars[[i]], barSide[i], barColor[i], barLength[i], barsAtSide,
-                   usePCH = usePCH, resolution = node.resolution, noPar = noPar, bw = bw, density = density[i], angle = angle[i])
+                   usePCH = usePCH, resolution = node.resolution, noPar = noPar, bw = bw, density = density[i], angle = angle[i],
+                   mean=means[i],SD=SDs[i],meanRange=meanRange)
         }
       }      
     } else {
@@ -1134,7 +1140,60 @@ x$plotOptions$legend.mode -> legend.mode
         }
       } else
       {
-        if (legend.mode == "names")
+
+        if (legend.mode == "style2"){
+          # Generate names in list:
+          LEGENDgroups <- lapply(groups,function(x)paste0(labels[x],": ",nodeNames[x]))
+          LEGENDstr <- character(0)
+          LEGENDcol <- character(0)
+          LEGENDpch <- numeric(0)
+          LEGENDtextfont <- numeric(0)
+          for (GR in seq_along(groups)){
+            LEGENDstr <- c(LEGENDstr,names(groups)[GR],LEGENDgroups[[GR]])
+            LEGENDcol <- c(LEGENDcol,rep(color[GR],length(LEGENDgroups[[GR]])+1))
+            LEGENDpch <- c(LEGENDpch,16,rep(1,length(LEGENDgroups[[GR]])))
+            LEGENDtextfont <- c(LEGENDtextfont,2,rep(1,length(LEGENDgroups[[GR]])))
+          }
+          
+          legend (1.2 + 0.5 * 2.4/GLratio,0,LEGENDstr, col= LEGENDcol ,pch = LEGENDpch, text.font = LEGENDtextfont, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
+          
+          
+        } else if (legend.mode == "style1"){
+
+          # Generate names in list:
+          LEGENDgroups <- lapply(groups,function(x)paste0(labels[x],": ",nodeNames[x]))
+          LEGENDstr <- character(0)
+          LEGENDcol <- character(0)
+          LEGENDbord <- character(0)
+          LEGENDpch <- numeric(0)
+          LEGENDtextfont <- numeric(0)
+
+          getShape <- function(x, border=FALSE){
+            sapply(x,function(xx){
+              if (xx == "circle"){
+                return(16)
+              } else if (xx == "square"){
+                return(15)
+              } else if (xx == "triangle"){
+                return(17)
+              } else return(16)
+            })
+          }
+            
+            
+          for (GR in seq_along(groups)){
+            LEGENDstr <- c(LEGENDstr,names(groups)[GR],LEGENDgroups[[GR]],"")
+            LEGENDcol <- c(LEGENDcol,NA,rep(color[GR],length(LEGENDgroups[[GR]])),NA)
+            LEGENDbord <- c(LEGENDbord,NA,bcolor[groups[[GR]]],NA)
+            LEGENDpch <- c(LEGENDpch,NA,getShape(shape[groups[[GR]]]),NA)
+            LEGENDtextfont <- c(LEGENDtextfont,2,rep(1,length(LEGENDgroups[[GR]])),NA)
+          }
+          
+          legend (1.2 + 0.5 * 2.4/GLratio,0,LEGENDstr, col= LEGENDcol ,pch = LEGENDpch, text.font = LEGENDtextfont, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
+          legend (1.2 + 0.5 * 2.4/GLratio,0,LEGENDstr, col= LEGENDbord ,pch = LEGENDpch-15, text.font = LEGENDtextfont, xjust=0.5, yjust=0.5, cex=legend.cex, bty='n')
+          
+          
+        } else if (legend.mode == "names")
         {
           text(1 + mar[4] ,0, paste(labels,": ",nodeNames,sep="",collapse="\n"), cex=legend.cex, adj = c(0, 0.5)) 
         } else 

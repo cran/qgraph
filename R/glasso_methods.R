@@ -17,10 +17,11 @@ EBICglasso <- function(
   gamma = 0.5,
   penalize.diagonal = FALSE, # Penalize diagonal?
   nlambda = 100,
-  lambda.min.ratio = 0.1,
+  lambda.min.ratio = 0.01,
   returnAllResults = FALSE, # If true, returns a list
   checkPD = TRUE, # Checks if matrix is positive definite and stops if not
   penalizeMatrix, # Optional logical matrix to indicate which elements are penalized
+  countDiagonal = FALSE, # Set to TRUE to get old qgraph behavior: conting diagonal elements as parameters in EBIC computation. This is not correct, but is included to replicate older analyses
   ... # glasso arguments
 ) {
   
@@ -64,7 +65,7 @@ lambda.min = lambda.min.ratio*lambda.max
     })
 
     EBICs <- sapply(seq_along(lambda),function(i){
-      EBIC(S, glas_path$wi[,,i], n, gamma)
+      EBIC(S, glas_path$wi[,,i], n, gamma, countDiagonal=countDiagonal)
     })
 
   # Smallest EBIC:
