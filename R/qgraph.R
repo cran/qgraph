@@ -364,8 +364,8 @@ if (length(alpha) > 4) stop("`alpha' can not have length > 4")
   if(is.null(qgraphObject$Arguments[['background']])) background <- NULL else background <- qgraphObject$Arguments[['background']]
   if(is.null(qgraphObject$Arguments[['label.prop']])) label.prop <- 0.9 else label.prop <- qgraphObject$Arguments[['label.prop']]
   if(is.null(qgraphObject$Arguments[['label.norm']])) label.norm <- "OOO" else label.norm <- qgraphObject$Arguments[['label.norm']]
-  if(is.null(qgraphObject$Arguments[['label.cex']])) label.cex <- NULL else label.cex <- qgraphObject$Arguments[['label.cex']]
-  
+#   if(is.null(qgraphObject$Arguments[['label.cex']])) label.cex <- NULL else label.cex <- qgraphObject$Arguments[['label.cex']]
+#   
   if(is.null(qgraphObject$Arguments[['font']])) font <- 1 else font <- qgraphObject$Arguments[['font']]
   
   if(is.null(qgraphObject$Arguments[['label.font']])) label.font <- font else label.font <- qgraphObject$Arguments[['label.font']]
@@ -734,7 +734,23 @@ if(is.null(qgraphObject$Arguments[['noPar']])) noPar <- FALSE else noPar <- qgra
     polygonList[[i]]$y <- (polygonList[[i]]$y - min(polygonList[[i]]$y)) / (max(polygonList[[i]]$y) - min(polygonList[[i]]$y)) * 2 - 1
   }
   
-  if(is.null(qgraphObject$Arguments$label.scale)) label.scale=TRUE else label.scale=qgraphObject$Arguments$label.scale
+  if(is.null(qgraphObject$Arguments[['label.scale']])) label.scale=TRUE else label.scale=qgraphObject$Arguments[['label.scale']]
+  
+  if(is.null(qgraphObject$Arguments[['label.cex']])){ 
+      if (label.scale){
+        label.cex <- NULL  
+      } else {
+        label.cex <- 1
+      }
+    } else label.cex <- qgraphObject$Arguments[['label.cex']]
+  
+  if(is.null(qgraphObject$Arguments$label.scale.equal)) label.scale.equal=FALSE else label.scale.equal=qgraphObject$Arguments$label.scale.equal
+  
+  if(is.null(qgraphObject$Arguments$label.fill.horizontal)) label.fill.horizontal<-1 else label.fill.horizontal <- qgraphObject$Arguments$label.fill.horizontal
+  if(is.null(qgraphObject$Arguments$label.fill.vertical)) label.fill.vertical<-1 else label.fill.vertical <- qgraphObject$Arguments$label.fill.vertical
+  
+  
+  
   if(is.null(qgraphObject$Arguments$scores)) scores=NULL else scores=qgraphObject$Arguments$scores
   if(is.null(qgraphObject$Arguments$scores.range)) scores.range=NULL else scores.range=qgraphObject$Arguments$scores.range
   if(is.null(qgraphObject$Arguments$lty)) lty=1 else lty=qgraphObject$Arguments$lty
@@ -2367,6 +2383,9 @@ if(is.null(qgraphObject$Arguments[['noPar']])) noPar <- FALSE else noPar <- qgra
   qgraphObject$plotOptions$curveScale <- curveScale
   qgraphObject$plotOptions$curvePivotShape <- curvePivotShape
   qgraphObject$plotOptions$label.scale <- label.scale
+  qgraphObject$plotOptions$label.scale.equal <- label.scale.equal
+  qgraphObject$plotOptions$label.fill.vertical <- label.fill.vertical
+  qgraphObject$plotOptions$label.fill.horizontal <- label.fill.horizontal
   qgraphObject$plotOptions$label.prop <- label.prop
   qgraphObject$plotOptions$label.norm <- label.norm
   qgraphObject$plotOptions$overlay <- overlay
