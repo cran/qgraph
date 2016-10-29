@@ -37,6 +37,14 @@ plot.qgraph <- function(x, ...)
   x$graphAttributes$Nodes$means -> means
   x$graphAttributes$Nodes$SDs -> SDs
   
+  # Pies:
+  x$graphAttributes$Nodes$pieColor -> pieColor
+  x$graphAttributes$Nodes$pieColor2 -> pieColor2
+  x$graphAttributes$Nodes$pieBorder -> pieBorder
+  x$graphAttributes$Nodes$pieStart -> pieStart
+  x$graphAttributes$Nodes$pie -> pie
+  x$graphAttributes$Nodes$pieDarken -> pieDarken
+  
   # for BW only
   bw <- FALSE
   if(!is.null(x$graphAttributes$Nodes$density))
@@ -179,6 +187,12 @@ x$plotOptions$legend.mode -> legend.mode
 
   x$plotOptions$noPar -> noPar
   x$plotOptions$meanRange -> meanRange
+  
+  x$plotOptions$drawPies -> drawPies
+  x$plotOptions$pieRadius -> pieRadius
+  x$plotOptions$pastel -> pastel
+  x$plotOptions$rainbowStart -> rainbowStart
+  x$plotOptions$piePastel -> piePastel
   
   rm(x)
   
@@ -400,6 +414,16 @@ x$plotOptions$legend.mode -> legend.mode
     EdgeLenghts <- sqrt((layout[E$to,1] - layout[E$from,1])^2 + (layout[E$to,2] - layout[E$from,2])^2)
     curve <- curve * EdgeLenghts /AverageLength
   }
+  
+  ##### MAKE SUBPLOTS FOR PIE CHARTS #####
+#   if (drawPies){
+#     # Parse expressions:
+#     subplots <- mapply(width = border.width, bg = vertex.colors, x = pie, R = pieRadius, bord = pieBorder, col1 = pieColor, col2 = pieColor2, FUN = function(width, bg, x, R, bord, col1, col2){
+#       parse(text=paste0('qgraph:::pie2(x=',x,', label="", radius=',R ,', pie.bord=',bord,', pie.col = "',col1,'", pie.col2 = "',col2,'",
+#                         bg =  "',bg,'", border.width = ',width,')'))
+#     }, SIMPLIFY = FALSE)
+#     
+#     }
   
   # Create 'omitEdge' vector to make sure bidirectional edges are not plotted.
   if (any(bidirectional))
@@ -849,11 +873,11 @@ x$plotOptions$legend.mode -> legend.mode
     if (!is.list(edge.labels))
     {
       text(midX[edgesort2],midY[edgesort2],edge.labels[edgesort2],cex=edge.label.cex[edgesort2],col=ELcolor[edgesort2],
-           font = edge.label.font[edgesort2])
+           font = edge.label.font[edgesort2], adj = c(0.5, 0.5))
     } else {
       for (i in edgesort2)
       {
-        text(midX[i],midY[i],edge.labels[[i]],font=edge.label.font[i],cex=edge.label.cex[i],col=ELcolor[i])
+        text(midX[i],midY[i],edge.labels[[i]],font=edge.label.font[i],cex=edge.label.cex[i],col=ELcolor[i], adj = c(0.5, 0.5))
       }
     }
   }			
@@ -904,7 +928,9 @@ x$plotOptions$legend.mode -> legend.mode
 
           drawNode(x, y, shape[i], vsize[i], vsize2[i], borders[i], vertex.colors[i], bcolor[i], border.width[i], polygonList, bars[[i]], barSide[i], barColor[i], barLength[i], barsAtSide,
                    usePCH = usePCH, resolution = node.resolution, noPar = noPar, bw = bw, density = density[i], angle = angle[i],
-                   mean=means[i],SD=SDs[i],meanRange=meanRange)
+                   mean=means[i],SD=SDs[i],meanRange=meanRange,pie=pie[[i]],pieColor=pieColor[[i]],pieColor2=pieColor2[[i]],
+                   pieBorder=pieBorder[[i]],pieStart=pieStart[[i]],pieDarken=pieDarken[[i]],pastel=piePastel,
+                   rainbowStart=rainbowStart)
         }
       }      
     } else {
@@ -993,14 +1019,18 @@ x$plotOptions$legend.mode -> legend.mode
 
     if (label.scale)
     {
+      ones <- rep(1, nNodes)
       VWidths <- sapply(mapply(Cent2Edge,cex=vsize,cex2=vsize2,shape=shape,MoreArgs=list(x=0,y=0,r=pi/2,polygonList=polygonList, noPar = noPar),SIMPLIFY=FALSE),'[',1) * 2
       VHeights <- sapply(mapply(Cent2Edge,cex=vsize,cex2=vsize2,shape=shape,MoreArgs=list(x=0,y=0,r=0,polygonList=polygonList, noPar = noPar),SIMPLIFY=FALSE),'[',2) * 2          
-      LWidths <- pmax(sapply(label.cex,function(x)strwidth(label.norm,cex=x)),mapply(strwidth, s=labels, cex=label.cex))
-      LHeights <- pmax(sapply(label.cex,function(x)strheight(label.norm,cex=x)),mapply(strheight, s=labels, cex=label.cex))
+#       LWidths <- pmax(sapply(label.cex,function(x)strwidth(label.norm,cex=x)),mapply(strwidth, s=labels, cex=label.cex))
+#       LHeights <- pmax(sapply(label.cex,function(x)strheight(label.norm,cex=x)),mapply(strheight, s=labels, cex=label.cex))
+#       
+      LWidths <- pmax(sapply(ones,function(x)strwidth(label.norm,cex=x)),mapply(strwidth, s=labels, cex=ones))
+      LHeights <- pmax(sapply(ones,function(x)strheight(label.norm,cex=x)),mapply(strheight, s=labels, cex=ones))
       
       label.cex <- label.cex * label.prop * pmin((VWidths*label.fill.horizontal)/LWidths,(VHeights*label.fill.vertical)/LHeights)
       #           label.cex[nchar(labels)>1]=label.cex[nchar(labels)>1]*2/nchar(labels[nchar(labels)>1],"width")
-      
+ 
       # Equalize:
       if (!identical(label.scale.equal,FALSE)){
         if (isTRUE(label.scale.equal)){
@@ -1013,12 +1043,12 @@ x$plotOptions$legend.mode -> legend.mode
     # Plot labels:
     if (!is.list(labels))
     {
-      text(layout[,1],layout[,2],labels,cex=label.cex,col=lcolor,font=label.font)
+      text(layout[,1],layout[,2],labels,cex=label.cex,col=lcolor,font=label.font, adj = c(0.5, 0.5))
     } else {
       lcolor <- rep(lcolor,length=nNodes)
       for (i in seq_along(labels))
       {
-        text(layout[i,1],layout[i,2],labels[[i]],cex=label.cex[i],col=lcolor[i],font=label.font[i])
+        text(layout[i,1],layout[i,2],labels[[i]],cex=label.cex[i],col=lcolor[i],font=label.font[i], adj = c(0.5, 0.5))
       }
     }
   }

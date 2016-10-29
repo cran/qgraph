@@ -1,8 +1,8 @@
 ff547ababc85108875b8e8f94239d4dd *COPYING
 1a2af62c3ce2e2cc524a8a2067947f54 *COPYRIGHTS
-ca4a336b63f69efa469d0eeff11dbdc5 *DESCRIPTION
-ec599a778a0df8df75948801cb5ad034 *NAMESPACE
-607b80d7870ad547a448edccda7eeb17 *NEWS
+d9a084979965e63b2a7d45f46d27bf99 *DESCRIPTION
+1d0bf3552df6a9be6e7b6664d8df626c *NAMESPACE
+4a17a7a1cd4e62bc7353b133ee86ec4d *NEWS
 fa7a58c82e7f64ac41f1467ab0a257a5 *R/00PolyShapes.R
 8ec3dfbaaa5842955f9c6fafaf2614df *R/Cent2EdgeNode.R
 affcb13e3ecdae977828c34f75028add *R/DrawArrow.R
@@ -10,7 +10,7 @@ affcb13e3ecdae977828c34f75028add *R/DrawArrow.R
 e26741c1a97f6f33729613ce3846a187 *R/FDRnetwork.R
 ebcac4462dcb3c008ae449b28e128122 *R/Fade.R
 cee6b0a630bc6d883cefdd09db2bc101 *R/IntInNode.r
-b75a1b7c7e6de38cd077bf8f31028f0d *R/PLOT.R
+82d0dc5d8648b40be97e4f126d8c3f60 *R/PLOT.R
 bec4c869cdcc49d7368fa200d64fbb08 *R/SelfLoop.R
 637d5a81fcecaec5c9561c74f7fb2a6b *R/VARglm.R
 0ab244d3e2e75264f9326d875fa74581 *R/XKCD.R
@@ -25,7 +25,7 @@ f5c2c6f00b08c7775968b09294021341 *R/clusteringPlot.R
 5ed3f1ef2e8b46b507fb33841aab3597 *R/clusteringTable.R
 161db6a13fe046b3f28bc686271f6278 *R/cor_auto.R
 04a5d5232a56de7e649f56386f3faf8d *R/drawEdge.R
-e7b7bc24859918417cb71b42270a0f4a *R/drawNode.R
+05f253ce721b405ff8bd617113628d20 *R/drawNode.R
 217339d1768706069d1a4c5d2d5fcf7f *R/findGraph.R
 a0283ebf562ff5b1d32a64489332437e *R/fixnames.R
 d5d9b0310bb3dc92d2462ee64ab5f2b2 *R/getArgs.R
@@ -39,8 +39,10 @@ b910635348404f56edfb5214d7a830e9 *R/logGaus.R
 8425ba9088a0823fed814833538cf803 *R/mapusr2in.R
 b6d3fe391415047940b5497b602d1733 *R/mixCols.R
 9160b3e7974658f6de3078abb516cf77 *R/mixGraphs.R
+0c3a6d3dead069e511179548ccbb795f *R/pathways.R
+bc4f90020d199ba941fa883bebb42586 *R/pie2.R
 608ab043e398d83fccfdef7e8eeff590 *R/printplotsummary.R
-9487f0251fd22c3d016f204e05a21321 *R/qgraph.R
+db57ac74da6fb8a4669751671f4d8ae9 *R/qgraph.R
 3f1a9d911d34d48092fa2946ef1ec24b *R/qgraph.lavaan.R
 38f477aa7190a6df9b2b50331b685c61 *R/qgraph.panel.R
 7fe38c42e56f7e945aca4c4682a5bd2d *R/qgraph.rack.R
@@ -84,9 +86,10 @@ a129f3cc2312b5ad47507fbc1e1bbd12 *man/cor_auto.Rd
 6def56397700916221e6035da92af5a2 *man/getWmat.Rd
 a8b7f70012dccf9780ea0d91503753d2 *man/makeBW.Rd
 09b94aad451f23b137109135e7ae5e20 *man/mat2vec.Rd
+154397578cf690bb56f586200dfc67de *man/pathways.Rd
 ccb0bd71591eab120c5bf7bb11e6411b *man/plot.qgraph.Rd
 60c990eafedbfdc74f81ebf5fc4b3e5c *man/print.qgraph.Rd
-ed846f8559248998fe4e733a1f2c538e *man/qgraph.Rd
+3511eac62571c2ebcfaafa032c325203 *man/qgraph.Rd
 a8170510c4edb3ea7d0c1495166e5fb5 *man/qgraph.animate.Rd
 3b90dc79e812b4340f28df1ffcb6ca2e *man/qgraph.cfa.Rd
 115729cfb4a724629dcc8266607b107c *man/qgraph.gui.Rd

@@ -294,6 +294,13 @@ qgraph <- function( input, ... )
   {
     graph <- "fdr.cor"
   }
+  if (graph == "EBICglasso"){
+    graph <- "glasso"
+  }
+  
+  if (!graph %in% c("default","cor","pcor","assosciation","concentration","glasso","fdr","factorial")){
+    stop("'graph' argument must be one of 'default', 'cor', 'pcor', 'assosciation', 'concentration', 'glasso', 'fdr' or 'factorial'")
+  }
   
   # Reset graph for replotting:
   qgraphObject$Arguments[['graph']] <- NULL
@@ -358,38 +365,7 @@ if (length(alpha) > 4) stop("`alpha' can not have length > 4")
       #       }
     }
   } else labels <- qgraphObject$Arguments$labels
-
-  if (is.expression(labels)) labels <- as.list(labels)
   
-  if(is.null(qgraphObject$Arguments[['background']])) background <- NULL else background <- qgraphObject$Arguments[['background']]
-  if(is.null(qgraphObject$Arguments[['label.prop']])) label.prop <- 0.9 else label.prop <- qgraphObject$Arguments[['label.prop']]
-  if(is.null(qgraphObject$Arguments[['label.norm']])) label.norm <- "OOO" else label.norm <- qgraphObject$Arguments[['label.norm']]
-#   if(is.null(qgraphObject$Arguments[['label.cex']])) label.cex <- NULL else label.cex <- qgraphObject$Arguments[['label.cex']]
-#   
-  if(is.null(qgraphObject$Arguments[['font']])) font <- 1 else font <- qgraphObject$Arguments[['font']]
-  
-  if(is.null(qgraphObject$Arguments[['label.font']])) label.font <- font else label.font <- qgraphObject$Arguments[['label.font']]
-  
-  if(is.null(qgraphObject$Arguments[['nodeNames']])) nodeNames <- NULL else nodeNames <- qgraphObject$Arguments[['nodeNames']]
-  
-  if(is.null(qgraphObject$Arguments[['subplots']])) subplots <- NULL else subplots <- qgraphObject$Arguments[['subplots']]
-  if(is.null(qgraphObject$Arguments[['subpars']])) subpars <- list(mar=c(0,0,0,0)) else subpars <- qgraphObject$Arguments[['subpars']]
-  
-  if(is.null(qgraphObject$Arguments[['subplotbg']])) subplotbg <- NULL else subplotbg <- qgraphObject$Arguments[['subplotbg']]
-  
-  if(is.null(qgraphObject$Arguments[['images']])) images <- NULL else images <- qgraphObject$Arguments[['images']]
-
-if(is.null(qgraphObject$Arguments[['noPar']])) noPar <- FALSE else noPar <- qgraphObject$Arguments[['noPar']]
-  
- 
-  
-  # Knots:
-  if(is.null(qgraphObject$Arguments[['knots']])) knots <- list() else knots <- qgraphObject$Arguments[['knots']]
-  if(is.null(qgraphObject$Arguments[['knot.size']])) knot.size <- 1 else knot.size <- qgraphObject$Arguments[['knot.size']]
-  if(is.null(qgraphObject$Arguments[['knot.color']])) knot.color <- NA else knot.color <- qgraphObject$Arguments[['knot.color']]
-  if(is.null(qgraphObject$Arguments[['knot.borders']])) knot.borders <- FALSE else knot.borders <- qgraphObject$Arguments[['knot.borders']]
-  if(is.null(qgraphObject$Arguments[['knot.border.color']])) knot.border.color <- "black" else knot.border.color <- qgraphObject$Arguments[['knot.border.color']]
-  if(is.null(qgraphObject$Arguments[['knot.border.width']])) knot.border.width <- 1 else knot.border.width <- qgraphObject$Arguments[['knot.border.width']]
   
   if (edgelist)
   {
@@ -411,19 +387,215 @@ if(is.null(qgraphObject$Arguments[['noPar']])) noPar <- FALSE else noPar <- qgra
     } else nNodes=nrow(input)
   } else nNodes=qgraphObject$Arguments$nNodes
   
-  if(is.null(qgraphObject$Arguments$shape)) {
-    shape <- rep("circle",nNodes) 
-    if (!is.null(subplots))
-    {
-      # Get which nodes become a subplot:
-      whichsub <- which(sapply(subplots,function(x)is.expression(x)|is.function(x)))
-      
-      shape[whichsub][!shape[whichsub]%in%c("square","rectangle")] <- "square"
+  
+  #####
+  
+  
+  #### Arguments for pies with Jonas
+  # Arguments for pies:
+  if(is.null(qgraphObject$Arguments[['pieRadius']])){
+    pieRadius <- 1
+  } else {
+    pieRadius <- qgraphObject$Arguments[['pieRadius']]
+  }
+  
+  if(is.null(qgraphObject$Arguments[['pieBorder']])){
+    pieBorder <- .15
+    if (any(pieBorder < 0 | pieBorder > 1)){
+      stop("Values in the 'pieBorder' argument must be within [0,1]")
     }
-  }else shape=qgraphObject$Arguments$shape
+  } else {
+    pieBorder <- qgraphObject$Arguments[['pieBorder']]
+  }
+  
+  if(is.null(qgraphObject$Arguments[['pieStart']])){
+    pieStart <- 0
+    if (any(pieStart < 0 | pieStart > 1)){
+      stop("Values in the 'pieStart' argument must be within [0,1]")
+    }
+  } else {
+    pieStart <- qgraphObject$Arguments[['pieStart']]
+  }
+  
+  if(is.null(qgraphObject$Arguments[['pieDarken']])){
+    pieDarken <- 0.25
+    if (any(pieDarken < 0 | pieDarken > 1)){
+      stop("Values in the 'pieDarken' argument must be within [0,1]")
+    }
+  } else {
+    pieDarken <- qgraphObject$Arguments[['pieDarken']]
+  }
+  
+  if(is.null(qgraphObject$Arguments[['pieColor']])){
+    # pieColor <- 'grey'
+    pieColor <- NA
+  } else {
+    pieColor <- qgraphObject$Arguments[['pieColor']]
+  }
   
   
+  if(is.null(qgraphObject$Arguments[['pieColor2']])){
+    pieColor2 <- 'white'
+  } else {
+    pieColor2 <- qgraphObject$Arguments[['pieColor2']]
+  }
+  
+  # Make arguments vectorized:
+  if (length(pieColor) == 1){
+    pieColor <- rep(pieColor,length=nNodes)
+  }
+  if (length(pieColor) != nNodes){
+    stop("Length of 'pieColor' argument must be 1 or number of nodes")
+  }
+  
+  if (length(pieColor2) == 1){
+    pieColor2 <- rep(pieColor2,length=nNodes)
+  }
+  if (length(pieColor2) != nNodes){
+    stop("Length of 'pieColor2' argument must be 1 or number of nodes")
+  }
+  
+  if (length(pieBorder) == 1){
+    pieBorder <- rep(pieBorder,length=nNodes)
+  }
+  if (length(pieBorder) != nNodes){
+    stop("Length of 'pieBorder' argument must be 1 or number of nodes")
+  }
+  
+  if (length(pieStart) == 1){
+    pieStart <- rep(pieStart,length=nNodes)
+  }
+  if (length(pieStart) != nNodes){
+    stop("Length of 'pieStart' argument must be 1 or number of nodes")
+  }
+  
+  if (length(pieDarken) == 1){
+    pieDarken <- rep(pieDarken,length=nNodes)
+  }
+  if (length(pieDarken) != nNodes){
+    stop("Length of 'pieDarken' argument must be 1 or number of nodes")
+  }
+  
+  if(is.null(qgraphObject$Arguments[['pie']])){
+    drawPies <- FALSE
+    pie <- NULL
+  } else {
+    # Obtain pie values:
+    pie <- qgraphObject$Arguments[['pie']]
+    
+    # Check values:
+    if (length(pie) != nNodes){
+      stop("Length of 'pie' argument must be equal to number of nodes.")
+    }
+#     if (any(pie < 0 | pie > 1)){
+#       stop("Values in the 'pie' argument must be within [0,1]")
+#     }
+    
 
+    # Dummy subplots (to be filed later)
+    # subplots <- vector("list", nNodes)
+
+    # Overwrite subplotbg to NA:
+    # subplotbg <- NA
+    
+    # Overwrite borders to FALSE:
+    # borders <- FALSE
+    
+    # Overwrite shape to circle:
+    # shape <- "circle"
+    
+    # Logical:
+    drawPies <- TRUE
+  }
+  
+  #####
+  
+  
+  if (is.expression(labels)) labels <- as.list(labels)
+  
+  if(is.null(qgraphObject$Arguments[['background']])) background <- NULL else background <- qgraphObject$Arguments[['background']]
+  if(is.null(qgraphObject$Arguments[['label.prop']])){
+
+      label.prop <- 0.9*(1-ifelse(pieBorder < 0.5,pieBorder,0))
+
+  } else {
+    label.prop <- qgraphObject$Arguments[['label.prop']]
+  }
+  
+  if(is.null(qgraphObject$Arguments[['label.norm']])) label.norm <- "OOO" else label.norm <- qgraphObject$Arguments[['label.norm']]
+  #   if(is.null(qgraphObject$Arguments[['label.cex']])) label.cex <- NULL else label.cex <- qgraphObject$Arguments[['label.cex']]
+  #   
+  if(is.null(qgraphObject$Arguments[['font']])) font <- 1 else font <- qgraphObject$Arguments[['font']]
+  
+  if(is.null(qgraphObject$Arguments[['label.font']])) label.font <- font else label.font <- qgraphObject$Arguments[['label.font']]
+  
+  if(is.null(qgraphObject$Arguments[['nodeNames']])) nodeNames <- NULL else nodeNames <- qgraphObject$Arguments[['nodeNames']]
+  
+  if(is.null(qgraphObject$Arguments[['subplots']])) {
+    # if (!drawPies){
+      subplots <- NULL       
+    # }
+    } else {
+#       if (drawPies){
+#         warning("'subplots' argument ignored if 'pie' argument is used.")     
+#       } else {
+        subplots <- qgraphObject$Arguments[['subplots']]        
+      # }
+    }
+  if(is.null(qgraphObject$Arguments[['subpars']])) subpars <- list(mar=c(0,0,0,0)) else subpars <- qgraphObject$Arguments[['subpars']]
+  
+  
+  if(is.null(qgraphObject$Arguments[['subplotbg']])) {
+    # if (!drawPies){
+      subplotbg <- NULL       
+    # }
+    } else {
+#       if (drawPies){
+#         warning("'subplotbg' argument ignored if 'pie' argument is used.")
+#       } else {
+        subplotbg <- qgraphObject$Arguments[['subplotbg']]        
+      # }
+    }
+  
+  if(is.null(qgraphObject$Arguments[['images']])) images <- NULL else images <- qgraphObject$Arguments[['images']]
+  
+  if(is.null(qgraphObject$Arguments[['noPar']])) noPar <- FALSE else noPar <- qgraphObject$Arguments[['noPar']]
+  
+  
+  
+  # Knots:
+  if(is.null(qgraphObject$Arguments[['knots']])) knots <- list() else knots <- qgraphObject$Arguments[['knots']]
+  if(is.null(qgraphObject$Arguments[['knot.size']])) knot.size <- 1 else knot.size <- qgraphObject$Arguments[['knot.size']]
+  if(is.null(qgraphObject$Arguments[['knot.color']])) knot.color <- NA else knot.color <- qgraphObject$Arguments[['knot.color']]
+  if(is.null(qgraphObject$Arguments[['knot.borders']])) knot.borders <- FALSE else knot.borders <- qgraphObject$Arguments[['knot.borders']]
+  if(is.null(qgraphObject$Arguments[['knot.border.color']])) knot.border.color <- "black" else knot.border.color <- qgraphObject$Arguments[['knot.border.color']]
+  if(is.null(qgraphObject$Arguments[['knot.border.width']])) knot.border.width <- 1 else knot.border.width <- qgraphObject$Arguments[['knot.border.width']]
+  
+  
+  #####
+  
+  
+  
+  
+  if(is.null(qgraphObject$Arguments$shape))  {
+    # if (!drawPies){
+      shape <- rep("circle",nNodes) 
+      if (!is.null(subplots))
+      {
+        # Get which nodes become a subplot:
+        whichsub <- which(sapply(subplots,function(x)is.expression(x)|is.function(x)))
+        
+        shape[whichsub][!shape[whichsub]%in%c("square","rectangle")] <- "square"
+      }      
+    # }
+  } else {
+#     if (drawPies){
+#       warning("'shape' argument ignored if 'pie' argument is used.")
+#     } else {
+      shape <- qgraphObject$Arguments[['shape']]        
+    # }
+  }
+    
   
   if(is.null(qgraphObject$Arguments[['usePCH']])) 
   {
@@ -681,6 +853,7 @@ if(is.null(qgraphObject$Arguments[['noPar']])) noPar <- FALSE else noPar <- qgra
   if (gray) posCol <- negCol <- c("gray10","black")
   
   if(is.null(qgraphObject$Arguments[['pastel']])) pastel <- FALSE else pastel <- qgraphObject$Arguments[['pastel']]
+  if(is.null(qgraphObject$Arguments[['piePastel']])) piePastel <- FALSE else piePastel <- qgraphObject$Arguments[['piePastel']]
   if(is.null(qgraphObject$Arguments[['rainbowStart']])) rainbowStart <- 0 else rainbowStart <- qgraphObject$Arguments[['rainbowStart']]
   
   if(is.null(qgraphObject$Arguments$bgcontrol)) bgcontrol=6 else bgcontrol=qgraphObject$Arguments$bgcontrol
@@ -729,8 +902,18 @@ if(is.null(qgraphObject$Arguments[['noPar']])) noPar <- FALSE else noPar <- qgra
     } else if (!is.null(nodeNames)) legend.mode <- "names" else legend.mode <- "groups"
   }  else legend.mode=qgraphObject$Arguments[['legend.mode']]
   
-  if(is.null(qgraphObject$Arguments$borders)) borders=TRUE else borders=qgraphObject$Arguments$borders
-
+  if(is.null(qgraphObject$Arguments$borders)){
+    # if (!drawPies){
+      borders <- TRUE       
+    # }
+  } else {
+#     if (drawPies){
+#       warning("'borders' argument ignored if 'pie' argument is used.")     
+#     } else {
+      borders <- qgraphObject$Arguments[['borders']]        
+    # }
+  }
+  
   
   ### Polygon lookup list:
   polygonList = list(
@@ -752,7 +935,7 @@ if(is.null(qgraphObject$Arguments[['noPar']])) noPar <- FALSE else noPar <- qgra
   
   if(is.null(qgraphObject$Arguments[['label.cex']])){ 
       if (label.scale){
-        label.cex <- NULL  
+        label.cex <- 1  
       } else {
         label.cex <- 1
       }
@@ -2176,6 +2359,8 @@ if(is.null(qgraphObject$Arguments[['noPar']])) noPar <- FALSE else noPar <- qgra
   if (length(means)==1) means <- rep(means,nNodes)
   if (length(SDs)==1) SDs <- rep(SDs, nNodes)
   
+
+  
   #     
   #     pch1=numeric(0)
   #     pch2=numeric(0)
@@ -2329,6 +2514,16 @@ if(is.null(qgraphObject$Arguments[['noPar']])) noPar <- FALSE else noPar <- qgra
   qgraphObject$graphAttributes$Nodes$means <- means
   qgraphObject$graphAttributes$Nodes$SDs <- SDs
   
+  # Pies:
+  qgraphObject$graphAttributes$Nodes$pieColor <- pieColor
+  qgraphObject$graphAttributes$Nodes$pieColor2 <- pieColor2
+  qgraphObject$graphAttributes$Nodes$pieBorder <- pieBorder
+  qgraphObject$graphAttributes$Nodes$pie <- pie
+  qgraphObject$graphAttributes$Nodes$pieStart <- pieStart
+  qgraphObject$graphAttributes$Nodes$pieDarken <- pieDarken
+  
+  
+  
   # Edges:
   qgraphObject$graphAttributes$Edges$curve <- curve
   qgraphObject$graphAttributes$Edges$color <- edge.color
@@ -2427,7 +2622,13 @@ if(is.null(qgraphObject$Arguments[['noPar']])) noPar <- FALSE else noPar <- qgra
   qgraphObject$plotOptions$node.resolution <- node.resolution
   qgraphObject$plotOptions$noPar <- noPar
   qgraphObject$plotOptions$meanRange <- meanRange
-
+  qgraphObject$plotOptions$drawPies <- drawPies
+  qgraphObject$plotOptions$pieRadius <- pieRadius
+  qgraphObject$plotOptions$pastel <- pastel
+  qgraphObject$plotOptions$piePastel <- piePastel
+  
+  qgraphObject$plotOptions$rainbowStart <- rainbowStart
+  
   
   if (!DoNotPlot)
   {
