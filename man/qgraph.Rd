@@ -22,6 +22,8 @@ qgraph( input, ... )
 \item{details}{Logical indicating if minimum, maximum and cutoff score should be printed under the graph. Defaults to FALSE.}
 
 \item{threshold}{A numeric value that defaults to 0. Edges with absolute weight that are not above this value are REMOVED from the network. This differs from \code{minimum} which simply changes the scaling of width and color so that edges with absolute weight under minimum are not plotted/invisible. Setting a threshold influences the spring layout and centrality measures obtained with the graph whereass setting a minimum does not. In the case of correlation (\code{graph = "association"}) or partial correlation (\code{graph = "concentration"}) networks this argument can also be given a string to omit insignificant edges. See description of this argumet in the next section (Additional options for correlation/covariance matrices).}
+\item{palette}{The palette used for coloring nodes when the \code{groups} argument is used. Can be one of \code{"rainbow"} (default), \code{"colorblind"} (making use of http://jfly.iam.u-tokyo.ac.jp/color/), \code{"pastel"}, \code{"gray"}, \code{"R"} and \code{"ggplot2"}.}
+\item{theme}{This argument sets different defaults for various graphical arguments (most notably \code{posCol}, \code{negCol} and \code{palette}). Can be \code{"classic"}, \code{"colorblind"}, \code{"Hollywood"}, \code{"Borkulo"}, \code{"TeamFortress"}, \code{"Reddit"}, \code{"Leuven"} or \code{"Fried"}.}
 }
 }
 
@@ -40,6 +42,9 @@ qgraph( input, ... )
   
   \item{sampleSize}{The sample-size. Used when \code{graph = "glasso"} or \code{minimum = "sig"}}
     \item{tuning}{A tuning parameter used in estimation. Currently only used when \code{graph = "glasso"} and corresponds to the \code{gamma} argument}
+      \item{refit}{
+    Logical, should the optimal graph be refitted without LASSO regularization? Defaults to \code{FALSE} and only used if \code{graph = "glasso"}.
+  }
      \item{countDiagonal}{
     Should diagonal be counted in EBIC computation? Defaults to \code{FALSE}. Set to \code{TRUE} to mimic qgraph < 1.3 behavior (not recommended!).
   }
@@ -148,7 +153,8 @@ These arguments control the curvature of edges.  Most of them can be assigned a 
     \item{curveAll}{Logical, indicating if all edges should be curved with the value of the 'curve' or only edges between nodes that have share multiple edges.}
     \item{curveDefault}{The default curvature. Defaults to 1.}
     \item{curveShape}{The shape of the curve, as used in \code{xspline}. Defaults to \code{-1}.}
-    \item{curveScale}{Logical, should curve scale with distance between nodes. Defaults to TRUE. If FALSE, the curve can be exactly determined. Recommended to set to TRUE for graphs and FALSE for diagrams.}
+    \item{curveScale}{Logical, should curve scale with distance between nodes. Defaults to \code{TRUE}. If \code{FALSE}, the curve can be exactly determined. Recommended to set to \code{TRUE} for graphs and \code{FALSE} for diagrams. The curvature is corrected for the number of nodes and will be smaller if there are more nodes.}
+    \item{curveScaleNodeCorrection}{Logical, disable the node correction in \code{curveScale}. Defaults to \code{FALSE}. Not recommended. Set to \code{TRUE} ONLY if you know what you are doing.}
     \item{curvePivot}{Quantile to pivot curves on. This can be used to, rather than round edges, make straight edges as curves with "knicks" in them. Can be logical or numeric. \code{FALSE} (default) indicates no pivoting in the curved edges, a number indicates the quantile (and one minus this value as quantile) on which to pivot curved edges and \code{TRUE} indicates a value of 0.1.}
         \item{curvePivotShape}{The shape of the curve around the pivots, as used in \code{xspline}. Defaults to \code{0.25}.}
         \item{parallelEdge}{Logical, set to \code{TRUE} to draw parallel straight edges rather than curved edges when there are multiple edges between two nodes. Can be a vector with value per edge for edgelists or a matrix with a value per edge for weights marices.}
