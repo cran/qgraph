@@ -14,10 +14,10 @@ cor_auto <- function(
 {
 
   # Check for data frame:
-  if (!is.data.frame(data))
-  {
+  # if (!is.data.frame(data))
+  # {
     data <- as.data.frame(data)
-  }
+  # }
   
   # Select columns:
   if (!missing(select))
@@ -41,7 +41,7 @@ cor_auto <- function(
 
   
   # Detect ordinal:
-  Numerics <- which(sapply(data,is,"numeric") | sapply(data,is,"integer"))
+  Numerics <- which(sapply(data,is.numeric) | sapply(data,is.integer))
   
   if (detectOrdinal & length(Numerics) > 0)
   {
@@ -68,7 +68,7 @@ cor_auto <- function(
   
   ### START COMPUTING CORRELATIONS ###
   # IF ALL NUMERIC OR INTEGER, NONPARANORMAL SKEPTIC:
-  if (all(sapply(data,is,"numeric") | sapply(data,is,"integer") ) & npn.SKEPTIC)
+  if (all(sapply(data,is.numeric) | sapply(data,is.integer) ) & npn.SKEPTIC)
   {
 #     message("All variables detected to be continuous, computing nonparanormal skeptic!")
     
