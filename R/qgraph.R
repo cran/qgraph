@@ -183,57 +183,64 @@ qgraph <- function( input, ... )
   if (is(input,"bdgraph"))
   {
     
-    stop("BDgraph support has temporarily been removed")
+    # browser()
+    # stop("BDgraph support has temporarily been removed")
     
-    #     if(is.null(qgraphObject$Arguments[['BDgraph']])) BDgraph=c("phat","Khat") else BDgraph=qgraphObject$Arguments[['BDgraph']]
-    #     if (all(c("Khat","phat")%in%BDgraph)) layout(t(1:2))
-    #     
-    #     if(is.null(qgraphObject$Arguments[['BDtitles']])) BDtitles <- TRUE else BDtitles <- qgraphObject$Arguments[['BDtitles']]
-    #     
-    #     
-    #     Res <- list()
-    #     
-    #     if (isTRUE(which(BDgraph == "phat") < which(BDgraph == "Khat")))
-    #     {
-    #       # phat:
-    #       W <- phat(input)
-    #       W <- W + t(W)
-    #       Res[["phat"]] <- do.call(qgraph,c(list(input=W,probabilityEdges = TRUE),qgraphObject$Arguments))
-    #       L <- Res[["phat"]]$layout
-    #       
-    #       if (BDtitles) text(mean(par('usr')[1:2]),par("usr")[4] - (par("usr")[4] - par("usr")[3])/40,"Posterior probabilities", adj = c(0.5,1))     
-    #       
-    #       # Khat:
-    #       W <- input$Khat
-    #       diag(W) <- -1*diag(W)
-    #       W <-  - W / sqrt(diag(W)%o%diag(W))
-    #       Res[["Khat"]] <- do.call(qgraph,c(list(input = W,layout = L), qgraphObject$Arguments))
-    #       L <- Res[["Khat"]]$layout
-    #       if (BDtitles) text(mean(par('usr')[1:2]),par("usr")[4] - (par("usr")[4] - par("usr")[3])/40,"Mean partial correlations", adj = c(0.5,1))
-    #       
-    #     } else 
-    #     {
-    #       if ("Khat" %in% BDgraph)
-    #       {
-    #         W <- input$Khat
-    #         diag(W) <- -1*diag(W)
-    #         W <-  - W / sqrt(diag(W)%o%diag(W))
-    #         Res[["Khat"]] <- do.call(qgraph,c(list(input=W),qgraphObject$Arguments))
-    #         L <- Res[["Khat"]]$layout
-    #         if (BDtitles) text(mean(par('usr')[1:2]),par("usr")[4],"Mean partial correlations", adj = c(0.5,1))
-    #       } else L <- qgraphObject$Arguments$layout
-    #       
-    #       if ("phat" %in% BDgraph)
-    #       {
-    #         W <- phat(input)
-    #         W <- W + t(W)
-    #         Res[["phat"]] <- do.call(qgraph,c(list(input = W,layout = L,probabilityEdges= TRUE), qgraphObject$Arguments))
-    #         if (BDtitles) text(mean(par('usr')[1:2]),par("usr")[4],"Posterior probabilities", adj = c(0.5,1))
-    #       }
-    #     }  
-    #     
-    #     if (length(Res)==1) Res <- Res[[1]]
-    #     return(Res)
+        if(is.null(qgraphObject$Arguments[['BDgraph']])){
+          BDgraph=c("phat","Khat")
+        } else {
+          BDgraph=qgraphObject$Arguments[['BDgraph']]
+        } 
+        if (all(c("Khat","phat")%in%BDgraph)) layout(t(1:2))
+
+        if(is.null(qgraphObject$Arguments[['BDtitles']])) BDtitles <- TRUE else BDtitles <- qgraphObject$Arguments[['BDtitles']]
+
+
+        Res <- list()
+
+        if (isTRUE(which(BDgraph == "phat") < which(BDgraph == "Khat")))
+        {
+          # phat:
+          W <- as.matrix(BDgraph::plinks(input))
+          W <- W + t(W)
+          Res[["phat"]] <- do.call(qgraph,c(list(input=W,probabilityEdges = TRUE),qgraphObject$Arguments))
+          L <- Res[["phat"]]$layout
+
+          if (BDtitles) text(mean(par('usr')[1:2]),par("usr")[4] - (par("usr")[4] - par("usr")[3])/40,"Posterior probabilities", adj = c(0.5,1))
+
+          # Khat:
+          W <- as.matrix(input$K_hat)
+          # diag(W) <- -1*diag(W)
+          # W <-  - W / sqrt(diag(W)%o%diag(W))
+          W <- wi2net(W)
+          Res[["Khat"]] <- do.call(qgraph,c(list(input = W,layout = L), qgraphObject$Arguments))
+          L <- Res[["Khat"]]$layout
+          if (BDtitles) text(mean(par('usr')[1:2]),par("usr")[4] - (par("usr")[4] - par("usr")[3])/40,"Mean partial correlations", adj = c(0.5,1))
+
+        } else
+        {
+          if ("Khat" %in% BDgraph)
+          {
+            W <- as.matrix(input$K_hat)
+            # diag(W) <- -1*diag(W)
+            # W <-  - W / sqrt(diag(W)%o%diag(W))
+            W <- wi2net(input$K_hat)
+            Res[["Khat"]] <- do.call(qgraph,c(list(input=W),qgraphObject$Arguments))
+            L <- Res[["Khat"]]$layout
+            if (BDtitles) text(mean(par('usr')[1:2]),par("usr")[4],"Mean partial correlations", adj = c(0.5,1))
+          } else L <- qgraphObject$Arguments$layout
+
+          if ("phat" %in% BDgraph)
+          {
+            W <- as.matrix(plinks(input))
+            W <- W + t(W)
+            Res[["phat"]] <- do.call(qgraph,c(list(input = W,layout = L,probabilityEdges= TRUE), qgraphObject$Arguments))
+            if (BDtitles) text(mean(par('usr')[1:2]),par("usr")[4],"Posterior probabilities", adj = c(0.5,1))
+          }
+        }
+
+        if (length(Res)==1) Res <- Res[[1]]
+        return(Res)
     
   }
   
@@ -278,7 +285,7 @@ qgraph <- function( input, ... )
                "piePastel", "BDgraph", "BDtitles", "edgelist", "weighted", "nNodes", 
                "XKCD", "Edgelist", "Arguments", "plotOptions", "graphAttributes", 
                "layout", "layout.orig","resid","factorCors","residSize","filetype","model",
-               "crossloadings")
+               "crossloadings","gamma","lambda.min.ratio","loopRotation","edgeConnectPoints","residuals","residScale","residEdge","CircleEdgeEnd")
   
   if (any(!names(qgraphObject$Arguments) %in% allArgs)){
     wrongArgs <- names(qgraphObject$Arguments)[!names(qgraphObject$Arguments) %in% allArgs]
@@ -295,6 +302,16 @@ qgraph <- function( input, ... )
   {
     tuning <- 0.5
   } else tuning <- qgraphObject$Arguments[['tuning']]  
+  
+  if(!is.null(qgraphObject$Arguments[['gamma']]))
+  {
+    tuning <- qgraphObject$Arguments[['gamma']]
+  }
+  
+  if(is.null(qgraphObject$Arguments[['lambda.min.ratio']]))
+  {
+    lambda.min.ratio <- 0.01
+  } else lambda.min.ratio <- qgraphObject$Arguments[['lambda.min.ratio']]  
   
   # Refit:
   if(is.null(qgraphObject$Arguments[['refit']]))
@@ -1401,7 +1418,8 @@ qgraph <- function( input, ... )
     {
       if (edgelist) stop("Concentration graph requires correlation matrix")
       if (is.null(sampleSize)) stop("'sampleSize' argument is needed for glasso estimation")
-      input <- EBICglasso(input, sampleSize, gamma = tuning,refit=refit)
+      input <- EBICglasso(input, sampleSize, gamma = tuning,
+                          refit=refit, lambda.min.ratio = lambda.min.ratio)
     }
     
     diag(input) <- 1

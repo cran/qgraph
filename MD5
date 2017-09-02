@@ -1,8 +1,8 @@
 ff547ababc85108875b8e8f94239d4dd *COPYING
 1a2af62c3ce2e2cc524a8a2067947f54 *COPYRIGHTS
-2b129dde4a4e48abb506c73490f7ce55 *DESCRIPTION
-2e37cf3a9d37528977c2dfce571a244c *NAMESPACE
-3472f55ecf7ab752936cbb9d1a35f046 *NEWS
+a5d0e6cbb78f7cff9cf2f5533bac3eb2 *DESCRIPTION
+98e8b01b2a55d5c27ca7e5d7b46a1b73 *NAMESPACE
+4a4e8a560eda25b79f98f8fdfd0fab33 *NEWS
 fa7a58c82e7f64ac41f1467ab0a257a5 *R/00PolyShapes.R
 8ec3dfbaaa5842955f9c6fafaf2614df *R/Cent2EdgeNode.R
 affcb13e3ecdae977828c34f75028add *R/DrawArrow.R
@@ -12,6 +12,7 @@ ebcac4462dcb3c008ae449b28e128122 *R/Fade.R
 cee6b0a630bc6d883cefdd09db2bc101 *R/IntInNode.r
 497b8e36bc1f938c02260991d79912e2 *R/PLOT.R
 bec4c869cdcc49d7368fa200d64fbb08 *R/SelfLoop.R
+db8960c7178aac30b2d0e42d03c51fa6 *R/Untitled.R
 637d5a81fcecaec5c9561c74f7fb2a6b *R/VARglm.R
 0ab244d3e2e75264f9326d875fa74581 *R/XKCD.R
 7ee5eeca7e3284dc4081e02c4c693bca *R/addTitle.R
@@ -31,7 +32,7 @@ a0283ebf562ff5b1d32a64489332437e *R/fixnames.R
 d5d9b0310bb3dc92d2462ee64ab5f2b2 *R/getArgs.R
 90d03709ad8565fa25b616be91d193ef *R/getWmat.R
 a95a6df679a4d1c523a019eb281d3e74 *R/ggmFit.R
-e915801e052a70f09ae6c82dffd80723 *R/glasso_methods.R
+eba831cf5a1e1ac749634ac5c5f1bfac *R/glasso_methods.R
 28618b8aeda72a2a245141fa3506de3c *R/igraphConversion.R
 37cc0419c2dd2dd4fbd580a6d9bad2f3 *R/isColor.R
 49d8731fa0884a1efb0bf0060e7b9795 *R/layout.R
@@ -44,7 +45,7 @@ dc7db0cfcd912f94485843f006b3f94a *R/palettes.R
 019aed05710aa023f3512abe0dd1228a *R/pathways.R
 bc4f90020d199ba941fa883bebb42586 *R/pie2.R
 608ab043e398d83fccfdef7e8eeff590 *R/printplotsummary.R
-352da9aa50d35284031e2a9697b0965b *R/qgraph.R
+4af4a179e4fc194f3d43e0a135d38e45 *R/qgraph.R
 3f1a9d911d34d48092fa2946ef1ec24b *R/qgraph.lavaan.R
 38f477aa7190a6df9b2b50331b685c61 *R/qgraph.panel.R
 7fe38c42e56f7e945aca4c4682a5bd2d *R/qgraph.rack.R
@@ -92,7 +93,7 @@ a8b7f70012dccf9780ea0d91503753d2 *man/makeBW.Rd
 154397578cf690bb56f586200dfc67de *man/pathways.Rd
 ccb0bd71591eab120c5bf7bb11e6411b *man/plot.qgraph.Rd
 60c990eafedbfdc74f81ebf5fc4b3e5c *man/print.qgraph.Rd
-57c10a793cb38adccb07b612aabce7ee *man/qgraph.Rd
+1e31422733b748a3d39d5d8c771bffd4 *man/qgraph.Rd
 a8170510c4edb3ea7d0c1495166e5fb5 *man/qgraph.animate.Rd
 3b90dc79e812b4340f28df1ffcb6ca2e *man/qgraph.cfa.Rd
 115729cfb4a724629dcc8266607b107c *man/qgraph.gui.Rd

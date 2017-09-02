@@ -2,20 +2,20 @@ Package: qgraph
 Type: Package
 Title: Graph Plotting Methods, Psychometric Data Visualization and
         Graphical Model Estimation
-Version: 1.4.3
+Version: 1.4.4
 Author: Sacha Epskamp, Giulio Costantini, Jonas Haslbeck, Angelique O. J. Cramer, Lourens J. Waldorp, Verena D. Schmittmann and Denny Borsboom
 Maintainer: Sacha Epskamp <mail@sachaepskamp.com>
 Depends: R (>= 3.0.0)
 Suggests: RSVGTipsDevice, sendplot
 Imports: methods, grDevices, psych, ellipse, lavaan, sem, plyr, Hmisc,
         igraph, jpeg, png, colorspace, Matrix, sna, corpcor, reshape2,
-        ggplot2, glasso, huge, fdrtool, d3Network, ggm, gtools
+        ggplot2, glasso, huge, fdrtool, d3Network, ggm, gtools, BDgraph
 ByteCompile: yes
 Description: Can be used to visualize data as networks as well as provides an interface for visualizing weighted graphical models.
 URL: http://sachaepskamp.com/qgraph
 License: GPL-2
 LazyLoad: yes
 NeedsCompilation: yes
-Packaged: 2017-03-27 14:20:31 UTC; sachaepskamp
+Packaged: 2017-09-02 15:32:12 UTC; sachaepskamp
 Repository: CRAN
-Date/Publication: 2017-03-27 14:41:42 UTC
+Date/Publication: 2017-09-02 16:05:29 UTC
