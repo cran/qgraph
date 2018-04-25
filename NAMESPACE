@@ -1,3 +1,6 @@
+export(mutualInformation) 
+# export(vein)
+export(flow)
 importFrom("utils", "capture.output")
 importFrom("grDevices", "hcl")
 S3method(print, ggmFit)
@@ -80,6 +83,9 @@ export(mat2vec)
 # LASSO STUFF:
 export(wi2net)
 export(EBICglasso)
+export(ggmModSelect)
+#export(EBICglasso2)
+#export(EBICglassoCluster)
 importFrom(Matrix, forceSymmetric)
 import(glasso)
 
@@ -131,3 +137,9 @@ importFrom("utils", "browseURL", "combn", "menu", "setTxtProgressBar",
              "txtProgressBar")
 importFrom("graphics", "plot.new", "plot.window")
 importFrom("stats", "uniroot")
+
+
+# Parallel:
+import(parallel)
+importFrom("pbapply","pblapply")
+importFrom("abind","abind")

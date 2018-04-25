@@ -1,5 +1,9 @@
-centralityPlot <- function(..., labels, scale = c("z-scores", "raw", "raw0","relative"), include, theme_bw = TRUE, print = TRUE,
-                           verbose = TRUE, standardized, relative, weighted = TRUE, signed = TRUE)
+centralityPlot <- function(..., labels, scale = c("z-scores", "raw", "raw0","relative"), 
+                           include = c("Degree","Strength","OutDegree","InDegree","OutStrength","InStrength","Closeness","Betweenness"), theme_bw = TRUE, print = TRUE,
+                           verbose = TRUE, standardized, relative, weighted = TRUE, signed = TRUE,
+                           orderBy = "default", # Can also be one of the measures
+                           decreasing = FALSE
+)
 {
   scale <- match.arg(scale)
   if (!missing(standardized)){
@@ -33,15 +37,30 @@ centralityPlot <- function(..., labels, scale = c("z-scores", "raw", "raw0","rel
   Long <- centralityTable(..., standardized=standardized, labels=labels, relative=relative, weighted = weighted, signed = signed)
 
   # If not missing, include only include vars:
-  if (!missing(include))
-  {
-    Long <- subset(Long, measure %in% include)
-  }
+  # if (!missing(include))
+  # {
+  Long <- subset(Long, measure %in% include)
+  # }
   
-
+  # Re-order:
+  Long$measure <- factor(Long$measure,levels = include)
+  
   # Ordereing by node name to make nice paths:
-  Long <- Long[gtools::mixedorder(Long$node),] 
-  Long$node <- factor(as.character(Long$node), levels = unique(gtools::mixedsort(as.character(Long$node))))
+  if (orderBy == "default"){
+    nodeLevels <- unique(gtools::mixedsort(as.character(Long$node), decreasing = decreasing))
+  } else {
+    nodeLevels <- names(sort(tapply(Long$value[Long$measure == orderBy],Long$node[Long$measure == orderBy],mean), decreasing=decreasing))
+  }
+  Long$node <- factor(as.character(Long$node), levels = nodeLevels)
+  Long <- Long[gtools::mixedorder(Long$node),]
+  # 
+  #      Long <- Long[gtools::mixedorder(Long$node),] 
+  #      Long$node <- factor(as.character(Long$node), levels = unique(gtools::mixedsort(as.character(Long$node))))
+  #    } else {
+  # 
+  #      Long <- Long[gtools::mixedorder(Long[[orderBy]]),] 
+  #      Long$node <- factor(as.character(Long$node), levels = unique(gtools::mixedsort(as.character(Long$node))))
+  #    }
   
   # PLOT:
   if (length(unique(Long$type)) > 1)
@@ -64,7 +83,7 @@ centralityPlot <- function(..., labels, scale = c("z-scores", "raw", "raw0","rel
   if (theme_bw){
     g <- g + theme_bw()
   }
-
+  
   if (scale == "raw0"){
     g <-g + xlim(0,NA)
   }

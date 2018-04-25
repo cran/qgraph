@@ -12,12 +12,14 @@ These functions can be used to facilitate interpreting centrality and clustering
 }
 \usage{
 centralityPlot(..., labels, scale = c("z-scores", "raw", "raw0","relative"),
-                 include, theme_bw = TRUE, print = TRUE,
-                 verbose = TRUE, standardized, relative, weighted =
-                 TRUE, signed = TRUE)
+                 include = c("Degree","Strength","OutDegree","InDegree","OutStrength",
+                 "InStrength", "Closeness","Betweenness"), theme_bw = TRUE, print = TRUE, 
+                 verbose = TRUE, standardized, relative, weighted = TRUE, signed = TRUE, 
+                 orderBy = "default", decreasing = FALSE)
 clusteringPlot(..., scale = c("z-scores", "raw", "raw0","relative"), labels, 
                   include , signed = FALSE, theme_bw = TRUE, print = TRUE,
-                  verbose = TRUE, standardized, relative)
+                  verbose = TRUE, standardized, relative,orderBy = "default", 
+                  decreasing = FALSE)
 centralityTable(..., labels, standardized = TRUE,  relative = FALSE, weighted =
                  TRUE, signed = TRUE)
 clusteringTable(..., labels,  standardized = TRUE, relative = FALSE, 
@@ -33,7 +35,7 @@ Objects usuable in the \code{\link{getWmat}} generic, such as qgraph objects and
 A vector overwriting the labels used. Can be missing.
 }
   \item{include}{
-A vector of measures to include. if missing all measures available will be included.
+A vector of measures to include. if missing all measures available will be included. Not included by default are \code{"ExpectedInfluence"}, \code{"OutExpectedInfluence"}, and \code{"InExpectedInfluence"}
 }
 \item{theme_bw}{
 Adds the ggplot2 black and white theme to the plot
@@ -52,6 +54,8 @@ Logical, should all measures be scaled relative to the largest value? Argument i
 }
 \item{weighted}{Logical, set to \code{FALSE} to set all edge weights to 1 or -1}
 \item{signed}{Logical, set to \code{FALSE} to make all edge weights absolute}
+\item{orderBy}{String indicating which measure to order by. Can be default (alphabetical), or one of the measures plotted (e.g., \code{"Strength"})}
+\item{decreasing}{Logical indicating if the nodes should be ordered increasing or decreasing}
 }
 
 \details{
