@@ -75,6 +75,11 @@ centrality <- function(graph,alpha=1,posfun=abs,pkg = c("igraph","qgraph"),all.s
   InExpectedInfluence <- colSums(W)
   OutExpectedInfluence <- rowSums(W)
   
+  # # Randomized Shortest Paths Betweenness Centrality
+  # rspbc <- NetworkToolbox::rspbc(abs(W))
+  # 
+  # # Hybrid Centrality
+  # hybrid <- NetworkToolbox::hybrid(abs(W), BC = "random")
   
   DistMat <- 1/(ifelse(posfun(W)==0,0,posfun(W)^alpha))
   if (pkg=="igraph"){
@@ -91,7 +96,7 @@ centrality <- function(graph,alpha=1,posfun=abs,pkg = c("igraph","qgraph"),all.s
     E <- cbind(c(row(W)),c(col(W)),c(posfun(W)))
     # E <- E[E[,3] != 0, ]
     # E[,3] <- 1/E[,3]
-    igraphObject <- igraph::graph_from_edgelist(E[,1:2],directed=TRUE)
+    igraphObject <- igraph::graph_from_edgelist(E[,1:2, drop=FALSE],directed=TRUE)
     
     
     
@@ -217,6 +222,8 @@ centrality <- function(graph,alpha=1,posfun=abs,pkg = c("igraph","qgraph"),all.s
     InDegree = lab(CombinedDegreesIn,Labels),
     Closeness = lab(Closeness,Labels),
     Betweenness = lab(Betweenness,Labels),
+    # rspbc = lab(as.vector(rspbc),Labels),
+    # hybrid = lab(as.vector(hybrid),Labels),
     InExpectedInfluence = InExpectedInfluence,
     OutExpectedInfluence = OutExpectedInfluence,
     ShortestPathLengths = lab(ShortestPaths,Labels),

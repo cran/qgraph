@@ -4,24 +4,26 @@ qgraph <- function( input, ... )
 {
   
   # OTHER INPUT MODES: 
-  if (any(class(input)=="factanal") )
-  {
-    return(qgraph.efa(input,...))
-  } else if (any(class(input)=="principal") )
-  {
-    return(qgraph.pca(input,...))
-  } else if (any(class(input)=="lavaan"))
-  {
-    return(qgraph.lavaan(input,edge.labels=TRUE,include=8,filetype="",...))
-  } else if (any(class(input)=="sem"))
-  {
-    return(qgraph.sem(input,edge.labels=TRUE,include=6,filetype="",...))
-  } else if (any(class(input)=="loadings"))
+  # if (any(class(input)=="factanal") )
+  # {
+  #   return(qgraph.efa(input,...))
+  # } else if (any(class(input)=="principal") )
+  # {
+  #   return(qgraph.pca(input,...))
+  # } else if (any(class(input)=="lavaan"))
+  # {
+  #   return(qgraph.lavaan(input,edge.labels=TRUE,include=8,filetype="",...))
+  # } else if (any(class(input)=="sem"))
+  # {
+  #   return(qgraph.sem(input,edge.labels=TRUE,include=6,filetype="",...))
+  # } else 
+    if (any(class(input)=="loadings"))
   {
     return(qgraph.loadings(input,...))
-  }  else if (any(class(input)=="semmod"))
-  {
-    return(qgraph.semModel(input,...))
+  # }  
+  # else if (any(class(input)=="semmod"))
+  # {
+  #   return(qgraph.semModel(input,...))
   } else if (is.list(input) && identical(names(input),c("Bhat", "omega", "lambda1", "lambda2")))
   {
     layout(t(1:2))
@@ -257,7 +259,7 @@ qgraph <- function( input, ... )
   allArgs <- c("input", "layout", "groups", "minimum", "maximum", "cut", "details", 
                "threshold", "palette", "theme", "graph", "threshold", "sampleSize", 
                "tuning", "refit", "countDiagonal", "alpha", "bonf", "FDRcutoff", 
-               "mar", "filetype", "filename", "width", "height", "normalize", 
+               "mar", "filetype", "filename", "width", "height", "normalize", "res",
                "DoNotPlot", "plot", "rescale", "standAlone", "color", "vsize", 
                "vsize2", "node.width", "node.height", "borders", "border.color", 
                "border.width", "shape", "polygonList", "vTrans", "subplots", 
@@ -271,11 +273,11 @@ qgraph <- function( input, ... )
                "curve", "curveAll", "curveDefault", "curveShape", "curveScale", 
                "curveScaleNodeCorrection", "curvePivot", "curvePivotShape", 
                "parallelEdge", "parallelAngle", "parallelAngleDefault", "edge.labels", 
-               "edge.label.cex", "edge.label.bg", "edge.label.position", "edge.label.font", 
+               "edge.label.cex", "edge.label.bg", "edge.label.position", "edge.label.font", "edge.label.color",
                "repulsion", "layout.par", "layout.control", "aspect", "rotation", 
                "legend", "legend.cex", "legend.mode", "GLratio", "layoutScale", 
                "layoutOffset", "nodeNames", "bg", "bgcontrol", "bgres", "pty", 
-               "gray", "tooltips", "overlay", "overlaySize", "font", "directed", 
+               "gray",  "font", "directed", 
                "arrows", "arrowAngle", "asize", "open", "bidirectional", "mode", 
                "alpha", "sigScale", "bonf", "scores", "scores.range", "mode", 
                "edge.color", "knots", "knot.size", "knot.color", "knot.borders", 
@@ -285,7 +287,8 @@ qgraph <- function( input, ... )
                "piePastel", "BDgraph", "BDtitles", "edgelist", "weighted", "nNodes", 
                "XKCD", "Edgelist", "Arguments", "plotOptions", "graphAttributes", 
                "layout", "layout.orig","resid","factorCors","residSize","filetype","model",
-               "crossloadings","gamma","lambda.min.ratio","loopRotation","edgeConnectPoints","residuals","residScale","residEdge","CircleEdgeEnd","title.cex")
+               "crossloadings","gamma","lambda.min.ratio","loopRotation","edgeConnectPoints","residuals","residScale","residEdge","CircleEdgeEnd","title.cex",  
+               "node.label.offset", "node.label.position")
   
   if (any(!names(qgraphObject$Arguments) %in% allArgs)){
     wrongArgs <- names(qgraphObject$Arguments)[!names(qgraphObject$Arguments) %in% allArgs]
@@ -594,9 +597,6 @@ qgraph <- function( input, ... )
   if(is.null(qgraphObject$Arguments[['label.norm']])) label.norm <- "OOO" else label.norm <- qgraphObject$Arguments[['label.norm']]
   #   if(is.null(qgraphObject$Arguments[['label.cex']])) label.cex <- NULL else label.cex <- qgraphObject$Arguments[['label.cex']]
   #   
-  if(is.null(qgraphObject$Arguments[['font']])) font <- 1 else font <- qgraphObject$Arguments[['font']]
-  
-  if(is.null(qgraphObject$Arguments[['label.font']])) label.font <- font else label.font <- qgraphObject$Arguments[['label.font']]
   
   if(is.null(qgraphObject$Arguments[['nodeNames']])) nodeNames <- NULL else nodeNames <- qgraphObject$Arguments[['nodeNames']]
   
@@ -804,7 +804,6 @@ qgraph <- function( input, ... )
   if(is.null(qgraphObject$Arguments$weighted)) weighted=NULL else weighted=qgraphObject$Arguments$weighted
   if(is.null(qgraphObject$Arguments$rescale)) rescale=TRUE else rescale=qgraphObject$Arguments$rescale
   if(is.null(qgraphObject$Arguments[['edge.labels']])) edge.labels=FALSE else edge.labels=qgraphObject$Arguments[['edge.labels']]
-  if(is.null(qgraphObject$Arguments[['edge.label.font']])) edge.label.font=font else edge.label.font=qgraphObject$Arguments[['edge.label.font']]
   if(is.null(qgraphObject$Arguments[['edge.label.bg']])) edge.label.bg=TRUE else edge.label.bg=qgraphObject$Arguments[['edge.label.bg']]
   if (identical(FALSE,edge.label.bg)) plotELBG <- FALSE else plotELBG <- TRUE
   
@@ -817,6 +816,9 @@ qgraph <- function( input, ... )
   negDashed <- FALSE
   parallelEdge <- FALSE
   fade <- NA 
+  border.width <- 1 
+  font <- 1 
+  unCol <- "#808080" 
   # if (length(groups) < 8){
   #   palette <- "colorblind"
   # } else {
@@ -827,7 +829,7 @@ qgraph <- function( input, ... )
     theme <- qgraphObject$Arguments[['theme']]
     if (length(theme) > 1) stop("'theme' must be of lenght 1")
     if (!theme %in% c("classic","Hollywood","Leuven","Reddit","TeamFortress","Fried",
-                      "Borkulo","colorblind","gray","gimme","GIMME")){
+                      "Borkulo","colorblind","gray","gimme","GIMME","neon")){
       stop(paste0("Theme '",theme,"' is not supported."))
     }
  
@@ -872,7 +874,17 @@ qgraph <- function( input, ... )
       negCol <- "blue"
       parallelEdge <- TRUE
       fade <- FALSE
-    } 
+    } else if(theme == "neon"){
+      bg <- "black"
+      label.color <- "#8ffcff"
+      bcolor <- "#8ffcff"
+      border.width <- 4
+      font <- 2
+      posCol <- "#f3ea5f"
+      negCol <- "#c04df9"
+      unCol <- "#8ffcff"
+      palette <- "neon"
+    }
   }
   
   # Overwrite:
@@ -883,7 +895,14 @@ qgraph <- function( input, ... )
   if(!is.null(qgraphObject$Arguments[['negDashed']])) negDashed <- qgraphObject$Arguments[['negDashed']]
   if(!is.null(qgraphObject$Arguments[['posCol']])) posCol <- qgraphObject$Arguments[['posCol']]
   if(!is.null(qgraphObject$Arguments[['negCol']])) negCol <- qgraphObject$Arguments[['negCol']]
-  
+  if(!is.null(qgraphObject$Arguments[['border.width']])) border.width <- qgraphObject$Arguments[['border.width']]
+    
+  if(!is.null(qgraphObject$Arguments[['font']])) font <- qgraphObject$Arguments[['font']]
+  if(is.null(qgraphObject$Arguments[['edge.label.font']])) edge.label.font=font else edge.label.font=qgraphObject$Arguments[['edge.label.font']]
+  if(is.null(qgraphObject$Arguments[['label.font']])) label.font <- font else label.font <- qgraphObject$Arguments[['label.font']]
+   if(!is.null(qgraphObject$Arguments[['unCol']])) unCol <- qgraphObject$Arguments[['unCol']] 
+    
+    
   if (length(posCol)==1) posCol <- rep(posCol,2)
   if (length(posCol)!=2) stop("'posCol' must be of length 1 or 2.")
   if (length(negCol)==1) negCol <- rep(negCol,2)
@@ -922,7 +941,7 @@ qgraph <- function( input, ... )
     if (length(palette) != 1 && !is.character(palette)){
       stop("'palette' must be a single string.")
     }
-    if (!palette %in% c("rainbow","colorblind","R","ggplot2","gray","grey","pastel")){
+    if (!palette %in% c("rainbow","colorblind","R","ggplot2","gray","grey","pastel","neon")){
       stop(paste0("Palette '",palette,"' is not supported."))
     }
   }
@@ -930,8 +949,7 @@ qgraph <- function( input, ... )
   
   ###
   
-  if(is.null(qgraphObject$Arguments[['unCol']])) unCol <- "#808080" else unCol <- qgraphObject$Arguments[['unCol']] 
-  
+
   if(is.null(qgraphObject$Arguments[['colFactor']])) colFactor <- 1 else colFactor <- qgraphObject$Arguments[['colFactor']]
   
   if(is.null(qgraphObject$Arguments[['edge.color']])) edge.color <- NULL else edge.color=qgraphObject$Arguments[['edge.color']]
@@ -983,7 +1001,7 @@ qgraph <- function( input, ... )
   
   
   
-  if(is.null(qgraphObject$Arguments[['border.width']])) border.width <- 1 else border.width <- qgraphObject$Arguments[['border.width']]
+  # if(is.null(qgraphObject$Arguments[['border.width']])) border.width <- 1 else border.width <- qgraphObject$Arguments[['border.width']]
   #if (!DoNotPlot & !is.null(dev.list()[dev.cur()]))
   #{
   #	par(mar=c(0,0,0,0), bg=background)
@@ -1154,6 +1172,8 @@ qgraph <- function( input, ... )
   
   if(is.null(qgraphObject$Arguments$label.fill.horizontal)) label.fill.horizontal<-1 else label.fill.horizontal <- qgraphObject$Arguments$label.fill.horizontal
   if(is.null(qgraphObject$Arguments$label.fill.vertical)) label.fill.vertical<-1 else label.fill.vertical <- qgraphObject$Arguments$label.fill.vertical
+  if(is.null(qgraphObject$Arguments$node.label.offset)) node.label.offset<-c(0.5, 0.5) else node.label.offset <- qgraphObject$Arguments$node.label.offset
+  if(is.null(qgraphObject$Arguments$node.label.position)) node.label.position<-NULL else node.label.position <- qgraphObject$Arguments$node.label.position
   
   
   
@@ -1161,8 +1181,8 @@ qgraph <- function( input, ... )
   if(is.null(qgraphObject$Arguments$scores.range)) scores.range=NULL else scores.range=qgraphObject$Arguments$scores.range
   if(is.null(qgraphObject$Arguments$lty)) lty=1 else lty=qgraphObject$Arguments$lty
   if(is.null(qgraphObject$Arguments$vTrans)) vTrans=255 else vTrans=qgraphObject$Arguments$vTrans
-  if(is.null(qgraphObject$Arguments[['overlay']])) overlay <- FALSE else overlay <- qgraphObject$Arguments[['overlay']]
-  if(is.null(qgraphObject$Arguments[['overlaySize']])) overlaySize <- 0.5 else overlaySize <- qgraphObject$Arguments[['overlaySize']]
+  # if(is.null(qgraphObject$Arguments[['overlay']])) overlay <- FALSE else overlay <- qgraphObject$Arguments[['overlay']]
+  # if(is.null(qgraphObject$Arguments[['overlaySize']])) overlaySize <- 0.5 else overlaySize <- qgraphObject$Arguments[['overlaySize']]
   if(is.null(qgraphObject$Arguments[['GLratio']])) GLratio <- 2.5 else GLratio <- qgraphObject$Arguments[['GLratio']]
   if(is.null(qgraphObject$Arguments$layoutScale)) layoutScale <- 1 else layoutScale <- qgraphObject$Arguments$layoutScale
   if(is.null(qgraphObject$Arguments[['layoutOffset']])) layoutOffset <- 0 else layoutOffset <- qgraphObject$Arguments[['layoutOffset']]
@@ -1216,8 +1236,8 @@ qgraph <- function( input, ... )
   if(is.null(qgraphObject$Arguments$bidirectional)) bidirectional=FALSE else bidirectional=qgraphObject$Arguments$bidirectional
   
   # qgraphObject$Arguments for SVG pictures:
-  if(is.null(qgraphObject$Arguments$tooltips)) tooltips=NULL else tooltips=qgraphObject$Arguments$tooltips
-  if(is.null(qgraphObject$Arguments$SVGtooltips)) SVGtooltips=NULL else SVGtooltips=qgraphObject$Arguments$SVGtooltips
+  # if(is.null(qgraphObject$Arguments$tooltips)) tooltips=NULL else tooltips=qgraphObject$Arguments$tooltips
+  # if(is.null(qgraphObject$Arguments$SVGtooltips)) SVGtooltips=NULL else SVGtooltips=qgraphObject$Arguments$SVGtooltips
   if(is.null(qgraphObject$Arguments$hyperlinks)) hyperlinks=NULL else hyperlinks=qgraphObject$Arguments$hyperlinks
   
   # qgraphObject$Arguments for TEX:
@@ -2516,6 +2536,8 @@ qgraph <- function( input, ... )
       color <- ggplot_palette(length(groups))
     } else if (palette == "pastel"){
       color <- rainbow_hcl(length(groups), start = rainbowStart * 360, end = (360 * rainbowStart + 360*(length(groups)-1)/length(groups)))
+    } else if (palette == "neon"){
+      color <- neon(length(groups))
     } else stop(paste0("Palette '",palette,"' is not supported."))
   }
   
@@ -2805,14 +2827,17 @@ qgraph <- function( input, ... )
   qgraphObject$graphAttributes$Nodes$height <- vsize2
   qgraphObject$graphAttributes$Nodes$subplots <- subplots
   qgraphObject$graphAttributes$Nodes$images <- images
-  qgraphObject$graphAttributes$Nodes$tooltips <- tooltips
-  qgraphObject$graphAttributes$Nodes$SVGtooltips <- SVGtooltips
+  # qgraphObject$graphAttributes$Nodes$tooltips <- tooltips
+  # qgraphObject$graphAttributes$Nodes$SVGtooltips <- SVGtooltips
   qgraphObject$graphAttributes$Nodes$bars <- bars
   qgraphObject$graphAttributes$Nodes$barSide <- barSide
   qgraphObject$graphAttributes$Nodes$barColor <- barColor
   qgraphObject$graphAttributes$Nodes$barLength <- barLength
   qgraphObject$graphAttributes$Nodes$means <- means
   qgraphObject$graphAttributes$Nodes$SDs <- SDs
+  qgraphObject$graphAttributes$Nodes$node.label.offset <- node.label.offset
+  qgraphObject$graphAttributes$Nodes$node.label.position <- node.label.position
+
   
   # Pies:
   qgraphObject$graphAttributes$Nodes$pieColor <- pieColor
@@ -2899,7 +2924,7 @@ qgraph <- function( input, ... )
   qgraphObject$plotOptions$label.fill.horizontal <- label.fill.horizontal
   qgraphObject$plotOptions$label.prop <- label.prop
   qgraphObject$plotOptions$label.norm <- label.norm
-  qgraphObject$plotOptions$overlay <- overlay
+  # qgraphObject$plotOptions$overlay <- overlay
   qgraphObject$plotOptions$details <- details
   qgraphObject$plotOptions$title <- title
   qgraphObject$plotOptions$title.cex <- title.cex
@@ -2908,7 +2933,7 @@ qgraph <- function( input, ... )
   qgraphObject$plotOptions$legend.mode <- legend.mode
   qgraphObject$plotOptions$srt <- srt
   qgraphObject$plotOptions$gray <- gray
-  qgraphObject$plotOptions$overlaySize <- overlaySize
+  # qgraphObject$plotOptions$overlaySize <- overlaySize
   qgraphObject$plotOptions$plotELBG <- plotELBG
   qgraphObject$plotOptions$alpha <- alpha
   qgraphObject$plotOptions$width <- width
