@@ -1,8 +1,8 @@
 ff547ababc85108875b8e8f94239d4dd *COPYING
 1a2af62c3ce2e2cc524a8a2067947f54 *COPYRIGHTS
-347bf66fd474641f21eda39d483e9516 *DESCRIPTION
+57008c238e4685f5ea550e1eabf8e862 *DESCRIPTION
 b9ab02fa00ec8e1e639397a436226894 *NAMESPACE
-b60e4b79c2b0c904416be9adf90e9a55 *NEWS
+1eeb13b4d6a075c099942efa6d362c3a *NEWS
 bdc765e218448588b5774c4434371ac3 *R/00PolyShapes.R
 8ec3dfbaaa5842955f9c6fafaf2614df *R/Cent2EdgeNode.R
 affcb13e3ecdae977828c34f75028add *R/DrawArrow.R
@@ -32,7 +32,7 @@ a0283ebf562ff5b1d32a64489332437e *R/fixnames.R
 f227cf345b03a7f5bfd1568f606485d5 *R/flow.R
 d5d9b0310bb3dc92d2462ee64ab5f2b2 *R/getArgs.R
 90d03709ad8565fa25b616be91d193ef *R/getWmat.R
-d6f505d8fb0ce1bd89119e2bbce297d3 *R/ggmFit.R
+2ac99c0f7c921d7524250f01c8dac5f6 *R/ggmFit.R
 d79fbb3a01fb159597ab8133834df259 *R/ggmModSelect.R
 880719f38cc28318b269e47df3847869 *R/glasso_methods.R
 356e89b07599ae297ca9135f67d9e0be *R/glasso_tests.R
@@ -49,7 +49,7 @@ b6d3fe391415047940b5497b602d1733 *R/mixCols.R
 5fbf2d0e9609a4f7ab29573e7a829e0a *R/pathways.R
 bc4f90020d199ba941fa883bebb42586 *R/pie2.R
 608ab043e398d83fccfdef7e8eeff590 *R/printplotsummary.R
-845ddfc65cab727581031d3bf23a4a9f *R/qgraph.R
+92ae4c23fb48adbb2d895016a65f03d1 *R/qgraph.R
 7fe38c42e56f7e945aca4c4682a5bd2d *R/qgraph.rack.R
 42bd4cbfc2ca15ec6d7e234ea926b3b6 *R/qgraphAnnotate.R
 9c935f07f220491ef9210e3249ceb1e2 *R/qgraphD3.R
@@ -92,8 +92,8 @@ a8b7f70012dccf9780ea0d91503753d2 *man/makeBW.Rd
 154397578cf690bb56f586200dfc67de *man/pathways.Rd
 ccb0bd71591eab120c5bf7bb11e6411b *man/plot.qgraph.Rd
 60c990eafedbfdc74f81ebf5fc4b3e5c *man/print.qgraph.Rd
-8d5e2ebcad7849e13c8428b8b1d9583d *man/qgraph.Rd
-a8170510c4edb3ea7d0c1495166e5fb5 *man/qgraph.animate.Rd
+37dcb6e748952b5682677e8688c4dc0b *man/qgraph.Rd
+f2f1b1469407ba1a4a5aef722a4012fb *man/qgraph.animate.Rd
 4d485a6d9a24b487578c4499a9a0590e *man/qgraph.layout.fruchtermanreingold.Rd
 513765ae431746926a67e0974f9fc976 *man/qgraphAnnotate.Rd
 e4291b100392bfd7162bc0131d34e7ac *man/qgraphMixed.Rd
