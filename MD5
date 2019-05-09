@@ -1,8 +1,8 @@
 ff547ababc85108875b8e8f94239d4dd *COPYING
-1a2af62c3ce2e2cc524a8a2067947f54 *COPYRIGHTS
-57008c238e4685f5ea550e1eabf8e862 *DESCRIPTION
+dbdde27bb7548f7a0d12d48b70b25e0b *COPYRIGHTS
+82ce711c48bc42013242c9bcea0dff11 *DESCRIPTION
 b9ab02fa00ec8e1e639397a436226894 *NAMESPACE
-1eeb13b4d6a075c099942efa6d362c3a *NEWS
+cd864d3d64ca169f8a14a660013b106f *NEWS
 bdc765e218448588b5774c4434371ac3 *R/00PolyShapes.R
 8ec3dfbaaa5842955f9c6fafaf2614df *R/Cent2EdgeNode.R
 affcb13e3ecdae977828c34f75028add *R/DrawArrow.R
@@ -21,7 +21,7 @@ cd8821c5c9176c0ec56e85416344f5cf *R/addTitle.R
 f5aa1cf975eebb7f42205d47e86f0e38 *R/centrality.R
 79973ab99d0726fa2db16d13f6217620 *R/centralityFunctions.R
 c092f08505769327fb392149d1ba34ae *R/centralityPlot.R
-8e5cd8eae942df9f5a42616ee7fda09f *R/centralityTable.R
+9b36fc580465ca85ea152809b9dcf395 *R/centralityTable.R
 af7ae51a0922b70a2180d3eacf98fe18 *R/clusteringPlot.R
 e61820b763aa44e39828e1bed31b26c2 *R/clusteringTable.R
 cba84517e14f065894b2ce523e94ce55 *R/cor_auto.R
@@ -49,7 +49,7 @@ b6d3fe391415047940b5497b602d1733 *R/mixCols.R
 5fbf2d0e9609a4f7ab29573e7a829e0a *R/pathways.R
 bc4f90020d199ba941fa883bebb42586 *R/pie2.R
 608ab043e398d83fccfdef7e8eeff590 *R/printplotsummary.R
-92ae4c23fb48adbb2d895016a65f03d1 *R/qgraph.R
+f225c2ff8b9da45dbe4bb8ffb846ae57 *R/qgraph.R
 7fe38c42e56f7e945aca4c4682a5bd2d *R/qgraph.rack.R
 42bd4cbfc2ca15ec6d7e234ea926b3b6 *R/qgraphAnnotate.R
 9c935f07f220491ef9210e3249ceb1e2 *R/qgraphD3.R
