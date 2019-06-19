@@ -19,7 +19,8 @@ ggmFit <- function(
   nPar, # Number of parameters, used for more general fit
   invSigma, # inverse variance covariance matrix instead of pcor, used for more general fit
   tol = sqrt(.Machine$double.eps),
-  verbose = TRUE
+  verbose = TRUE,
+  countDiagonalPars = TRUE
 ){
   mimic <- "lavaan"
  
@@ -53,6 +54,11 @@ ggmFit <- function(
   if (missing(pcor)){
     pcor <- qgraph::wi2net(invSigma)
   }
+  
+  if (is(pcor,"qgraph")){
+    pcor <- getWmat(pcor)
+  }
+  
   pcor <- as.matrix(pcor)
   
   # Refit:
@@ -70,7 +76,6 @@ ggmFit <- function(
     invSigma <- glassoRes$wi
     
   } else {
-    
     # If missing invSigma, compute from pcor:
     if (missing(invSigma)){
       # If qgraph object, extract:
@@ -115,10 +120,10 @@ ggmFit <- function(
   
   # Number of observations:
   fitMeasures$nobs <- nVar * (nVar+1) / 2
-  
+
   # Number of parameters:
   if (missing(nPar)){
-    fitMeasures$npar <- sum(invSigma[upper.tri(invSigma,diag=FALSE)] != 0)
+    fitMeasures$npar <- sum(invSigma[upper.tri(invSigma,diag=countDiagonalPars)] != 0)
   } else {
     fitMeasures$npar <- nPar
   }
@@ -269,7 +274,7 @@ print.ggmFit <- function(x,...){
       paste0("Fit measures stored under ",name,"$fitMeasures"),
       "\n\n"
   )
-  
+
   fit <- data.frame(Measure = names(x$fitMeasures),
                     Value = goodNum(unlist(x$fitMeasures)))
   rownames(fit) <- NULL
