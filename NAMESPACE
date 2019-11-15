@@ -148,3 +148,10 @@ import(parallel)
 importFrom("pbapply","pblapply")
 importFrom("abind","abind")
 
+# ggraph:
+#import(dplyr)
+# import(tidygraph)
+# import(ggraph)
+
+export(as.ggraph)
+
