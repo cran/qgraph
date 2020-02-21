@@ -1,8 +1,8 @@
 ff547ababc85108875b8e8f94239d4dd *COPYING
 dbdde27bb7548f7a0d12d48b70b25e0b *COPYRIGHTS
-6cb105abbd8ef627da2985cf9bb2c1e1 *DESCRIPTION
-10d377932bd9589d4f95a7c3417211d6 *NAMESPACE
-610ba44f1818182c99b815046189f772 *NEWS
+ea21bfe473247361da4d7aa10dbdfb77 *DESCRIPTION
+2a221ba33df0312aa2af9e90224a8c6b *NAMESPACE
+35949e372614bc87c799fc7343ada635 *NEWS
 bdc765e218448588b5774c4434371ac3 *R/00PolyShapes.R
 8ec3dfbaaa5842955f9c6fafaf2614df *R/Cent2EdgeNode.R
 affcb13e3ecdae977828c34f75028add *R/DrawArrow.R
@@ -28,7 +28,6 @@ af7ae51a0922b70a2180d3eacf98fe18 *R/clusteringPlot.R
 e0baa00abdb50c2801254f0a2ff26f09 *R/cor_auto.R
 04a5d5232a56de7e649f56386f3faf8d *R/drawEdge.R
 6793111feb5f4932444c80abf2f2074c *R/drawNode.R
-d3ba7c3b0bc67d4bab0928471c7759fd *R/findGraph.R
 a0283ebf562ff5b1d32a64489332437e *R/fixnames.R
 f227cf345b03a7f5bfd1568f606485d5 *R/flow.R
 d5d9b0310bb3dc92d2462ee64ab5f2b2 *R/getArgs.R
@@ -83,7 +82,6 @@ bebe551aa0891ad3f9a4cf6f526a3112 *man/as.igraph.Rd
 c6724d9aa7c84ee409a0599f8eb116c9 *man/centrality_auto.Rd
 bfcc810a310258c0117e97c10b3aec1a *man/clustcoef_auto.Rd
 7ede8fbea21bebce34aaee4576fa6569 *man/cor_auto.Rd
-27f6aed0a238e6b366b641f2da69a2cb *man/findGraph.Rd
 b3ecf0f70b44929f8b9b0eb89afc2450 *man/flow.Rd
 6def56397700916221e6035da92af5a2 *man/getWmat.Rd
 9f016f4b44ed023b65aae9e7a74e7600 *man/ggmFit.Rd
