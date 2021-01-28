@@ -1,3 +1,21 @@
+Changes in Version 1.7.0
+  - The 'centrality()' function now includes R-squared (predictability)
+  - 'qgraphAnnotate' has been removed due to CRAN removal of sendplot
+
+Changes in Version 1.6.9
+  - Fixed a bug where using qgraph on the output of qgraph did not use all arguments correctly
+
+Changes in Version 1.6.8
+  - Fixed a bug with legend not showing when edge labels are used.
+
+Changes in Version 1.6.7
+  - node labels are now colored white for lighter nodes with theme = "gray"
+  - Added argument label.color.split
+
+Changes in Version 1.6.6
+  - Fixed a bug where the diagonal of undirected graphs was counted twice in getWmat
+  - Fixed a bug with bnlearn as input
+
 Changes in Version 1.6.5
   - Removed findGraph
 

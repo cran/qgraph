@@ -51,8 +51,10 @@ qgraph <- function( input, ... )
   
   class(qgraphObject) <- "qgraph"
   
+
   ### Extract nested arguments ###
-  if ("qgraph"%in%class(input)) qgraphObject$Arguments <- list(...,input) else qgraphObject$Arguments <- list(...)
+  # if ("qgraph"%in%class(input)) qgraphObject$Arguments <- list(...,input) else qgraphObject$Arguments <- list(...)
+  qgraphObject$Arguments <- list(...,input=input) 
   
   if (isTRUE(qgraphObject$Arguments[['gui']]) | isTRUE(qgraphObject$Arguments[['GUI']])) 
   {
@@ -79,19 +81,23 @@ qgraph <- function( input, ... )
   # If qgraph object is used as input, recreate edgelist input:
   if ("qgraph"%in%class(input)) 
   {
-    if (is.null(qgraphObject$Arguments$directed)) qgraphObject$Arguments$directed <- input$Edgelist$directed
-    if (is.null(qgraphObject$Arguments$bidirectional)) qgraphObject$Arguments$bidirectional <- input$Edgelist$bidirectional
-    if (is.null(qgraphObject$Arguments$nNodes)) qgraphObject$Arguments$nNodes <- input$graphAttributes$Graph$nNodes
-    
-    
-    if(input[['graphAttributes']][['Graph']][['weighted']])
-    {
-      input <- cbind(input$Edgelist$from,input$Edgelist$to,input$Edgelist$weight)
-    } else
-    {
-      input <- cbind(input$Edgelist$from,input$Edgelist$to)
+    # if (is.null(qgraphObject$Arguments$directed)) qgraphObject$Arguments$directed <- input$Edgelist$directed
+    # if (is.null(qgraphObject$Arguments$bidirectional)) qgraphObject$Arguments$bidirectional <- input$Edgelist$bidirectional
+    # if (is.null(qgraphObject$Arguments$nNodes)) qgraphObject$Arguments$nNodes <- input$graphAttributes$Graph$nNodes
+    # 
+    if (!is.null(qgraphObject$Arguments$input)){
+      input <- qgraphObject$Arguments$input
+    } else {
+      if(input[['graphAttributes']][['Graph']][['weighted']])
+      {
+        input <- cbind(input$Edgelist$from,input$Edgelist$to,input$Edgelist$weight)
+      } else
+      {
+        input <- cbind(input$Edgelist$from,input$Edgelist$to)
+      }      
     }
-    qgraphObject$Arguments$edgelist <- TRUE
+
+    # qgraphObject$Arguments$edgelist <- TRUE
   }
   
   ### PCALG AND GRAPHNEL ###
@@ -124,6 +130,7 @@ qgraph <- function( input, ... )
   ### bnlearn ###
   if (is(input,"bn"))
   {
+    # browser()
     bnobject <- input
     input <- as.matrix(bnobject$arcs)
     TempLabs  <- names(bnobject$nodes)
@@ -136,10 +143,10 @@ qgraph <- function( input, ... )
     input <- input[!duplicated(srtInput),]
     qgraphObject$Arguments$directed <- !(duplicated(srtInput)|duplicated(srtInput,fromLast=TRUE))
     qgraphObject$Arguments$directed <- qgraphObject$Arguments$directed[!duplicated(srtInput)]
+    qgraphObject$Arguments$edgelist <- TRUE
   }
   if (is(input,"bn.strength"))
   {
-    
     bnobject <- input
     input <- as.matrix(bnobject[c("from","to","strength")])
     TempLabs  <- unique(c(bnobject$from,bnobject$to))
@@ -202,6 +209,7 @@ qgraph <- function( input, ... )
 
         if (isTRUE(which(BDgraph == "phat") < which(BDgraph == "Khat")))
         {
+          if(!requireNamespace("BDgraph")) stop("'BDgraph' package needs to be installed.")
           # phat:
           W <- as.matrix(BDgraph::plinks(input))
           W <- W + t(W)
@@ -234,7 +242,7 @@ qgraph <- function( input, ... )
 
           if ("phat" %in% BDgraph)
           {
-            W <- as.matrix(plinks(input))
+            W <- as.matrix(BDgraph::plinks(input))
             W <- W + t(W)
             Res[["phat"]] <- do.call(qgraph,c(list(input = W,layout = L,probabilityEdges= TRUE), qgraphObject$Arguments))
             if (BDtitles) text(mean(par('usr')[1:2]),par("usr")[4],"Posterior probabilities", adj = c(0.5,1))
@@ -336,7 +344,8 @@ qgraph <- function( input, ... )
   if (is(input,"huge"))
   {
     if (input$method != "glasso") stop("Only 'glasso' method is supported")
-    input <- huge.select(input, "ebic", ebic.gamma = tuning)
+    if(!requireNamespace("huge")) stop("'huge' package needs to be installed.")
+    input <- huge::huge.select(input, "ebic", ebic.gamma = tuning)
   }
   
   ### HUGE select ###
@@ -414,6 +423,8 @@ qgraph <- function( input, ... )
   
   if(is.null(qgraphObject$Arguments[['edgeConnectPoints']])) edgeConnectPoints <- NULL else edgeConnectPoints <- qgraphObject$Arguments[['edgeConnectPoints']]
   
+  
+  if(is.null(qgraphObject$Arguments[['label.color.split']])) label.color.split <- 0.25 else label.color.split <- qgraphObject$Arguments[['label.color.split']]
   
   if(is.null(qgraphObject$Arguments$labels))
   {
@@ -992,13 +1003,8 @@ qgraph <- function( input, ... )
   if(is.null(qgraphObject$Arguments[['label.font']])) label.font <- font else label.font <- qgraphObject$Arguments[['label.font']]
    if(!is.null(qgraphObject$Arguments[['unCol']])) unCol <- qgraphObject$Arguments[['unCol']] 
     
-    
-  if (length(posCol)==1) posCol <- rep(posCol,2)
-  if (length(posCol)!=2) stop("'posCol' must be of length 1 or 2.")
-  if (length(negCol)==1) negCol <- rep(negCol,2)
-  if (length(negCol)!=2) stop("'negCol' must be of length 1 or 2.")
   
-  if(is.null(qgraphObject$Arguments[['probCol']])) probCol <- "blue" else probCol <- qgraphObject$Arguments[['probCol']]
+  if(is.null(qgraphObject$Arguments[['probCol']])) probCol <- "black" else probCol <- qgraphObject$Arguments[['probCol']]
   if(!is.null(qgraphObject$Arguments[['probabilityEdges']])) 
   {
     if (isTRUE(qgraphObject$Arguments[['probabilityEdges']]))
@@ -1006,6 +1012,12 @@ qgraph <- function( input, ... )
       posCol <- probCol
     }
   }
+    
+  if (length(posCol)==1) posCol <- rep(posCol,2)
+  if (length(posCol)!=2) stop("'posCol' must be of length 1 or 2.")
+  if (length(negCol)==1) negCol <- rep(negCol,2)
+  if (length(negCol)!=2) stop("'negCol' must be of length 1 or 2.")
+  
   
   # border color:
   if(!is.null(qgraphObject$Arguments[['border.color']])) {
@@ -2125,7 +2137,7 @@ qgraph <- function( input, ... )
   
   # Make bidirectional vector:
   if (length(bidirectional)==1) bidirectional=rep(bidirectional,length(E$from))
-  if (length(bidirectional)!=length(E$from)) stop("Bidirectional vector must be of legth 1 or equal to the number of edges")
+  if (length(bidirectional)!=length(E$from)) stop("Bidirectional vector must be of length 1 or equal to the number of edges")
   
   srt <- cbind(pmin(E$from,E$to), pmax(E$from,E$to) , knots, abs(E$weight) > minimum)
   
@@ -2678,10 +2690,18 @@ qgraph <- function( input, ... )
     lcolor <- rep(lcolor,nNodes)
   }
   if (any(is.na(lcolor))){
-    lcolor[is.na(lcolor)] <- ifelse(vertex.colors == "background",
-                                    ifelse(mean(col2rgb(background)/255) > 0.5,"black","white"),
-                                    ifelse(colMeans(col2rgb(vertex.colors[is.na(lcolor)])) > 0.25,"black","white")
-    )
+    # if (!is.null(theme) && is.character(theme) && theme == "gray"){
+    #   browser()
+    #   lcolor[is.na(lcolor)] <- ifelse(vertex.colors == "background",
+    #                                   ifelse(mean(col2rgb(background)/255) > 0.5,"black","white"),
+    #                                   ifelse(colMeans(col2rgb(vertex.colors[is.na(lcolor)])) > 0.5,"black","white")
+    #   )
+    # } else {
+      lcolor[is.na(lcolor)] <- ifelse(vertex.colors == "background",
+                                      ifelse(mean(col2rgb(background)/255) > 0.5,"black","white"),
+                                      ifelse(colMeans(col2rgb(vertex.colors[is.na(lcolor)])/255) > label.color.split,"black","white")
+      )
+    # }
   }
   
   # Dummy groups list:
@@ -2754,8 +2774,11 @@ qgraph <- function( input, ... )
     bcolor <- rep(bcolor,length=nNodes)
   }
   
-  if (vTrans<255)
+  if (any(vTrans<255) || length(vTrans) > 1)
   {
+    if ( length(vTrans) > 1 && length(vTrans) != nNodes)
+    {vTrans <- 255}
+
     # Transparance in vertex colors:
     num2hex <- function(x)
     {
@@ -3093,4 +3116,3 @@ qgraph <- function( input, ... )
   }
   
 }
-
