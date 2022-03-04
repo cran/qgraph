@@ -2,7 +2,7 @@ Package: qgraph
 Type: Package
 Title: Graph Plotting Methods, Psychometric Data Visualization and
         Graphical Model Estimation
-Version: 1.9.1
+Version: 1.9.2
 Authors@R: c(
   person("Sacha", "Epskamp", email = "mail@sachaepskamp.com",role = c("aut", "cre")),
   person("Giulio", "Costantini", role = c("aut")),
@@ -26,7 +26,7 @@ LazyLoad: yes
 LinkingTo: Rcpp
 Suggests: BDgraph, huge
 NeedsCompilation: yes
-Packaged: 2022-02-19 15:16:07 UTC; Sacha
+Packaged: 2022-03-04 11:49:30 UTC; sachaepskamp
 Author: Sacha Epskamp [aut, cre],
   Giulio Costantini [aut],
   Jonas Haslbeck [aut],
@@ -36,4 +36,4 @@ Author: Sacha Epskamp [aut, cre],
   Verena D. Schmittmann [ctb],
   Denny Borsboom [ctb]
 Repository: CRAN
-Date/Publication: 2022-02-19 16:40:02 UTC
+Date/Publication: 2022-03-04 12:40:08 UTC
