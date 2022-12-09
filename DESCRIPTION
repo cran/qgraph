@@ -2,7 +2,7 @@ Package: qgraph
 Type: Package
 Title: Graph Plotting Methods, Psychometric Data Visualization and
         Graphical Model Estimation
-Version: 1.9.2
+Version: 1.9.3
 Authors@R: c(
   person("Sacha", "Epskamp", email = "mail@sachaepskamp.com",role = c("aut", "cre")),
   person("Giulio", "Costantini", role = c("aut")),
@@ -19,14 +19,14 @@ Imports: Rcpp (>= 1.0.0), methods, grDevices, psych, lavaan, plyr,
         reshape2, ggplot2, glasso, fdrtool, gtools, parallel, pbapply,
         abind
 ByteCompile: yes
-Description: Weighted network visualization and analysis, as well as Gaussian graphical model computation. See Epskamp et al. (2012) <doi:10.18637/jss.v048.i04>.
+Description: Fork of qgraph - Weighted network visualization and analysis, as well as Gaussian graphical model computation. See Epskamp et al. (2012) <doi:10.18637/jss.v048.i04>.
 BugReports: https://github.com/SachaEpskamp/qgraph
 License: GPL-2
 LazyLoad: yes
 LinkingTo: Rcpp
 Suggests: BDgraph, huge
 NeedsCompilation: yes
-Packaged: 2022-03-04 11:49:30 UTC; sachaepskamp
+Packaged: 2022-12-09 07:49:39 UTC; Sacha
 Author: Sacha Epskamp [aut, cre],
   Giulio Costantini [aut],
   Jonas Haslbeck [aut],
@@ -36,4 +36,4 @@ Author: Sacha Epskamp [aut, cre],
   Verena D. Schmittmann [ctb],
   Denny Borsboom [ctb]
 Repository: CRAN
-Date/Publication: 2022-03-04 12:40:08 UTC
+Date/Publication: 2022-12-09 18:10:02 UTC
