@@ -1,8 +1,8 @@
 ff547ababc85108875b8e8f94239d4dd *COPYING
 5010c6f976db2bc34fd7b183a9d0b006 *COPYRIGHTS
-e2b038d2ec971cd90a2ee1da9c0be863 *DESCRIPTION
+0a2396e219ba30da272ed5e7a5fb3d47 *DESCRIPTION
 3ed187da52d7f77db9de98c76007d6ce *NAMESPACE
-aa6c8a53ace74987af8a41c2939eb681 *NEWS
+07f8746cedd8573381549e26d3fa99ad *NEWS
 07105451202e24d100fa773c13fc5e8e *R/00PolyShapes.R
 df0d59d484e15ed42be9496400dc5f7f *R/Cent2EdgeNode.R
 19854d7e57ca1e9e4771bf96ebc94ebd *R/DrawArrow.R
@@ -36,7 +36,7 @@ c6b2a0bba3cfdde311b2e1da58114c83 *R/getArgs.R
 c6846b9af625dc6693bda7ec29567424 *R/ggmModSelect.R
 e9a037fa7a710811c99acf42d19b8b85 *R/glasso_methods.R
 58ee01a508f4337b546574a3b945b17a *R/glasso_tests.R
-976520e6c931f74ebb368d03e4dc9f3c *R/igraphConversion.R
+f8523a7558f708a5eafeb26a83724d3e *R/igraphConversion.R
 0bd8762aed11a7d8988b3f7a155ad44b *R/isColor.R
 1645e8b8fb39dd4ad6d2acb2cd766a2c *R/layout.R
 a59603170d33083860a377ded2354c99 *R/logGaus.R
@@ -66,14 +66,14 @@ aca927d5c1480a3c65f42fa1689498e7 *R/scale2.R
 863bc1f70cef0e9b29bf556ad6f28d2f *README
 546d181acb8094f53a46464ff2a70a05 *data/big5.RData
 b6895611f7d06c2388a7bd46e4b3a37a *data/big5groups.RData
-d68a57b1f9a37fe05848de1dbbb06a5f *inst/CITATION
+d33af77b8dfd8fec50e394f29f26ba4d *inst/CITATION
 ff547ababc85108875b8e8f94239d4dd *inst/COPYING
 1a2af62c3ce2e2cc524a8a2067947f54 *inst/COPYRIGHTS
 038cd8f2ae0af5b201f3e9b8dd782124 *man/CentAndClusfuns.Rd
 d3cfa096f392dcf8d88ed79c627d1cff *man/EBICglasso.Rd
 a52d857b20b71e9b8618033c1175b5e3 *man/FDRnetwork.Rd
 80a8127b576309494de635b6854cf25d *man/VARglm.Rd
-1b35b5c790cf837e4fb763e7dab35ffe *man/as.igraph.Rd
+563ca3a986172bb26c14afccdfd1e255 *man/as.igraph.Rd
 9ba70ebfaddca150cd22da2667d10e7b *man/averageLayout.Rd
 32884544a0f68af15af16eb017cd4a24 *man/big5.Rd
 c70a6a617f006caf1d85a716fcf99083 *man/big5groups.Rd
@@ -100,7 +100,7 @@ f1cf5453c5eea0e5f0de752fe3632b14 *man/qgraph_loadings.Rd
 5e400c85fc7639f5f83323b76d30721e *man/smallworldness.Rd
 1ceec221e5dcb8c951a4b937a7bd55fb *man/summary.qgraph.Rd
 c81d47a853e0017fc7d802aee75fed09 *man/wi2net.Rd
-05c9ade5e8d099f411051a062e3f3df9 *src/Makevars
-05c9ade5e8d099f411051a062e3f3df9 *src/Makevars.win
+83f130a0e16efaeac463afabb3bb909d *src/Makevars
+5d071be4e6977c1f9babf740cabe5e5f *src/Makevars.win
 79177597c96bff38d59a3a03afbbf43f *src/RcppExports.cpp
 2f417f0f8e7bc72f8488c93907f47624 *src/layout_rcpp.cpp
